@@ -1,0 +1,3 @@
+/vendas    /landing.html     200
+/sistema   /sistema.html     200
+/painel    /painel-ceo.html  200
