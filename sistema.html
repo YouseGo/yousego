@@ -961,16 +961,31 @@ const subDoc = (c,i) => doc(db,"companies",_tenant,c,i);
 const subCol = c     => collection(db,"companies",_tenant,c);
 
 // ── EMPRESAS ──────────────────────────────────────────────────
+// ── localStorage helpers para empresas ───────────────────────
+function lsGetEmpresas(){ try{return JSON.parse(localStorage.getItem("ysg_cos")||"[]");}catch{return [];} }
+function lsSalvaEmpresas(list){ try{localStorage.setItem("ysg_cos",JSON.stringify(list));}catch{} }
+
 async function dbEmpresas(){
   if(_cos?.length) return _cos;
+  // 1) Carrega local imediatamente
+  const local=lsGetEmpresas();
+  if(local.length){ _cos=local; }
+  // 2) Tenta Firebase em background (sem travar tela)
   try{
-    const s=await T(getDocs(collection(db,"companies")),10000,"empresas");
-    _cos=[]; s.forEach(d=>_cos.push({id:d.id,...d.data()})); return _cos;
-  }catch(e){ erroFirestore(e,"empresas"); return _cos||[]; }
+    const s=await T(getDocs(collection(db,"companies")),6000,"empresas");
+    const fresh=[]; s.forEach(d=>fresh.push({id:d.id,...d.data()}));
+    if(fresh.length){ _cos=fresh; lsSalvaEmpresas(fresh); }
+  }catch(e){ console.warn("Firebase empresas offline, usando cache local"); }
+  return _cos||[];
 }
 async function dbSalvaEmpresa(co){
-  await T(setDoc(doc(db,"companies",co.id),{...co,_at:Date.now()},{merge:true}),8000,"saveEmpresa");
-  _cos=null; // invalidate cache so next fetch gets fresh data
+  // Salva local imediatamente
+  const list=lsGetEmpresas();
+  const idx=list.findIndex(x=>x.id===co.id);
+  if(idx>=0)list[idx]={...co,_at:Date.now()};else list.push({...co,_at:Date.now()});
+  lsSalvaEmpresas(list); _cos=null;
+  // Firebase em background
+  T(setDoc(doc(db,"companies",co.id),{...co,_at:Date.now()},{merge:true}),8000,"saveEmpresa").catch(e=>console.warn("Firebase saveEmpresa:",e));
 }
 
 // ── PRODUTOS (Global) ─────────────────────────────────────────
@@ -1145,22 +1160,37 @@ let CM=new Date().getMonth(), CT="dashboard";
 let _coBuscaBound=false;
 async function renderEmpresas(){
   const status=$("firebase-status");
+  const el=$("co-list-home");
+  if(el){ el.style.display="block"; el.innerHTML=`<div style="text-align:center;padding:16px;color:var(--text3);font-size:.82rem">🔄 Conectando...</div>`; }
   try{
     const cos=await dbEmpresas();
-    if(status) status.innerHTML=`<span style="color:var(--ok)">🟢 Firebase Conectado</span> · ${cos.length} empresa(s) sincronizada(s)`;
+    if(status) status.innerHTML=cos.length
+      ? `<span style="color:var(--ok)">🟢 Firebase Conectado</span> · dados sincronizados`
+      : `<span style="color:var(--warn)">🟡 Conectado</span> · nenhuma empresa ainda`;
+    // Mostra lista com botões Entrar (como v7)
+    if(el){
+      if(!cos.length){
+        el.innerHTML=`<p style="text-align:center;padding:18px;color:var(--text3);font-size:.85rem">Nenhuma empresa cadastrada.<br>Crie a primeira abaixo.</p>`;
+      } else {
+        el.innerHTML=`<div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:700;margin-bottom:8px">Empresas cadastradas</div>`
+          +cos.map(co=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1.5px solid var(--brd);border-radius:var(--r);margin-bottom:8px;cursor:pointer;transition:all .18s" class="co-item-home" data-id="${co.id}">
+            <div style="width:42px;height:42px;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:1.3rem;background:var(--brand-t);flex-shrink:0;border:2px solid var(--brand-t2)">${co.logoImg?`<img src="${co.logoImg}" style="width:100%;height:100%;object-fit:cover">`:co.logo||"🏪"}</div>
+            <div style="flex:1"><div style="font-weight:700;font-size:.9rem;color:var(--text)">${esc(co.nome||co.name||"")}</div><div style="font-size:.72rem;color:var(--text3);font-family:monospace">${esc(co.tipo||co.type||"—")}</div></div>
+            <button class="btn btn-p btn-sm co-entrar" data-id="${co.id}" style="flex-shrink:0">Entrar →</button>
+          </div>`).join("");
+        el.querySelectorAll(".co-entrar").forEach(btn=>btn.addEventListener("click",e=>{e.stopPropagation();selecionaEmpresa(btn.dataset.id);}));
+        el.querySelectorAll(".co-item-home").forEach(item=>item.addEventListener("click",()=>selecionaEmpresa(item.dataset.id)));
+      }
+    }
+    // Campo de busca também funciona (para muitas empresas)
     const input=$("co-busca");
     const box=$("co-sug-box");
-    if(!input||!box)return;
-    // Guard against double-binding
-    if(!_coBuscaBound){
+    if(input&&box&&!_coBuscaBound){
       _coBuscaBound=true;
-      input.addEventListener("input",async()=>{
+      input.addEventListener("input",()=>{
         const q=input.value.trim().toLowerCase();
         if(q.length<1){box.style.display="none";return;}
-        // Re-fetch in case list changed
-        let lista=cos;
-        try{const fresh=await dbEmpresas();if(fresh&&fresh.length)lista=fresh;}catch(_){}
-        const filt=lista.filter(c=>(c.nome||c.name||"").toLowerCase().includes(q));
+        const filt=cos.filter(c=>(c.nome||c.name||"").toLowerCase().includes(q));
         if(!filt.length){box.style.display="none";return;}
         box.innerHTML=filt.map(co=>`<div class="co-sug-item" data-id="${co.id}" style="display:flex;align-items:center;gap:10px;padding:10px 13px;cursor:pointer;border-bottom:1px solid var(--brd);transition:background .15s">
           <div style="font-size:1.2rem;width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--brand-t);border-radius:8px;flex-shrink:0">${co.logoImg?`<img src="${co.logoImg}" style="width:100%;height:100%;object-fit:cover;border-radius:8px">`:co.logo||"🏪"}</div>
@@ -1177,6 +1207,7 @@ async function renderEmpresas(){
     }
   }catch(e){
     if(status) status.innerHTML=`<span style="color:var(--er)">🔴 Firebase offline</span> · verifique conexão`;
+    if(el) el.innerHTML=`<div style="color:var(--er);text-align:center;padding:16px;font-size:.82rem">Erro: ${e.message}<br><button onclick="location.reload()" style="margin-top:8px;background:var(--brand);color:#fff;border:none;padding:7px 14px;border-radius:8px;cursor:pointer">🔄 Recarregar</button></div>`;
     console.error("renderEmpresas error:",e);
   }
 }
@@ -3381,7 +3412,8 @@ async function fazerLoginDireto(){
 function initSuggest(){
   // Sugestão filial no login direto
   $("ld-filial")?.addEventListener("input",async function(){
-    const box=$("sug-filial"),q=this.value.toLowerCase();
+    const box=$("sug-filial"); if(!box) return;
+    const q=this.value.toLowerCase();
     if(!q||q.length<2){box.classList.remove("on");return;}
     try{
       const cos=await dbEmpresas();
@@ -3394,31 +3426,37 @@ function initSuggest(){
         <span style="margin-left:auto;font-size:.72rem;color:var(--text3)">${esc(c.tipo||c.type||"")}</span>
       </div>`).join("");
       box.querySelectorAll(".sug-item").forEach(i=>i.addEventListener("click",()=>{
-        $("ld-filial").value=i.dataset.n;box.classList.remove("on");
-        $("ld-user").focus();
+        $("ld-filial").value=i.dataset.n; box.classList.remove("on");
+        $("ld-user")?.focus();
       }));
     }catch(e){box.classList.remove("on");}
   });
-  // Sugestão cliente no pedido
-  $("oo-cliente").addEventListener("input",function(){
-    const box=$("sug-cliente"),q=this.value.toLowerCase();
+  // Sugestão cliente no pedido (só bind se elemento existir)
+  $("oo-cliente")?.addEventListener("input",function(){
+    const box=$("sug-cliente"); if(!box) return;
+    const q=this.value.toLowerCase();
     const ms=getContatos().filter(c=>c.tipo==="cliente"&&(c.nome.toLowerCase().includes(q)||(c.fone||"").includes(this.value))).slice(0,6);
     if(!q||!ms.length){box.classList.remove("on");return;}
     box.classList.add("on");
     box.innerHTML=ms.map(c=>`<div class="sug-item" data-n="${esc(c.nome)}" data-p="${esc(c.fone||"")}">👤 <strong>${esc(c.nome)}</strong><span style="margin-left:auto;font-family:monospace;font-size:.75rem">${esc(c.fone||"")}</span></div>`).join("");
     box.querySelectorAll(".sug-item").forEach(i=>i.addEventListener("click",()=>{$("oo-cliente").value=i.dataset.n;$("oo-fone").value=i.dataset.p;box.classList.remove("on");}));
   });
-  // sug-prod in order modal (oo-prod is hidden; using oo-prod-busca/sug-prod-enc)
-  if($("oo-prod-busca")&&$("sug-prod-enc")){
-    $("oo-prod-busca").addEventListener("input",function(){
-      const box=$("sug-prod-enc"),q=this.value.toLowerCase();
-      const ms=q?getProds().filter(p=>(p.nome||p.name||"").toLowerCase().includes(q)).slice(0,6):getProds().slice(0,6);
-      if(!ms.length){box.classList.remove("on");return;}
-      box.classList.add("on");
-      box.innerHTML=ms.map(p=>`<div class="sug-item" data-n="${esc(p.nome||p.name)}" data-v="${p.preco}">${p.emoji||"🎂"} <span>${esc(p.nome||p.name)}</span><span style="margin-left:auto;font-family:monospace;font-size:.75rem;color:var(--brand)">R$ ${fmt(p.preco)}</span></div>`).join("");
-      box.querySelectorAll(".sug-item").forEach(i=>i.addEventListener("click",()=>{$("oo-prod-busca").value=i.dataset.n;$("oo-prod").value=i.dataset.n;const q=parseInt($("oo-qtd")?.value)||1;if($("oo-val"))$("oo-val").value=(i.dataset.v*q).toFixed(2);box.classList.remove("on");}));
-    });
-  }
+  // Sugestão produto no pedido — usa oo-prod-busca (oo-prod é hidden)
+  $("oo-prod-busca")?.addEventListener("input",function(){
+    const box=$("sug-prod-enc"); if(!box) return;
+    const q=this.value.toLowerCase();
+    const ms=q?getProds().filter(p=>(p.nome||p.name||"").toLowerCase().includes(q)).slice(0,6):getProds().slice(0,6);
+    if(!ms.length){box.classList.remove("on");return;}
+    box.classList.add("on");
+    box.innerHTML=ms.map(p=>`<div class="sug-item" data-n="${esc(p.nome||p.name)}" data-v="${p.preco}">${p.emoji||"🎂"} <span>${esc(p.nome||p.name)}</span><span style="margin-left:auto;font-family:monospace;font-size:.75rem;color:var(--brand)">R$ ${fmt(p.preco)}</span></div>`).join("");
+    box.querySelectorAll(".sug-item").forEach(i=>i.addEventListener("click",()=>{
+      $("oo-prod-busca").value=i.dataset.n;
+      if($("oo-prod"))$("oo-prod").value=i.dataset.n;
+      const q=parseInt($("oo-qtd")?.value)||1;
+      if($("oo-val"))$("oo-val").value=(i.dataset.v*q).toFixed(2);
+      box.classList.remove("on");
+    }));
+  });
   document.addEventListener("click",e=>{
     if(!e.target.closest("#sug-filial")&&!e.target.matches("#ld-filial"))$("sug-filial")?.classList.remove("on");
     if(!e.target.closest("#sug-cliente")&&!e.target.matches("#oo-cliente"))$("sug-cliente")?.classList.remove("on");
@@ -3573,10 +3611,6 @@ function bindEvents(){
   $("btn-cancela-fid").addEventListener("click",()=>fechaM("m-cupom-fid"));
   $("btn-salva-fid").addEventListener("click",salvarCupomFid);
   $("fid-codigo").addEventListener("input",function(){this.value=this.value.toUpperCase();});
-  // Tamanho
-  $("btn-cancela-tam").addEventListener("click",()=>fechaM("m-tam"));
-}
-
   // Tamanho
   $("btn-cancela-tam").addEventListener("click",()=>fechaM("m-tam"));
 }
