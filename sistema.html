@@ -103,11 +103,12 @@ label{font-size:.65rem;font-weight:700;color:var(--text2);display:block;margin-b
 .sb-btn.on{background:var(--brand-t);color:var(--brand);font-weight:700}
 .sb-ic{width:20px;height:20px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:.8rem;background:rgba(255,255,255,.07);flex-shrink:0;transition:all .18s}
 .sb-btn.on .sb-ic{background:var(--brand);color:#fff}
-.main{flex:1;overflow-y:auto;padding:20px 18px}
-.main.pdv-ativo{overflow:hidden;padding:10px 12px;display:flex;flex-direction:column}
-.main.pdv-ativo .pg.on{flex:1;min-height:0;display:flex;flex-direction:column}
-.pg{display:none;max-width:1300px;margin:0 auto;animation:fadeIn .22s ease}
-.pg.on{display:block}
+.main{flex:1;overflow-y:auto;padding:20px 18px;display:flex;flex-direction:column}
+.main .pg.on{flex:1;min-height:0}
+.main .pg.on:not(#pg-pdv){overflow-y:auto}
+#pg-pdv.on{display:flex;flex-direction:column;overflow:hidden;padding:0}
+.pg{display:none;animation:fadeIn .22s ease}
+.pg.on{display:flex;flex-direction:column}
 
 /* ── CARDS / KPI ── */
 .card{background:#fff;border:1px solid var(--brd);border-radius:var(--r2);padding:20px;box-shadow:var(--sh)}
@@ -159,9 +160,9 @@ table.yt{width:100%;border-collapse:collapse}
 .toast.twn{border-left:3px solid var(--warn)}
 
 /* ── PDV ── */
-.pdv-wrap{display:grid;grid-template-columns:1fr 360px;flex:1;min-height:0;border-radius:var(--r3);overflow:hidden;border:1px solid var(--brd)}
+.pdv-wrap{display:grid;grid-template-columns:1fr 340px;height:100%;border-radius:var(--r3);overflow:hidden;border:1px solid var(--brd)}
 .pdv-esq{display:flex;flex-direction:column;background:var(--bg3);overflow:hidden;min-height:0}
-.pdv-dir{display:flex;flex-direction:column;background:#fff;border-left:1px solid var(--brd);min-height:0}
+.pdv-dir{display:flex;flex-direction:column;background:#fff;border-left:1px solid var(--brd);min-height:0;overflow:hidden}
 /* Produtos PDV — cards maiores com foto */
 .pdv-grid{flex:1;overflow-y:auto;padding:10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;align-content:start}
 .pdv-prod{background:#fff;border-radius:14px;padding:0;text-align:center;cursor:pointer;border:1.5px solid var(--brd);transition:all .18s;display:flex;flex-direction:column;align-items:stretch;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)}
@@ -183,7 +184,7 @@ table.yt{width:100%;border-collapse:collapse}
 .qb{width:20px;height:20px;border:1px solid var(--brd2);background:none;border-radius:5px;cursor:pointer;color:var(--brand);font-size:.85rem;display:flex;align-items:center;justify-content:center;transition:all .15s}
 .qb:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
 .ci-tot{font-family:"DM Mono",monospace;font-size:.82rem;font-weight:700;color:var(--brand);min-width:60px;text-align:right}
-.cart-foot{padding:10px 13px;border-top:1px solid var(--brd);flex-shrink:0;overflow-y:auto;max-height:none}
+.cart-foot{padding:8px 11px;border-top:1px solid var(--brd);flex-shrink:0;overflow-y:auto;max-height:52vh}
 .pay-btn-g{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:8px}
 .pb{padding:6px 4px;border:1.5px solid var(--brd);background:transparent;border-radius:7px;cursor:pointer;font-size:.68rem;font-weight:600;color:var(--text2);transition:all .18s;text-align:center;font-family:"Inter",sans-serif}
 .pb:hover{border-color:var(--brand);color:var(--brand)}
@@ -308,13 +309,32 @@ tr:hover .dre-del{display:inline}.dre-del:hover{color:var(--er)}
 .dre-add:hover{background:var(--brand-t2)}
 
 /* ── KDS ── */
-.kds-board{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.kds-tela{border-radius:var(--r2);overflow:hidden;border:2px solid}
-.kds-h{padding:11px 15px;font-weight:900;font-size:.95rem;color:#fff;display:flex;align-items:center;justify-content:space-between}
-.kds-body{padding:10px;display:flex;flex-direction:column;gap:8px;max-height:550px;overflow-y:auto}
-.kds-card{background:var(--card2);border-radius:11px;padding:13px;border-left:4px solid}
-.kds-num{font-size:1.5rem;font-weight:900;font-family:"DM Mono",monospace}
-.kds-items{font-size:.82rem;color:var(--text2);line-height:1.7;margin:6px 0}
+.kds-board{display:grid;grid-template-columns:repeat(3,1fr);gap:0;background:var(--brd);border:1px solid var(--brd);border-radius:var(--r2);overflow:hidden}
+.kds-col{background:var(--bg);display:flex;flex-direction:column;min-height:0}
+.kds-col-h{padding:8px 12px;font-weight:800;font-size:.72rem;text-transform:uppercase;letter-spacing:1.5px;color:#fff;display:flex;align-items:center;gap:7px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.12)}
+.kds-col-body{padding:7px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;overflow-y:auto;align-content:start;flex:1}
+.kds-mini{border-radius:9px;padding:8px 9px;cursor:pointer;transition:all .18s;position:relative;border:1.5px solid transparent}
+.kds-mini:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.kds-mini-num{font-family:"DM Mono",monospace;font-size:.7rem;font-weight:900;opacity:.85;margin-bottom:2px}
+.kds-mini-cli{font-weight:700;font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.kds-mini-info{font-size:.65rem;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kds-mini-items{font-size:.65rem;opacity:.7;margin-top:3px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.kds-mini-time{font-family:"DM Mono",monospace;font-size:.58rem;opacity:.6;margin-top:4px}
+.kds-mini-btn{display:none;position:absolute;top:4px;right:4px;background:rgba(255,255,255,.2);border:none;border-radius:5px;color:#fff;font-size:.6rem;font-weight:700;padding:2px 5px;cursor:pointer}
+.kds-mini:hover .kds-mini-btn{display:block}
+/* PDV orders KDS panel */
+.pdv-orders-panel{display:flex;flex-direction:column;background:var(--bg3);border-right:1px solid var(--brd);width:280px;flex-shrink:0;overflow:hidden}
+.pdv-orders-h{padding:8px 12px;background:var(--brand);color:#fff;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.pdv-orders-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:0;flex:1;overflow:hidden;border-top:1px solid rgba(255,255,255,.1)}
+.pdv-orders-col{display:flex;flex-direction:column;border-right:1px solid var(--brd);overflow:hidden}
+.pdv-orders-col:last-child{border:none}
+.pdv-orders-col-h{padding:5px 7px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:center;flex-shrink:0;border-bottom:1px solid var(--brd)}
+.pdv-orders-col-body{flex:1;overflow-y:auto;padding:4px;display:flex;flex-direction:column;gap:3px}
+.pdv-order-mini{border-radius:7px;padding:6px 7px;cursor:pointer;border:1.5px solid transparent;transition:all .15s}
+.pdv-order-mini:hover{filter:brightness(1.1)}
+.pdv-order-mini-num{font-family:"DM Mono",monospace;font-size:.6rem;font-weight:900;opacity:.85}
+.pdv-order-mini-cli{font-weight:700;font-size:.68rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pdv-order-mini-val{font-family:"DM Mono",monospace;font-size:.65rem;opacity:.85;margin-top:2px}
 
 /* ── CUPOM (impressão) ── */
 @media print{
@@ -469,6 +489,7 @@ tr:hover .dre-del{display:inline}.dre-del:hover{color:var(--er)}
     <main class="main">
       <div class="pg on" id="pg-dashboard"></div>
       <div class="pg" id="pg-dre"></div>
+      <div class="pg" id="pg-catalogo-pub"></div>
       <div class="pg" id="pg-catalogo"></div>
       <div class="pg" id="pg-producao"></div>
       <div class="pg" id="pg-pedidos"></div>
@@ -1135,6 +1156,7 @@ const PAGINAS=[
   {id:"dashboard",ic:"🏠",label:"Dashboard"},
   {id:"dre",ic:"📊",label:"DRE"},
   {id:"catalogo",ic:"🎂",label:"Catálogo"},
+  {id:"catalogo-pub",ic:"🛍️",label:"Catálogo Público"},
   {id:"producao",ic:"🏭",label:"Produção"},
   {id:"pedidos",ic:"📋",label:"Pedidos"},
   {id:"pdv",ic:"🛒",label:"PDV / Caixa"},
@@ -1326,6 +1348,7 @@ function buildNav(){
     {id:"dashboard",ic:"🏠",label:"Dashboard"},{sec:"Financeiro"},
     {id:"dre",ic:"📊",label:"DRE"},{id:"custos",ic:"🧾",label:"Custos"},
     {sec:"Vendas"},{id:"catalogo",ic:"🎂",label:"Catálogo"},
+    {id:"catalogo-pub",ic:"🛍️",label:"Catálogo Público"},
     {id:"pdv",ic:"🛒",label:"PDV / Caixa"},{id:"caixa",ic:"💰",label:"Gestão Caixa"},
     {id:"pedidos",ic:"📋",label:"Pedidos"},{id:"producao",ic:"🏭",label:"Produção"},
     {sec:"Operacional"},{id:"estoque",ic:"📦",label:"Estoque"},
@@ -1347,15 +1370,28 @@ function buildNav(){
 function irPara(pg,btn){
   if(!temAcesso(pg)){toast("⛔ Sem permissão","ter");return;}
   CT=pg;
-  document.querySelector(".main")?.classList.toggle("pdv-ativo",pg==="pdv");
+  const mainEl=document.querySelector(".main");
+  if(mainEl){
+    mainEl.style.overflow=pg==="pdv"?"hidden":"";
+    mainEl.style.padding=pg==="pdv"?"8px 10px":"20px 18px";
+  }
   $("sidebar").querySelectorAll(".sb-btn").forEach(b=>b.classList.remove("on"));
   if(btn)btn.classList.add("on");
-  document.querySelectorAll(".pg").forEach(p=>p.classList.remove("on"));
-  $("pg-"+pg)?.classList.add("on");
+  else $("sidebar").querySelectorAll(".sb-btn").forEach(b=>{if(b.dataset.pg===pg)b.classList.add("on");});
+  document.querySelectorAll(".pg").forEach(p=>{
+    p.classList.remove("on");
+    p.style.display="none";
+  });
+  const target=$("pg-"+pg);
+  if(target){
+    target.classList.add("on");
+    target.style.display=(pg==="pdv")?"flex":"block";
+    if(pg==="pdv"){target.style.flexDirection="column";target.style.height="100%";target.style.overflow="hidden";}
+  }
 }
 
 function renderTudo(){
-  renderDash();renderDRE();renderCatalogo();renderProducao();renderPedidos();
+  renderDash();renderDRE();renderCatalogo();renderCatalogoPub();renderProducao();renderPedidos();
   renderPDV();renderCaixa();renderEstoque();renderFichas();renderCustos();
   renderContatos();renderFidelidade();renderKDS();renderCardapioDigital();renderConfig();renderRelatorios();
 }
@@ -1572,6 +1608,47 @@ function renderCatalogo(){
   pg.querySelector("#btn-cat-pdf").addEventListener("click",exportarCatalogoPDF);
   pg.querySelector("#btn-cat-link").addEventListener("click",copiarLinkCatalogo);
   pg.querySelector("#btn-cat-qr").addEventListener("click",gerarQRCatalogo);
+}
+
+// ════════════════════════════════════════════════════════════
+//  CATÁLOGO PÚBLICO — página dedicada só ao catálogo visual
+// ════════════════════════════════════════════════════════════
+function renderCatalogoPub(){
+  const pg=$("pg-catalogo-pub"); if(!pg)return;
+  const prods=getProds();
+  const cats=["Todos",...new Set(prods.map(p=>p.cat||"Outro"))];
+  let filtCat="Todos";
+  function render(){
+    const filt=filtCat==="Todos"?prods:prods.filter(p=>(p.cat||"Outro")===filtCat);
+    pg.innerHTML=`
+    <div class="ph" style="padding:16px 18px 0">
+      <div class="ph-title">🛍️ Catálogo Público <span style="font-size:.72rem;color:var(--text3);font-weight:400">— visão do cliente</span></div>
+      <button class="btn btn-p btn-sm" id="btn-cat-pub-pdf">📄 PDF</button>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;padding:12px 18px;border-bottom:1px solid var(--brd)">
+      ${cats.map(c=>`<button class="btn ${filtCat===c?"btn-p":"btn-s"} btn-sm cat-pub-filt" data-c="${c}">${c}</button>`).join("")}
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:16px 18px">
+      <div class="cat-grid">
+        ${filt.map(p=>{
+          const mg=p.preco&&p.custo?((p.preco-p.custo)/p.preco*100):null;
+          return`<div class="cat-card">
+            <div class="cat-img">${p.img?`<img src="${p.img}" alt="${esc(p.nome)}">`:`<span>${p.emoji||"🎂"}</span>`}</div>
+            <div class="cat-body">
+              <div class="cat-nm">${esc(p.nome)}</div>
+              ${p.cat?`<div style="font-size:.68rem;color:var(--text3);margin-bottom:4px">${esc(p.cat)}</div>`:""}
+              <div class="cat-pr">R$ ${fmt(p.preco)}</div>
+              ${p.tamanhos?.length?`<div style="font-size:.7rem;color:var(--text3);margin-top:3px">${p.tamanhos.map(t=>t.label+" R$"+fmt(t.preco)).join(" · ")}</div>`:""}
+              <div style="font-size:.75rem;color:var(--text3);margin-top:4px;line-height:1.5;flex:1">${esc(p.desc||"")}</div>
+            </div></div>`;
+        }).join("")}
+        ${!filt.length?`<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text3)">Nenhum produto nesta categoria.</div>`:""}
+      </div>
+    </div>`;
+    pg.querySelectorAll(".cat-pub-filt").forEach(b=>b.addEventListener("click",()=>{filtCat=b.dataset.c;render();}));
+    pg.querySelector("#btn-cat-pub-pdf")?.addEventListener("click",exportarCatalogoPDF);
+  }
+  render();
 }
 
 async function exportarCatalogoPDF(){
@@ -2049,10 +2126,9 @@ let _cart=[], _cli=null, _pag="pix", _desc=0, _descTipo="val",
 
 function renderPDV(){
   const pg=$("pg-pdv"), prods=getProds();
-  pg.style.display="flex";pg.style.flexDirection="column";pg.style.height="100%";
   const cx=_caixas.find(c=>c.status==="aberto");
   if(!cx){
-    pg.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:420px;text-align:center;gap:16px">
+    pg.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:420px;text-align:center;gap:16px;flex:1">
       <div style="font-size:4rem">🔒</div><div style="font-size:1.2rem;font-weight:700">Caixa Fechado</div>
       <div style="color:var(--text3);max-width:380px">Abra o caixa para começar a registrar vendas.</div>
       <button class="btn btn-ok btn-lg" id="btn-pdv-abre-cx">🟢 Abrir Caixa</button></div>`;
@@ -2060,47 +2136,86 @@ function renderPDV(){
     return;
   }
   const cats=["Todos",...new Set(prods.map(p=>p.cat||"Outro"))];
+
+  // Build KDS orders panel for PDV
+  const kdsOrders=getKDS();
+  const pdvCols=[
+    {k:"pendente",label:"Preparo",bg:"#E53E3E"},
+    {k:"pronto",label:"Finalizado",bg:"#38A169"},
+    {k:"entregue",label:"Entregue",bg:"#3182CE"},
+  ];
+  function timeAgo(ts){if(!ts)return"";const m=Math.floor((Date.now()-ts)/60000);return m<1?"agora":m<60?m+"min":Math.floor(m/60)+"h";}
+  const pdvOrdersHtml=pdvCols.map(col=>{
+    const items=kdsOrders.filter(o=>(o.kdsStatus||"pendente")===col.k);
+    return`<div class="pdv-orders-col">
+      <div class="pdv-orders-col-h" style="background:${col.bg}22;color:${col.bg};border-bottom:2px solid ${col.bg}44">${col.label} <span style="opacity:.7">(${items.length})</span></div>
+      <div class="pdv-orders-col-body">
+        ${items.slice(0,20).map(o=>`<div class="pdv-order-mini" style="background:${col.bg}18;border-color:${col.bg}44" title="${esc(o.cliente||"")} — ${(o.itens||[]).map(i=>i.qtd+"x "+i.nome).join(", ")||o.produto||""}"
+          onclick="(()=>{const l=JSON.parse(localStorage.getItem('ys_kds_${_tenant}')||'[]');const o=l.find(x=>x.id==='${o.id}');if(!o)return;const nx={pendente:'pronto',pronto:'entregue',entregue:'entregue'};o.kdsStatus=nx[o.kdsStatus||'pendente'];localStorage.setItem('ys_kds_${_tenant}',JSON.stringify(l));renderPDV();renderKDS();})()">
+          <div class="pdv-order-mini-num" style="color:${col.bg}">#${o.kdsNum||o.codigo||"—"} ${o.modo==="delivery"?"🛵":o.modo==="local"?"🪑":"🏪"}</div>
+          <div class="pdv-order-mini-cli">${esc(o.cliente||"Balcão")}</div>
+          <div class="pdv-order-mini-val" style="color:${col.bg}">R$ ${fmt(o.val||o.total||0)} · ${timeAgo(o.criadoEm||o._at)}</div>
+        </div>`).join("")||`<div style="font-size:.65rem;color:var(--text3);text-align:center;padding:8px;opacity:.5">—</div>`}
+      </div>
+    </div>`;
+  }).join("");
+
   pg.innerHTML=`
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;padding:9px 14px;background:var(--ok-t);border:1px solid rgba(16,185,129,.2);border-radius:11px;flex-shrink:0">
-    🟢 <strong style="color:var(--ok)">Caixa Aberto</strong>
-    <span style="color:var(--text2);font-size:.82rem">· ${esc(cx.operador||"—")} · ${(cx.vendas||[]).length} vendas · R$ ${fmt((cx.vendas||[]).reduce((a,v)=>a+v.total,0))}</span>
-    <button class="btn btn-er btn-sm" style="margin-left:auto" id="btn-fecha-cx-pdv">🔴 Fechar Caixa</button>
+  <!-- Barra topo -->
+  <div style="display:flex;align-items:center;gap:8px;padding:7px 12px;background:var(--ok-t);border-bottom:1px solid rgba(16,185,129,.2);flex-shrink:0;flex-wrap:wrap">
+    <span style="font-size:.72rem">🟢 <strong style="color:var(--ok)">Caixa Aberto</strong></span>
+    <span style="color:var(--text3);font-size:.72rem">· ${esc(cx.operador||"—")} · ${(cx.vendas||[]).length} vendas · R$ ${fmt((cx.vendas||[]).reduce((a,v)=>a+v.total,0))}</span>
+    <button class="btn btn-er btn-sm" style="margin-left:auto;padding:4px 10px;font-size:.72rem" id="btn-fecha-cx-pdv">🔴 Fechar Caixa</button>
+    <button class="btn btn-s btn-sm" style="padding:4px 10px;font-size:.72rem" id="btn-hist-pdv-top">📋 Histórico</button>
   </div>
-  <!-- Modo do pedido -->
-  <div class="modo-tabs" style="flex-wrap:wrap;gap:6px;flex-shrink:0">
-    <div class="modo-tab${_modo==="balcao"?" on":""}" data-m="balcao">🏪 Balcão</div>
-    <div class="modo-tab${_modo==="delivery"?" on":""}" data-m="delivery">🛵 Delivery</div>
-    <div class="modo-tab${_modo==="local"?" on":""}" data-m="local">🪑 Mesa/Local</div>
-    ${_modo==="local"?`<div style="display:flex;align-items:center;gap:6px;margin-left:4px">
-      <span style="font-size:.72rem;color:var(--text3);white-space:nowrap">Mesa Nº:</span>
-      <select id="pdv-mesa" style="font-size:.82rem;padding:4px 7px;border-radius:7px;min-width:70px">
-        ${Array.from({length:100},(_,i)=>`<option value="${i+1}" ${_mesaNum===(i+1)?"selected":""}>${i+1}</option>`).join("")}
+  <!-- Modo -->
+  <div class="modo-tabs" style="padding:5px 10px;gap:5px;flex-shrink:0">
+    <div class="modo-tab${_modo==="balcao"?" on":""}" data-m="balcao" style="font-size:.72rem;padding:4px 10px">🏪 Balcão</div>
+    <div class="modo-tab${_modo==="delivery"?" on":""}" data-m="delivery" style="font-size:.72rem;padding:4px 10px">🛵 Delivery</div>
+    <div class="modo-tab${_modo==="local"?" on":""}" data-m="local" style="font-size:.72rem;padding:4px 10px">🪑 Mesa/Local</div>
+    ${_modo==="local"?`<div style="display:flex;align-items:center;gap:5px">
+      <span style="font-size:.68rem;color:var(--text3)">Mesa:</span>
+      <select id="pdv-mesa" style="font-size:.76rem;padding:3px 6px;border-radius:6px">
+        ${Array.from({length:30},(_,i)=>`<option value="${i+1}" ${_mesaNum===(i+1)?"selected":""}>${i+1}</option>`).join("")}
       </select>
-      <button class="btn btn-s btn-sm" id="btn-ver-mesas" title="Ver mesas abertas e fechadas">🪑 Ver Mesas</button>
+      <button class="btn btn-s" style="padding:3px 8px;font-size:.68rem" id="btn-ver-mesas">Mesas</button>
     </div>`:""}
   </div>
-  <div class="pdv-wrap" style="flex:1;min-height:0;margin-top:8px">
-    <!-- Esquerda: produtos -->
-    <div class="pdv-esq">
-      <div style="padding:9px 10px;border-bottom:1px solid var(--brd)">
-        <input id="pdv-busca" placeholder="🔍 Buscar produto..." style="font-size:.88rem">
+  <!-- Corpo principal: painel pedidos KDS + produtos + carrinho -->
+  <div style="display:flex;flex:1;min-height:0;overflow:hidden">
+    <!-- Painel KDS Orders (esquerda) -->
+    <div class="pdv-orders-panel">
+      <div class="pdv-orders-h">
+        <span>📦 Pedidos em Tempo Real</span>
+        <span style="font-size:.65rem;opacity:.7">${kdsOrders.length}</span>
       </div>
-      <div style="display:flex;gap:5px;padding:7px 10px;border-bottom:1px solid var(--brd);overflow-x:auto;scrollbar-width:none" id="pdv-cats">
-        ${cats.map(c=>`<div style="padding:4px 11px;border-radius:20px;background:${_pdvCat===c?"var(--brand-t)":"var(--bg3)"};border:1.5px solid ${_pdvCat===c?"var(--brand)":"var(--brd)"};font-size:.72rem;font-weight:600;color:${_pdvCat===c?"var(--brand)":"var(--text2)"};cursor:pointer;white-space:nowrap;transition:all .18s" class="pdv-cat" data-c="${c}">${c}</div>`).join("")}
-      </div>
-      <div class="pdv-grid" id="pdv-grid"></div>
+      <div class="pdv-orders-cols">${pdvOrdersHtml}</div>
     </div>
-    <!-- Direita: carrinho -->
-    <div class="pdv-dir">
-      <div class="cart-h">
-        <span style="font-weight:700;font-size:.9rem">🧺 Carrinho</span>
-        <span id="pdv-cli-label" style="font-size:.72rem;color:var(--brand);cursor:pointer;text-decoration:underline;font-family:monospace">${_cli?"👤 "+_cli.nome:"+ Cliente"}</span>
+    <!-- Produtos + Carrinho -->
+    <div style="display:grid;grid-template-columns:1fr 320px;flex:1;min-height:0;overflow:hidden">
+      <div class="pdv-esq" style="border-right:1px solid var(--brd)">
+        <div style="padding:7px 9px;border-bottom:1px solid var(--brd);flex-shrink:0">
+          <input id="pdv-busca" placeholder="🔍 Buscar..." style="font-size:.82rem;padding:6px 10px">
+        </div>
+        <div style="display:flex;gap:4px;padding:5px 8px;border-bottom:1px solid var(--brd);overflow-x:auto;scrollbar-width:none;flex-shrink:0" id="pdv-cats">
+          ${cats.map(c=>`<div style="padding:3px 10px;border-radius:20px;background:${_pdvCat===c?"var(--brand-t)":"var(--bg3)"};border:1.5px solid ${_pdvCat===c?"var(--brand)":"var(--brd)"};font-size:.68rem;font-weight:600;color:${_pdvCat===c?"var(--brand)":"var(--text2)"};cursor:pointer;white-space:nowrap" class="pdv-cat" data-c="${c}">${c}</div>`).join("")}
+        </div>
+        <div class="pdv-grid" id="pdv-grid" style="grid-template-columns:repeat(auto-fill,minmax(110px,1fr))"></div>
       </div>
-      <div class="cart-items" id="cart-items"></div>
-      <div class="cart-foot" id="cart-foot"></div>
+      <!-- Carrinho -->
+      <div class="pdv-dir">
+        <div class="cart-h" style="padding:7px 11px">
+          <span style="font-weight:700;font-size:.85rem">🧺 Carrinho</span>
+          <span id="pdv-cli-label" style="font-size:.7rem;color:var(--brand);cursor:pointer;text-decoration:underline">${_cli?"👤 "+_cli.nome:"+ Cliente"}</span>
+        </div>
+        <div class="cart-items" id="cart-items" style="flex:1;overflow-y:auto;padding:6px 9px"></div>
+        <div class="cart-foot" id="cart-foot"></div>
+      </div>
     </div>
   </div>`;
+
   pg.querySelector("#btn-fecha-cx-pdv").addEventListener("click",abrirFechamentoCaixa);
+  pg.querySelector("#btn-hist-pdv-top")?.addEventListener("click",abrirHistoricoCaixa);
   pg.querySelector("#pdv-cli-label").addEventListener("click",()=>{$("pc-end-wrap").style.display=_modo==="delivery"?"block":"none";abreM("m-pdv-cli");});
   pg.querySelector("#pdv-busca").addEventListener("input",()=>renderProdsPDV());
   pg.querySelectorAll(".modo-tab").forEach(t=>t.addEventListener("click",()=>{_modo=t.dataset.m;renderPDV();}));
@@ -2241,7 +2356,7 @@ function renderCarrinho(){
     <!-- Desconto -->
     <div style="display:flex;gap:5px;align-items:center;margin-bottom:6px">
       <span style="font-size:.74rem;color:var(--text2);white-space:nowrap">Desconto:</span>
-      <input id="desc-inp" type="number" min="0" step="0.01" value="${_desc}" style="font-size:.8rem;padding:4px 8px;flex:1">
+      <input id="desc-inp" inputmode="decimal" value="${_desc||""}" placeholder="0,00" style="font-size:.8rem;padding:4px 8px;flex:1">
       <button class="btn btn-s btn-xs ${_descTipo==="val"?"btn-p":""}" id="desc-val">R$</button>
       <button class="btn btn-s btn-xs ${_descTipo==="pct"?"btn-p":""}" id="desc-pct">%</button>
     </div>
@@ -2256,7 +2371,7 @@ function renderCarrinho(){
     <!-- Gorjeta -->
     <div style="display:flex;gap:5px;align-items:center;margin-bottom:6px">
       <span style="font-size:.74rem;color:var(--text2);white-space:nowrap">Gorjeta:</span>
-      <input id="gorj-inp" type="number" min="0" step="0.01" value="${_gorj}" style="font-size:.8rem;padding:4px 8px;flex:1">
+      <input id="gorj-inp" inputmode="decimal" value="${_gorj||""}" placeholder="0,00" style="font-size:.8rem;padding:4px 8px;flex:1">
       <button class="btn btn-s btn-xs ${_gorjTipo==="val"?"btn-p":""}" id="gorj-val">R$</button>
       <button class="btn btn-s btn-xs ${_gorjTipo==="pct"?"btn-p":""}" id="gorj-pct">%</button>
       <button class="btn btn-s btn-xs ${_gorjTipo==="none"?"btn-p":""}" id="gorj-sem">Sem</button>
@@ -2270,7 +2385,7 @@ function renderCarrinho(){
   <!-- Misto: campos individuais -->
   ${_pag==="misto"&&_cart.length?`
   <div class="misto-grid" style="margin-bottom:8px">
-    ${["pix","dinheiro","credito","debito"].map(k=>`<div class="misto-row"><label>${PI[k]} ${PL[k]}</label><input type="number" min="0" step="0.01" value="${_misto[k]||""}" class="misto-inp" data-k="${k}" placeholder="0.00" style="font-size:.82rem;padding:5px 8px"></div>`).join("")}
+    ${["pix","dinheiro","credito","debito"].map(k=>`<div class="misto-row"><label>${PI[k]} ${PL[k]}</label><input inputmode="decimal" value="${_misto[k]||""}" class="misto-inp" data-k="${k}" placeholder="0,00" style="font-size:.82rem;padding:5px 8px"></div>`).join("")}
     <div style="font-size:.75rem;color:${Math.abs(Object.values(_misto).reduce((a,v)=>a+(+v||0),0)-total)<0.01?"var(--ok)":"var(--er)"}">Total misto: R$ ${fmt(Object.values(_misto).reduce((a,v)=>a+(+v||0),0))} / R$ ${fmt(total)}</div>
   </div>`:""}
   <!-- Troco automático para dinheiro -->
@@ -2278,7 +2393,7 @@ function renderCarrinho(){
   <div style="background:var(--bg3);border-radius:9px;padding:8px 10px;margin-bottom:8px">
     <div style="display:flex;gap:7px;align-items:center;margin-bottom:6px">
       <span style="font-size:.74rem;color:var(--text2);white-space:nowrap;font-weight:600">💵 Recebido:</span>
-      <input id="troco-recebido" type="number" min="0" step="0.01" placeholder="0,00" value="${_trocoRecebido||""}" style="font-size:.9rem;padding:4px 9px;flex:1;font-weight:700;text-align:right">
+      <input id="troco-recebido" inputmode="decimal" placeholder="0,00" value="${_trocoRecebido||""}" style="font-size:.9rem;padding:4px 9px;flex:1;font-weight:700;text-align:right">
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:5px">
       ${[total,Math.ceil(total/10)*10,Math.ceil(total/50)*50,Math.ceil(total/100)*100].filter((v,i,a)=>a.indexOf(v)===i&&v>=total).slice(0,4).map(v=>`<button class="btn btn-s btn-xs troco-sug" data-v="${v}">R$ ${fmt(v)}</button>`).join("")}
@@ -2290,17 +2405,18 @@ function renderCarrinho(){
   <button class="fin-btn" id="btn-finalizar" ${!_cart.length?"disabled":""}>
     ${_cart.length?`✓ Finalizar — R$ ${fmt(total)}`:"Adicione produtos"}
   </button>`;
+  const parseVal=s=>parseFloat((s||"").toString().replace(",",".").replace(/[^\d.-]/g,""))||0;
   foot.querySelectorAll(".pb").forEach(b=>b.addEventListener("click",()=>{_pag=b.dataset.pm;_trocoRecebido=0;renderCarrinho();}));
-  foot.querySelectorAll(".misto-inp").forEach(inp=>inp.addEventListener("input",()=>{_misto[inp.dataset.k]=parseFloat(inp.value)||0;renderCarrinho();}));
-  $("troco-recebido")?.addEventListener("input",()=>{_trocoRecebido=parseFloat($("troco-recebido").value)||0;renderCarrinho();});
+  foot.querySelectorAll(".misto-inp").forEach(inp=>inp.addEventListener("input",()=>{_misto[inp.dataset.k]=parseVal(inp.value);renderCarrinho();}));
+  $("troco-recebido")?.addEventListener("input",()=>{_trocoRecebido=parseVal($("troco-recebido").value);renderCarrinho();});
   foot.querySelectorAll(".troco-sug").forEach(b=>b.addEventListener("click",()=>{_trocoRecebido=parseFloat(b.dataset.v);renderCarrinho();}));
   $("pdv-obs")?.addEventListener("input",()=>{_pdvObs=$("pdv-obs").value;});
-  $("desc-inp")?.addEventListener("input",()=>{_desc=parseFloat($("desc-inp").value)||0;renderCarrinho();});
+  $("desc-inp")?.addEventListener("input",()=>{_desc=parseVal($("desc-inp").value);renderCarrinho();});
   $("desc-val")?.addEventListener("click",()=>{_descTipo="val";renderCarrinho();});
   $("desc-pct")?.addEventListener("click",()=>{_descTipo="pct";renderCarrinho();});
   $("cupom-inp")?.addEventListener("keydown",e=>{if(e.key==="Enter")aplicarCupom($("cupom-inp").value);});
   $("btn-aplicar-cupom")?.addEventListener("click",()=>aplicarCupom($("cupom-inp")?.value||""));
-  $("gorj-inp")?.addEventListener("input",()=>{_gorj=parseFloat($("gorj-inp").value)||0;renderCarrinho();});
+  $("gorj-inp")?.addEventListener("input",()=>{_gorj=parseVal($("gorj-inp").value);renderCarrinho();});
   $("gorj-val")?.addEventListener("click",()=>{_gorjTipo="val";renderCarrinho();});
   $("gorj-pct")?.addEventListener("click",()=>{_gorjTipo="pct";renderCarrinho();});
   $("gorj-sem")?.addEventListener("click",()=>{_gorjTipo="none";_gorj=0;renderCarrinho();});
@@ -3187,42 +3303,81 @@ function atualizaTotalMesa(num,valor){
 // ════ KDS ═════════════════════════════════════════════════════
 function renderKDS(){
   const pg=$("pg-kds");if(!pg)return;
-  const cfg=getCfg();
-  const kdsSettings=cfg.kds||{telas:[{nome:"KDS Principal",cat:"all",cor:"#6C47FF",ativo:true},{nome:"KDS Cozinha",cat:"all",cor:"#E53E3E",ativo:false},{nome:"KDS Delivery",cat:"all",cor:"#38A169",ativo:false},{nome:"KDS Bar",cat:"all",cor:"#3182CE",ativo:false}]};
-  const orders=getKDS().filter(o=>o.kdsStatus!=="pronto");
-  const telas=kdsSettings.telas.filter(t=>t.ativo);
-  pg.innerHTML=`<div class="ph"><div class="ph-title">📺 KDS — Cozinha</div>
+  const allOrders=getKDS();
+  const cols=[
+    {k:"pendente",label:"🔥 Em Preparo",bg:"#E53E3E",text:"#fff",count:0},
+    {k:"pronto",label:"✅ Finalizado",bg:"#38A169",text:"#fff",count:0},
+    {k:"entregue",label:"🚀 Entregue",bg:"#3182CE",text:"#fff",count:0},
+  ];
+  cols.forEach(c=>c.orders=allOrders.filter(o=>(o.kdsStatus||"pendente")===c.k));
+
+  function timeAgo(ts){
+    if(!ts)return"";
+    const m=Math.floor((Date.now()-ts)/60000);
+    if(m<1)return"agora";if(m<60)return m+"min";return Math.floor(m/60)+"h"+m%60+"m";
+  }
+  function modeLabel(m){return m==="delivery"?"🛵":m==="local"?"🪑":"🏪";}
+
+  pg.innerHTML=`
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;flex-shrink:0;border-bottom:1px solid var(--brd);background:#fff">
+    <div style="font-size:1rem;font-weight:800;display:flex;align-items:center;gap:8px">📺 KDS Cozinha <span style="font-size:.7rem;color:var(--text3);font-weight:400">${allOrders.length} pedidos total</span></div>
     <div style="display:flex;gap:8px">
-      <button class="btn btn-s btn-sm" id="btn-kds-cfg">⚙️ Configurar</button>
+      <button class="btn btn-s btn-sm" id="btn-kds-cfg">⚙️ Config</button>
       <button class="btn btn-er btn-sm" id="btn-kds-limpar">🗑 Limpar Prontos</button>
     </div>
   </div>
-  <div class="kds-board" style="grid-template-columns:repeat(${Math.min(telas.length,2)},1fr)">
-    ${telas.map(tela=>{
-      const telaOrders=orders;
-      return`<div class="kds-tela" style="border-color:${tela.cor}">
-        <div class="kds-h" style="background:${tela.cor}">
-          <span>📺 ${esc(tela.nome)}</span>
-          <span style="font-size:.78rem;opacity:.8">${telaOrders.length} pedidos</span>
-        </div>
-        <div class="kds-body">
-          ${telaOrders.length?telaOrders.map(o=>`<div class="kds-card" style="border-color:${tela.cor}">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:7px">
-              <span class="kds-num" style="color:${tela.cor}">#${o.kdsNum||"—"}</span>
-              <span style="font-size:.72rem;background:${tela.cor};color:#fff;padding:2px 8px;border-radius:20px">${o.modo==="delivery"?"🛵 Delivery":o.modo==="local"?"🪑 Local":"🏪 Balcão"}</span>
-            </div>
-            <div style="font-weight:700;margin-bottom:5px">${esc(o.cliente)}</div>
-            <div class="kds-items">${(o.itens||[]).map(i=>`<div>• <strong>${i.qtd}x</strong> ${esc(i.nome)}</div>`).join("")}</div>
-            ${o.obs?`<div style="font-size:.75rem;font-style:italic;color:var(--text3);border-top:1px solid var(--brd);padding-top:5px;margin-top:5px">📝 ${esc(o.obs)}</div>`:""}
-            <button class="btn btn-ok btn-xs" style="width:100%;margin-top:9px;justify-content:center kds-pronto" data-id="${o.id}" onclick="(()=>{const l=JSON.parse(localStorage.getItem('ys_kds_${_tenant}')||'[]');const o=l.find(x=>x.id==='${o.id}');if(o){o.kdsStatus='pronto';localStorage.setItem('ys_kds_${_tenant}',JSON.stringify(l));renderKDS();}})()">✓ Pronto</button>
-          </div>`).join(""):`<div style="text-align:center;padding:28px;color:var(--text3)">Nenhum pedido</div>`}
-        </div>
-      </div>`;
-    }).join("")}
+  <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);min-height:0;border-top:1px solid var(--brd)">
+    ${cols.map(col=>`
+    <div class="kds-col" style="border-right:1px solid var(--brd)">
+      <div class="kds-col-h" style="background:${col.bg}">
+        <span>${col.label}</span>
+        <span style="background:rgba(255,255,255,.2);padding:2px 9px;border-radius:12px;font-size:.7rem">${col.orders.length}</span>
+      </div>
+      <div class="kds-col-body" id="kds-col-${col.k}">
+        ${col.orders.length?col.orders.map(o=>`
+        <div class="kds-mini" style="background:${col.bg}22;border-color:${col.bg}44;color:var(--text)" data-id="${o.id}">
+          <button class="kds-mini-btn" data-id="${o.id}" data-col="${col.k}" style="background:${col.bg};color:#fff">→</button>
+          <div class="kds-mini-num" style="color:${col.bg}">#${o.kdsNum||o.codigo||"—"} ${modeLabel(o.modo)}</div>
+          <div class="kds-mini-cli">${esc(o.cliente||"Balcão")}</div>
+          <div class="kds-mini-items">${(o.itens||[]).map(i=>`${i.qtd}x ${i.nome}`).join(", ")||esc(o.produto||"")}</div>
+          ${o.obs?`<div class="kds-mini-info" style="color:var(--warn)">📝 ${esc(o.obs)}</div>`:""}
+          <div class="kds-mini-time">${timeAgo(o.criadoEm||o._at)}</div>
+        </div>`).join(""):`<div style="text-align:center;padding:20px;color:var(--text3);font-size:.8rem;opacity:.5">Vazio</div>`}
+      </div>
+    </div>`).join("")}
   </div>`;
+
+  // Avançar status
+  pg.querySelectorAll(".kds-mini-btn").forEach(btn=>btn.addEventListener("click",e=>{
+    e.stopPropagation();
+    const id=btn.dataset.id, col=btn.dataset.col;
+    const next={pendente:"pronto",pronto:"entregue",entregue:"entregue"};
+    const list=getKDS();
+    const o=list.find(x=>x.id===id);
+    if(o){o.kdsStatus=next[col]||"pronto";localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(list));renderKDS();}
+  }));
+
+  // Clique no card abre detalhes
+  pg.querySelectorAll(".kds-mini").forEach(card=>card.addEventListener("click",e=>{
+    if(e.target.classList.contains("kds-mini-btn"))return;
+    const id=card.dataset.id;
+    const list=getKDS();
+    const o=list.find(x=>x.id===id);if(!o)return;
+    const cur=o.kdsStatus||"pendente";
+    const next={pendente:"pronto",pronto:"entregue",entregue:"entregue"};
+    const nxt=next[cur];
+    const nxtLabel={pronto:"✅ Marcar Finalizado",entregue:"🚀 Marcar Entregue",}[nxt]||"—";
+    if(nxt===cur)return;
+    if(confirm(`${nxtLabel}?\n#${o.kdsNum||o.codigo||"—"} — ${o.cliente||"Balcão"}`)){
+      o.kdsStatus=nxt;localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(list));renderKDS();toast(`Pedido ${o.kdsNum?"#"+o.kdsNum:""} → ${nxt==="pronto"?"Finalizado":"Entregue"}`,"ok");
+    }
+  }));
+
   pg.querySelector("#btn-kds-cfg")?.addEventListener("click",()=>{irPara("config",null);buildNav();});
-  pg.querySelector("#btn-kds-limpar")?.addEventListener("click",()=>{const l=JSON.parse(localStorage.getItem("ys_kds_"+_tenant)||"[]").filter(o=>o.kdsStatus!=="pronto");localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(l));renderKDS();});
-  addPrintBtn(pg,"KDS — Cozinha");
+  pg.querySelector("#btn-kds-limpar")?.addEventListener("click",()=>{
+    const l=getKDS().filter(o=>o.kdsStatus!=="entregue");
+    localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(l));renderKDS();toast("Pedidos entregues removidos","ok");
+  });
 }
 // ════ CONFIGURAÇÕES ═══════════════════════════════════════════
 const EMOJIS=["🍒","🎂","🍫","🍬","🍰","🧁","🍩","🍪","🎁","⭐","💎","🌸","🌺","🏅","🍓","🥐","🥧","☕","🍮","🛍️"];
@@ -3747,6 +3902,48 @@ function renderCardapioDigital(){
         <button class="btn btn-p btn-sm btn-fw" id="btn-cd-salvar" style="justify-content:center;margin-top:6px">💾 Salvar Configurações</button>
       </div>
 
+      <!-- ═══ NOVO: Personalização Visual do Cardápio ═══ -->
+      <div class="set-card">
+        <div class="set-t">🎨 Personalização do Cardápio</div>
+        <!-- Logo -->
+        <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:14px">
+          <div>
+            <div class="logo-up" id="cd-logo-prev" style="width:64px;height:64px;font-size:1.8rem">${cfg.logoImg?`<img src="${cfg.logoImg}">`:(cfg.logo||"🍽️")}</div>
+            <input type="file" id="cd-logo-file" accept="image/*" style="display:none">
+            <button class="btn btn-s btn-xs" id="btn-cd-logo-up" style="margin-top:5px;width:64px">📁 Logo</button>
+          </div>
+          <div style="flex:1">
+            <div class="fg"><label>Nome da Loja</label><input id="cd-nome-loja" value="${esc(cfg.nomeExib||biz.nome||"")}"></div>
+            <div class="fg"><label>Subtítulo</label><input id="cd-subtitulo" value="${esc(cfg.sub||"")}" placeholder="Peça online 🛵"></div>
+          </div>
+        </div>
+        <!-- Cor de destaque do cardápio -->
+        <label style="font-size:.74rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Cor de Destaque</label>
+        <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px">
+          ${CORES.map(c=>`<div class="co-sw${(cfg.corCardapio||cfg.cor||"#ff5c35")===c.v?" sel":""}" style="background:${c.v}" data-vc="${c.v}" title="${c.n}"></div>`).join("")}
+          <input type="color" id="cd-cor-custom" value="${cfg.corCardapio||cfg.cor||"#ff5c35"}" style="width:33px;height:33px;padding:2px;cursor:pointer;border-radius:8px;border:2px solid var(--brd)">
+        </div>
+        <!-- Tema escuro/claro -->
+        <label style="font-size:.74rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Tema do Cardápio</label>
+        <div style="display:flex;gap:7px;margin-bottom:12px">
+          <div class="tema-opt${(cfg.temaCardapio||"dark")==="dark"?" sel":""}" data-tc="dark" style="background:#0d0d0d;color:#f4f4f4;padding:7px 14px;border-radius:9px;cursor:pointer;border:2px solid transparent;font-size:.8rem;font-weight:700">🌙 Escuro</div>
+          <div class="tema-opt${(cfg.temaCardapio||"dark")==="light"?" sel":""}" data-tc="light" style="background:#fff;color:#111;padding:7px 14px;border-radius:9px;cursor:pointer;border:2px solid transparent;font-size:.8rem;font-weight:700">☀️ Claro</div>
+          <div class="tema-opt${(cfg.temaCardapio||"dark")==="brand"?" sel":""}" data-tc="brand" style="background:var(--brand);color:#fff;padding:7px 14px;border-radius:9px;cursor:pointer;border:2px solid transparent;font-size:.8rem;font-weight:700">✨ Marca</div>
+        </div>
+        <!-- Categorias visíveis -->
+        <label style="font-size:.74rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Categorias no Cardápio</label>
+        <div style="margin-bottom:10px">
+          ${[...new Set(getProds().map(p=>p.cat||"Outro"))].map(cat=>{
+            const hidden=(cfg.catsOcultas||[]).includes(cat);
+            return`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--brd)">
+              <input type="checkbox" ${!hidden?"checked":""} class="cd-cat-vis" data-cat="${esc(cat)}" style="accent-color:var(--brand);width:14px;height:14px">
+              <span style="font-size:.84rem">${esc(cat)}</span>
+            </div>`;
+          }).join("")||`<div style="font-size:.8rem;color:var(--text3)">Nenhum produto cadastrado ainda.</div>`}
+        </div>
+        <button class="btn btn-p btn-sm btn-fw" id="btn-cd-salva-visual" style="justify-content:center">✓ Salvar Aparência</button>
+      </div>
+
       <!-- Pedidos Recebidos Hoje -->
       <div class="set-card">
         <div class="set-t" style="display:flex;justify-content:space-between;align-items:center">
@@ -3857,6 +4054,43 @@ function renderCardapioDigital(){
 
   pg.querySelector("#btn-cd-print-qr")?.addEventListener("click", imprimirQRCode);
   pg.querySelector("#btn-cd-dl-qr")?.addEventListener("click", baixarQRCode);
+
+  // ── Personalização visual ──────────────────────────────────
+  pg.querySelector("#btn-cd-logo-up")?.addEventListener("click",()=>$("cd-logo-file")?.click());
+  pg.querySelector("#cd-logo-file")?.addEventListener("change",function(){
+    const f=this.files[0];if(!f)return;
+    const r=new FileReader();r.onload=async ev=>{
+      const cfg=getCfg();cfg.logoImg=ev.target.result;setCfg(cfg);
+      const cos=await dbEmpresas();const co=cos.find(x=>x.id===_tenant);
+      if(co){co.logoImg=ev.target.result;await dbSalvaEmpresa(co);}
+      const prev=pg.querySelector("#cd-logo-prev");if(prev)prev.innerHTML=`<img src="${ev.target.result}">`;
+      aplicaBranding();toast("✅ Logo salva!","ok");
+    };r.readAsDataURL(f);
+  });
+  pg.querySelectorAll(".co-sw[data-vc]").forEach(el=>el.addEventListener("click",()=>{
+    pg.querySelectorAll(".co-sw[data-vc]").forEach(x=>x.classList.remove("sel"));
+    el.classList.add("sel");
+    const ci=pg.querySelector("#cd-cor-custom");if(ci)ci.value=el.dataset.vc;
+  }));
+  pg.querySelector("#cd-cor-custom")?.addEventListener("input",function(){
+    pg.querySelectorAll(".co-sw[data-vc]").forEach(x=>x.classList.remove("sel"));
+  });
+  pg.querySelectorAll(".tema-opt[data-tc]").forEach(el=>el.addEventListener("click",()=>{
+    pg.querySelectorAll(".tema-opt[data-tc]").forEach(x=>x.classList.remove("sel"));
+    el.classList.add("sel");
+  }));
+  pg.querySelector("#btn-cd-salva-visual")?.addEventListener("click",()=>{
+    const cfg=getCfg();
+    cfg.nomeExib=pg.querySelector("#cd-nome-loja")?.value.trim()||cfg.nomeExib;
+    cfg.sub=pg.querySelector("#cd-subtitulo")?.value.trim()||"";
+    cfg.corCardapio=pg.querySelector("#cd-cor-custom")?.value||cfg.cor;
+    cfg.temaCardapio=pg.querySelector(".tema-opt.sel[data-tc]")?.dataset.tc||"dark";
+    const ocultas=[];
+    pg.querySelectorAll(".cd-cat-vis").forEach(cb=>{if(!cb.checked)ocultas.push(cb.dataset.cat);});
+    cfg.catsOcultas=ocultas;
+    setCfg(cfg);aplicaBranding();toast("✅ Aparência do cardápio salva!","ok");
+    renderCardapioDigital();
+  });
 }
 
 function gerarQRCode(link){
