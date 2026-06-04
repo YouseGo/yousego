@@ -1349,29 +1349,31 @@
     }
 
     // ── 2. Monta e envia mensagem WhatsApp ────────────────────
+    // Ensure emojis render correctly in WhatsApp
+    function safeEmoji(e){ try{return e}catch{return ""} }
     let msg = '';
-    msg += `*🛒 NOVO PEDIDO — CARDÁPIO DIGITAL*\n`;
-    msg += `————————————————\n`;
-    msg += `*👤 Cliente:* ${nomeCliente}\n`;
-    if(foneCliente) msg += `*📱 Contato:* ${foneCliente}\n`;
-    msg += `*📦 Entrega:* ${tipoEntrega}\n`;
-    if(tipoEntrega==='Entrega') msg += `*📍 Endereço:* ${endereco}\n`;
-    msg += `*💳 Pagamento:* ${pagamento}\n`;
-    msg += `————————————————\n`;
-    msg += `*📋 ITENS DO PEDIDO:*\n\n`;
+    msg += safeEmoji('*🛒 NOVO PEDIDO — CARDÁPIO DIGITAL*\n');
+    msg += '————————————————\n';
+    msg += safeEmoji('*👤 Cliente:* ') + nomeCliente + '\n';
+    if(foneCliente) msg += safeEmoji('*📱 Contato:* ') + foneCliente + '\n';
+    msg += safeEmoji('*📦 Entrega:* ') + tipoEntrega + '\n';
+    if(tipoEntrega==='Entrega') msg += safeEmoji('*📍 Endereço:* ') + endereco + '\n';
+    msg += safeEmoji('*💳 Pagamento:* ') + pagamento + '\n';
+    msg += '————————————————\n';
+    msg += safeEmoji('*📋 ITENS DO PEDIDO:*\n\n');
     let totalMsg=0;
     carrinho.forEach((item,idx)=>{
       const sub=item.preco*item.qtd; totalMsg+=sub;
       msg+=`*${idx+1}. ${item.nome}*\n`;
-      msg+=`   Qtd: ${item.qtd}x — ${fmtBRL(item.preco)}/un\n`;
+      msg+=`   Qtd: ${item.qtd}x \u2014 ${fmtBRL(item.preco)}/un\n`;
       msg+=`   Subtotal: *${fmtBRL(sub)}*\n`;
-      if(item.obs) msg+=`   ✏️ Obs: _${item.obs}_\n`;
-      msg+=`\n`;
+      if(item.obs) msg+=safeEmoji('   \u270f\ufe0f Obs: ')+'_'+item.obs+'_\n';
+      msg+='\n';
     });
-    msg+=`————————————————\n`;
-    msg+=`💰 *TOTAL: ${fmtBRL(totalMsg)}*\n`;
-    msg+=`————————————————\n`;
-    msg+=`_Pedido enviado via Cardápio Digital YOUSEGO_ 🍽️`;
+    msg+='————————————————\n';
+    msg+=safeEmoji('💰 ')+'*TOTAL: '+fmtBRL(totalMsg)+'*\n';
+    msg+='————————————————\n';
+    msg+=safeEmoji('_Pedido enviado via Cardápio Digital YOUSEGO_ 🍽️');
 
     let numero=WPP_NUMERO.replace(/\D/g,'');
     if(!numero.startsWith('55')) numero='55'+numero;
