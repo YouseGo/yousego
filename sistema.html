@@ -365,14 +365,21 @@ tr:hover .dre-del{display:inline}.dre-del:hover{color:var(--er)}
   <div class="auth-box" style="max-width:460px">
     <div class="auth-logo" style="font-size:2rem;margin-bottom:4px">YOUSEGO</div>
     <div class="auth-sub" style="margin-bottom:22px">Sistema de Gestão Profissional</div>
-    <!-- Campo de busca de empresa (sem listar todas) -->
+    <!-- Botão principal de entrada -->
+    <button class="lbtn" id="btn-entrar-sistema" style="background:var(--brand);color:#fff;margin-bottom:6px;font-size:1rem">🔐 Entrar no Sistema</button>
+    <!-- Separador -->
+    <div style="display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--text3);font-size:.75rem">
+      <div style="flex:1;height:1px;background:var(--brd)"></div>ou selecione a empresa<div style="flex:1;height:1px;background:var(--brd)"></div>
+    </div>
+    <!-- Campo de busca de empresa com sugestões -->
     <div style="position:relative;margin-bottom:10px">
       <label style="font-size:.65rem;font-weight:700;color:var(--text2);display:block;margin-bottom:4px;text-transform:uppercase;letter-spacing:.8px">Buscar Empresa / Filial</label>
       <input class="lf" id="co-busca" placeholder="Digite o nome da empresa..." autocomplete="off" style="margin-bottom:0">
-      <div id="co-sug-box" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--brd2);border-radius:0 0 var(--r) var(--r);z-index:100;display:none;max-height:220px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.1)"></div>
+      <div id="co-sug-box" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--brd2);border-radius:0 0 var(--r) var(--r);z-index:200;display:none;max-height:220px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.12)"></div>
     </div>
     <div id="co-list-home" style="display:none"></div>
-    <div style="display:flex;align-items:center;gap:10px;margin:16px 0;color:var(--text3);font-size:.75rem">
+    <!-- Separador criar -->
+    <div style="display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--text3);font-size:.75rem">
       <div style="flex:1;height:1px;background:var(--brd)"></div>ou crie nova<div style="flex:1;height:1px;background:var(--brd)"></div>
     </div>
     <button class="lbtn" id="btn-nova-co" style="background:var(--bg3);color:var(--brand);border:1.5px solid var(--brand)">+ Criar Nova Empresa</button>
@@ -1135,36 +1142,42 @@ let CM=new Date().getMonth(), CT="dashboard";
 // ════════════════════════════════════════════════════════════
 //  AUTH
 // ════════════════════════════════════════════════════════════
+let _coBuscaBound=false;
 async function renderEmpresas(){
-  // Não exibir lista ao carregar — apenas atualizar status e preparar sugestão
   const status=$("firebase-status");
   try{
     const cos=await dbEmpresas();
-    if(status) status.innerHTML=`<span style="color:var(--ok)">🟢 Firebase Conectado</span> · dados sincronizados`;
-    // Configurar campo de sugestão
+    if(status) status.innerHTML=`<span style="color:var(--ok)">🟢 Firebase Conectado</span> · ${cos.length} empresa(s) sincronizada(s)`;
     const input=$("co-busca");
     const box=$("co-sug-box");
     if(!input||!box)return;
-    input.addEventListener("input",()=>{
-      const q=input.value.trim().toLowerCase();
-      if(q.length<1){box.style.display="none";return;}
-      const filt=cos.filter(c=>(c.nome||c.name||"").toLowerCase().includes(q));
-      if(!filt.length){box.style.display="none";return;}
-      box.innerHTML=filt.map(co=>`<div class="co-sug-item" data-id="${co.id}" style="display:flex;align-items:center;gap:10px;padding:10px 13px;cursor:pointer;border-bottom:1px solid var(--brd);transition:background .15s">
-        <div style="font-size:1.2rem;width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--brand-t);border-radius:8px;flex-shrink:0">${co.logoImg?`<img src="${co.logoImg}" style="width:100%;height:100%;object-fit:cover;border-radius:8px">`:co.logo||"🏪"}</div>
-        <div><div style="font-weight:700;font-size:.88rem">${esc(co.nome||co.name||"")}</div><div style="font-size:.7rem;color:var(--text3)">${esc(co.tipo||co.type||"—")}</div></div>
-      </div>`).join("");
-      box.style.display="block";
-      box.querySelectorAll(".co-sug-item").forEach(it=>{
-        it.addEventListener("mouseenter",()=>it.style.background="var(--bg3)");
-        it.addEventListener("mouseleave",()=>it.style.background="");
-        it.addEventListener("click",()=>{box.style.display="none";input.value="";selecionaEmpresa(it.dataset.id);});
+    // Guard against double-binding
+    if(!_coBuscaBound){
+      _coBuscaBound=true;
+      input.addEventListener("input",async()=>{
+        const q=input.value.trim().toLowerCase();
+        if(q.length<1){box.style.display="none";return;}
+        // Re-fetch in case list changed
+        let lista=cos;
+        try{const fresh=await dbEmpresas();if(fresh&&fresh.length)lista=fresh;}catch(_){}
+        const filt=lista.filter(c=>(c.nome||c.name||"").toLowerCase().includes(q));
+        if(!filt.length){box.style.display="none";return;}
+        box.innerHTML=filt.map(co=>`<div class="co-sug-item" data-id="${co.id}" style="display:flex;align-items:center;gap:10px;padding:10px 13px;cursor:pointer;border-bottom:1px solid var(--brd);transition:background .15s">
+          <div style="font-size:1.2rem;width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--brand-t);border-radius:8px;flex-shrink:0">${co.logoImg?`<img src="${co.logoImg}" style="width:100%;height:100%;object-fit:cover;border-radius:8px">`:co.logo||"🏪"}</div>
+          <div><div style="font-weight:700;font-size:.88rem">${esc(co.nome||co.name||"")}</div><div style="font-size:.7rem;color:var(--text3)">${esc(co.tipo||co.type||"—")}</div></div>
+        </div>`).join("");
+        box.style.display="block";
+        box.querySelectorAll(".co-sug-item").forEach(it=>{
+          it.addEventListener("mouseenter",()=>it.style.background="var(--bg3)");
+          it.addEventListener("mouseleave",()=>it.style.background="");
+          it.addEventListener("click",()=>{box.style.display="none";input.value="";selecionaEmpresa(it.dataset.id);});
+        });
       });
-    });
-    // Fechar ao clicar fora
-    document.addEventListener("click",e=>{if(!input.contains(e.target)&&!box.contains(e.target))box.style.display="none";},{once:false});
+      document.addEventListener("click",e=>{if(!input.contains(e.target)&&!box.contains(e.target))box.style.display="none";});
+    }
   }catch(e){
     if(status) status.innerHTML=`<span style="color:var(--er)">🔴 Firebase offline</span> · verifique conexão`;
+    console.error("renderEmpresas error:",e);
   }
 }
 
@@ -3395,18 +3408,21 @@ function initSuggest(){
     box.innerHTML=ms.map(c=>`<div class="sug-item" data-n="${esc(c.nome)}" data-p="${esc(c.fone||"")}">👤 <strong>${esc(c.nome)}</strong><span style="margin-left:auto;font-family:monospace;font-size:.75rem">${esc(c.fone||"")}</span></div>`).join("");
     box.querySelectorAll(".sug-item").forEach(i=>i.addEventListener("click",()=>{$("oo-cliente").value=i.dataset.n;$("oo-fone").value=i.dataset.p;box.classList.remove("on");}));
   });
-  $("oo-prod").addEventListener("input",function(){
-    const box=$("sug-prod"),q=this.value.toLowerCase();
-    const ms=q?getProds().filter(p=>(p.nome||p.name||"").toLowerCase().includes(q)).slice(0,6):getProds().slice(0,6);
-    if(!ms.length){box.classList.remove("on");return;}
-    box.classList.add("on");
-    box.innerHTML=ms.map(p=>`<div class="sug-item" data-n="${esc(p.nome||p.name)}" data-v="${p.preco}">${p.emoji||"🎂"} <span>${esc(p.nome||p.name)}</span><span style="margin-left:auto;font-family:monospace;font-size:.75rem;color:var(--brand)">R$ ${fmt(p.preco)}</span></div>`).join("");
-    box.querySelectorAll(".sug-item").forEach(i=>i.addEventListener("click",()=>{$("oo-prod").value=i.dataset.n;const q=parseInt($("oo-qtd").value)||1;$("oo-val").value=(i.dataset.v*q).toFixed(2);box.classList.remove("on");}));
-  });
+  // sug-prod in order modal (oo-prod is hidden; using oo-prod-busca/sug-prod-enc)
+  if($("oo-prod-busca")&&$("sug-prod-enc")){
+    $("oo-prod-busca").addEventListener("input",function(){
+      const box=$("sug-prod-enc"),q=this.value.toLowerCase();
+      const ms=q?getProds().filter(p=>(p.nome||p.name||"").toLowerCase().includes(q)).slice(0,6):getProds().slice(0,6);
+      if(!ms.length){box.classList.remove("on");return;}
+      box.classList.add("on");
+      box.innerHTML=ms.map(p=>`<div class="sug-item" data-n="${esc(p.nome||p.name)}" data-v="${p.preco}">${p.emoji||"🎂"} <span>${esc(p.nome||p.name)}</span><span style="margin-left:auto;font-family:monospace;font-size:.75rem;color:var(--brand)">R$ ${fmt(p.preco)}</span></div>`).join("");
+      box.querySelectorAll(".sug-item").forEach(i=>i.addEventListener("click",()=>{$("oo-prod-busca").value=i.dataset.n;$("oo-prod").value=i.dataset.n;const q=parseInt($("oo-qtd")?.value)||1;if($("oo-val"))$("oo-val").value=(i.dataset.v*q).toFixed(2);box.classList.remove("on");}));
+    });
+  }
   document.addEventListener("click",e=>{
     if(!e.target.closest("#sug-filial")&&!e.target.matches("#ld-filial"))$("sug-filial")?.classList.remove("on");
     if(!e.target.closest("#sug-cliente")&&!e.target.matches("#oo-cliente"))$("sug-cliente")?.classList.remove("on");
-    if(!e.target.closest("#sug-prod")&&!e.target.matches("#oo-prod"))$("sug-prod")?.classList.remove("on");
+    if(!e.target.closest("#sug-prod-enc")&&!e.target.matches("#oo-prod-busca"))$("sug-prod-enc")?.classList.remove("on");
   });
 }
 
@@ -3414,6 +3430,10 @@ function initSuggest(){
 function bindEvents(){
   // Auth
   $("btn-nova-co").addEventListener("click",()=>mostrar("sc-nova-co"));
+  $("btn-entrar-sistema").addEventListener("click",()=>{
+    $("ld-filial").value="";$("ld-user").value="";$("ld-pass").value="";$("ld-err").textContent="";
+    mostrar("sc-login-direto");
+  });
   $("btn-criar-co").addEventListener("click",criarEmpresa);
   $("btn-volta-co").addEventListener("click",()=>mostrar("sc-empresa"));
   $("btn-volta-login").addEventListener("click",()=>mostrar("sc-empresa"));
@@ -3901,20 +3921,7 @@ function carregarPedidosCardapioHoje(pg){
 (async function boot(){
   try{
     bindEvents();
-    // Add "Entrar" button on empresa screen that goes to direct login
-    const btnEntrar=document.createElement("button");
-    btnEntrar.className="lbtn";
-    btnEntrar.style.cssText="background:var(--brand);color:#fff;margin-bottom:8px";
-    btnEntrar.textContent="🔐 Já tenho conta — Entrar";
-    btnEntrar.addEventListener("click",()=>{
-      $("ld-filial").value="";$("ld-user").value="";$("ld-pass").value="";$("ld-err").textContent="";
-      mostrar("sc-login-direto");
-    });
-    const box=$("sc-empresa")?.querySelector(".auth-box");
-    if(box){
-      const nova=box.querySelector("#btn-nova-co");
-      if(nova)nova.parentNode.insertBefore(btnEntrar,nova);
-    }
+    // Botão "Entrar" agora está direto no HTML (btn-entrar-sistema)
     initSuggest();
     await renderEmpresas();
   }catch(err){
