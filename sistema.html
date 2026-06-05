@@ -312,29 +312,38 @@ tr:hover .dre-del{display:inline}.dre-del:hover{color:var(--er)}
 .kds-board{display:grid;grid-template-columns:repeat(3,1fr);gap:0;background:var(--brd);border:1px solid var(--brd);border-radius:var(--r2);overflow:hidden}
 .kds-col{background:var(--bg);display:flex;flex-direction:column;min-height:0}
 .kds-col-h{padding:8px 12px;font-weight:800;font-size:.72rem;text-transform:uppercase;letter-spacing:1.5px;color:#fff;display:flex;align-items:center;gap:7px;flex-shrink:0;border-bottom:1px solid rgba(255,255,255,.12)}
-.kds-col-body{padding:7px;display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;overflow-y:auto;align-content:start;flex:1}
-.kds-mini{border-radius:9px;padding:8px 9px;cursor:pointer;transition:all .18s;position:relative;border:1.5px solid transparent}
+.kds-col-body{padding:7px;display:flex;flex-direction:column;gap:6px;overflow-y:auto;align-content:start;flex:1}
+/* Card KDS — altura automática conforme conteúdo */
+.kds-mini{border-radius:9px;padding:9px 10px;cursor:pointer;transition:all .18s;position:relative;border:1.5px solid transparent;height:auto}
 .kds-mini:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(0,0,0,.25)}
 .kds-mini-num{font-family:"DM Mono",monospace;font-size:.7rem;font-weight:900;opacity:.85;margin-bottom:2px}
-.kds-mini-cli{font-weight:700;font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
-.kds-mini-info{font-size:.65rem;opacity:.75;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.kds-mini-items{font-size:.65rem;opacity:.7;margin-top:3px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.kds-mini-time{font-family:"DM Mono",monospace;font-size:.58rem;opacity:.6;margin-top:4px}
-.kds-mini-btn{display:none;position:absolute;top:4px;right:4px;background:rgba(255,255,255,.2);border:none;border-radius:5px;color:#fff;font-size:.6rem;font-weight:700;padding:2px 5px;cursor:pointer}
-.kds-mini:hover .kds-mini-btn{display:block}
+.kds-mini-cli{font-weight:700;font-size:.8rem;margin-bottom:2px}
+.kds-mini-info{font-size:.66rem;opacity:.75;margin-bottom:2px}
+/* Itens SEM truncar — mostra tudo */
+.kds-mini-items{font-size:.68rem;opacity:.75;line-height:1.5;word-break:break-word;margin-bottom:3px;white-space:normal}
+.kds-mini-time{font-family:"DM Mono",monospace;font-size:.58rem;opacity:.55;margin-top:4px}
+.kds-mini-actions{display:flex;gap:4px;margin-top:6px;border-top:1px solid rgba(255,255,255,.15);padding-top:6px}
+.kds-mini-btn{flex:1;background:rgba(255,255,255,.18);border:none;border-radius:6px;color:inherit;font-size:.62rem;font-weight:700;padding:4px 6px;cursor:pointer;font-family:"Inter",sans-serif;transition:all .15s}
+.kds-mini-btn:hover{background:rgba(255,255,255,.35)}
+.kds-mini-btn.next{flex:2;background:rgba(255,255,255,.9);color:#222}
 /* PDV orders KDS panel */
-.pdv-orders-panel{display:flex;flex-direction:column;background:var(--bg3);border-right:1px solid var(--brd);width:280px;flex-shrink:0;overflow:hidden}
+.pdv-orders-panel{display:flex;flex-direction:column;background:var(--bg3);border-right:1px solid var(--brd);width:300px;flex-shrink:0;overflow:hidden}
 .pdv-orders-h{padding:8px 12px;background:var(--brand);color:#fff;font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .pdv-orders-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:0;flex:1;overflow:hidden;border-top:1px solid rgba(255,255,255,.1)}
 .pdv-orders-col{display:flex;flex-direction:column;border-right:1px solid var(--brd);overflow:hidden}
 .pdv-orders-col:last-child{border:none}
-.pdv-orders-col-h{padding:5px 7px;font-size:.6rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:center;flex-shrink:0;border-bottom:1px solid var(--brd)}
-.pdv-orders-col-body{flex:1;overflow-y:auto;padding:4px;display:flex;flex-direction:column;gap:3px}
-.pdv-order-mini{border-radius:7px;padding:6px 7px;cursor:pointer;border:1.5px solid transparent;transition:all .15s}
-.pdv-order-mini:hover{filter:brightness(1.1)}
-.pdv-order-mini-num{font-family:"DM Mono",monospace;font-size:.6rem;font-weight:900;opacity:.85}
-.pdv-order-mini-cli{font-weight:700;font-size:.68rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pdv-order-mini-val{font-family:"DM Mono",monospace;font-size:.65rem;opacity:.85;margin-top:2px}
+.pdv-orders-col-h{padding:5px 7px;font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:1px;text-align:center;flex-shrink:0;border-bottom:1px solid var(--brd)}
+.pdv-orders-col-body{flex:1;overflow-y:auto;padding:4px;display:flex;flex-direction:column;gap:4px}
+/* Card de pedido no painel PDV */
+.pdv-order-card{border-radius:8px;padding:7px 8px;border:1.5px solid transparent;transition:all .15s;position:relative}
+.pdv-order-card:hover{filter:brightness(1.05);box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.pdv-order-card-num{font-family:"DM Mono",monospace;font-size:.6rem;font-weight:900;opacity:.9}
+.pdv-order-card-cli{font-weight:700;font-size:.7rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:1px 0}
+.pdv-order-card-itens{font-size:.6rem;opacity:.75;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:3px}
+.pdv-order-card-val{font-family:"DM Mono",monospace;font-size:.65rem;font-weight:700;opacity:.9}
+.pdv-order-card-btns{display:flex;gap:3px;margin-top:5px;border-top:1px solid rgba(255,255,255,.15);padding-top:5px}
+.poc-btn{flex:1;background:rgba(255,255,255,.2);border:none;border-radius:5px;color:inherit;font-size:.58rem;font-weight:700;padding:3px 4px;cursor:pointer;transition:all .15s;white-space:nowrap;font-family:"Inter",sans-serif}
+.poc-btn:hover{background:rgba(255,255,255,.4);transform:translateY(-1px)}
 
 /* ── CUPOM (impressão) ── */
 @media print{
@@ -915,28 +924,76 @@ function fechaM(id){$(id)?.classList.remove("on")}
 document.addEventListener("click",e=>{if(e.target.classList.contains("mbg"))e.target.classList.remove("on")});
 
 // ── Sons do Sistema ──────────────────────────────────────────
-const SONS = {
-  suave: [[440,0],[523,.12],[659,.24]],
-  claro: [[880,.0],[1047,.1],[1319,.2]],
-  forte: [[523,0],[659,.08],[784,.16],[1047,.24]],
-  caixa: [[880,0],[1047,.12],[1319,.24],[1568,.36]]
+// Cada som: array de [frequência_hz, tempo_offset_s, duração_s, volume, forma_onda]
+const SONS_LIB = {
+  // ── Notificações suaves ──
+  "ping":       {ic:"🔔",label:"Ping Suave",    notas:[[880,0,.15,.15,"sine"],[1047,.1,.12,.12,"sine"]]},
+  "duplo":      {ic:"🎵",label:"Duplo Clique",  notas:[[523,0,.1,.18,"sine"],[784,.12,.1,.18,"sine"]]},
+  "subida":     {ic:"📈",label:"Subida",         notas:[[392,0,.08,.15,"sine"],[523,.08,.08,.15,"sine"],[659,.16,.08,.15,"sine"],[784,.24,.12,.18,"sine"]]},
+  "campanha":   {ic:"🔕",label:"Campainha",      notas:[[1047,0,.06,.2,"square"],[1047,.08,.06,.15,"square"],[1047,.22,.06,.15,"square"]]},
+  // ── Médios / ação ──
+  "confirma":   {ic:"✅",label:"Confirmação",    notas:[[523,0,.1,.16,"sine"],[659,.1,.1,.16,"sine"],[784,.2,.15,.18,"sine"],[1047,.32,.2,.2,"sine"]]},
+  "caixa":      {ic:"💰",label:"Caixa",          notas:[[880,0,.08,.2,"sine"],[1047,.1,.08,.2,"sine"],[1319,.2,.08,.2,"sine"],[1568,.32,.15,.22,"sine"]]},
+  "alarme":     {ic:"🚨",label:"Alarme",         notas:[[880,0,.08,.22,"sawtooth"],[660,.1,.08,.18,"sawtooth"],[880,.2,.08,.22,"sawtooth"],[660,.3,.08,.18,"sawtooth"]]},
+  "bipe_curto": {ic:"📳",label:"Bipe Curto",     notas:[[1000,0,.05,.2,"square"]]},
+  // ── KDS / Cozinha ──
+  "novo_pedido":{ic:"🍽️",label:"Novo Pedido",   notas:[[440,0,.06,.15,"sine"],[554,.08,.06,.15,"sine"],[659,.16,.06,.15,"sine"],[880,.26,.18,.22,"sine"],[1047,.44,.2,.18,"sine"]]},
+  "preparo":    {ic:"🔥",label:"Em Preparo",     notas:[[392,0,.1,.18,"triangle"],[494,.12,.1,.18,"triangle"],[587,.24,.1,.2,"triangle"]]},
+  "pronto":     {ic:"🎉",label:"Pronto!",        notas:[[784,0,.08,.15,"sine"],[988,.08,.08,.15,"sine"],[1175,.16,.08,.15,"sine"],[1568,.26,.25,.22,"sine"]]},
+  "entregue":   {ic:"🚀",label:"Entregue",       notas:[[523,0,.06,.12,"sine"],[659,.07,.06,.12,"sine"],[784,.14,.06,.12,"sine"],[1047,.22,.06,.12,"sine"],[1319,.3,.3,.2,"sine"]]},
+  // ── Alertas ──
+  "erro":       {ic:"❌",label:"Erro",           notas:[[330,0,.15,.2,"sawtooth"],[294,.18,.15,.18,"sawtooth"]]},
+  "aviso":      {ic:"⚠️",label:"Aviso",          notas:[[440,0,.1,.18,"triangle"],[349,.14,.1,.18,"triangle"],[440,.28,.1,.18,"triangle"]]},
+  "silencio":   {ic:"🔇",label:"Silêncio",       notas:[]},
 };
-function bip(tipo="ok"){
+
+// Mapa de eventos → qual som usar (configurável)
+const EVENTOS_SOM = {
+  novo_pedido_kds: {label:"🛒 Novo pedido (KDS/Cardápio)", default:"novo_pedido"},
+  pedido_preparo:  {label:"🔥 Pedido → Em Preparo",        default:"preparo"},
+  pedido_pronto:   {label:"✅ Pedido → Finalizado",         default:"pronto"},
+  pedido_entregue: {label:"🚀 Pedido → Entregue",           default:"entregue"},
+  venda_pdv:       {label:"💰 Venda finalizada no PDV",     default:"caixa"},
+  adicionar_item:  {label:"➕ Item adicionado ao carrinho", default:"ping"},
+  alerta_estoque:  {label:"📦 Alerta de estoque baixo",    default:"aviso"},
+  erro_sistema:    {label:"❌ Erro / falha",                default:"erro"},
+  confirmacao:     {label:"✅ Confirmação geral",            default:"confirma"},
+};
+
+function bipEvento(evento){
   try{
-    const cfg=getCfg(); if(cfg.semSom) return;
-    const perfil=cfg.somPerfil||"suave";
-    const notas=tipo==="cash"?SONS.caixa:tipo==="done"?SONS.forte:tipo==="ok"?SONS.claro:SONS.suave;
+    const cfg=getCfg();
+    if(cfg.semSom) return;
+    const somKey=(cfg.sons||{})[evento] ?? EVENTOS_SOM[evento]?.default ?? "ping";
+    tocarSom(somKey);
+  }catch(e){}
+}
+
+function tocarSom(somKey){
+  try{
+    const cfg=getCfg();
+    if(cfg.semSom) return;
+    const som=SONS_LIB[somKey];
+    if(!som||!som.notas.length) return;
     const ac=new(window.AudioContext||window.webkitAudioContext)();
-    notas.forEach(([f,t])=>{
+    som.notas.forEach(([f,t,dur,vol,wave])=>{
       const o=ac.createOscillator(),g=ac.createGain();
       o.connect(g);g.connect(ac.destination);
-      o.type="sine";o.frequency.value=f;
+      o.type=wave||"sine";o.frequency.value=f;
+      const v=vol||.18, d=dur||.2;
       g.gain.setValueAtTime(0,ac.currentTime+t);
-      g.gain.linearRampToValueAtTime(.18,ac.currentTime+t+.05);
-      g.gain.linearRampToValueAtTime(0,ac.currentTime+t+.2);
-      o.start(ac.currentTime+t);o.stop(ac.currentTime+t+.22);
+      g.gain.linearRampToValueAtTime(v,ac.currentTime+t+.03);
+      g.gain.linearRampToValueAtTime(v*.7,ac.currentTime+t+d*.6);
+      g.gain.linearRampToValueAtTime(0,ac.currentTime+t+d);
+      o.start(ac.currentTime+t);o.stop(ac.currentTime+t+d+.05);
     });
   }catch(e){}
+}
+
+// Compatibilidade retroativa — mapeia chamadas antigas para eventos
+function bip(tipo="ok"){
+  const mapa={ok:"confirmacao",done:"pedido_pronto",cash:"venda_pdv",ter:"aviso",twn:"aviso"};
+  bipEvento(mapa[tipo]||"confirmacao");
 }
 
 // ════════════════════════════════════════════════════════════
@@ -1137,17 +1194,31 @@ function addKDS(pedido){
 
 // ── Wrappers síncronos ────────────────────────────────────────
 function gm(mi){ return _meses[mi]||(_meses[mi]=defM()) }
-function sm(mi,v){ dbSalvaMes(mi,v) }
+
+// Debounce map para saves
+const _saveDebounce={};
+function debounced(key,fn,ms=800){
+  clearTimeout(_saveDebounce[key]);
+  _saveDebounce[key]=setTimeout(fn,ms);
+}
+
+function sm(mi,v){
+  _meses[mi]=v;
+  debounced("mes_"+mi,()=>dbSalvaMes(mi,v),600);
+}
 function getCfg(){ return _cfgCache }
-function setCfg(c){ dbSalvaCfg(c) }
+function setCfg(c){
+  _cfgCache=c;
+  debounced("cfg",()=>dbSalvaCfg(c),800);
+}
 function getProds(){ return _prods }
-function setProds(p){ dbSalvaProds(p) }
+function setProds(p){ _prods=p; debounced("prods",()=>dbSalvaProds(p),600); }
 function getEstoque(){ return _stock }
-function setEstoque(s){ dbSalvaEstoque(s) }
+function setEstoque(s){ _stock=s; debounced("stock",()=>dbSalvaEstoque(s),600); }
 function getReceitas(){ return _receitas }
-function setReceitas(r){ dbSalvaReceitas(r) }
+function setReceitas(r){ _receitas=r; debounced("receitas",()=>dbSalvaReceitas(r),600); }
 function getContatos(){ return _contatos }
-function setContatos(c){ dbSalvaContatos(c) }
+function setContatos(c){ _contatos=c; debounced("contatos",()=>dbSalvaContatos(c),600); }
 
 // ════════════════════════════════════════════════════════════
 //  PÁGINAS E NAVEGAÇÃO
@@ -1281,18 +1352,53 @@ async function fazerLogin(){
   const u=$("lu").value.trim(), p=$("lp").value;
   $("lerr").textContent="🔄 Verificando...";
   try{
+    // ── Fase 1: só o essencial para autenticar e abrir o sistema (rápido) ──
     await Promise.all([
-      dbCarregaUsers(), dbCarregaCfg(), dbCarregaEstoque(),
-      dbCarregaReceitas(), dbCarregaContatos(), dbCarregaProdos(),
+      dbCarregaUsers(),
+      dbCarregaCfg(),
+      dbCarregaProdos(),
       dbCarregaCaixas(),
-      ...Array.from({length:12},(_,i)=>dbCarregaMes(i))
+      dbCarregaMes(CM),   // só o mês atual
     ]);
     const found=_usuarios.find(x=>x.user===u&&x.pass===p);
     if(!found){$("lerr").textContent="Usuário ou senha incorretos.";return;}
     _user=found; $("lerr").textContent="";
-    mostrar("app"); aplicaBranding(); buildNav(); renderTudo();
+    mostrar("app"); aplicaBranding(); buildNav();
+    renderTudo();        // renderiza com o que tem
     iniciarKDSListener();
+    // ── Fase 2: resto em background sem travar a tela ──
+    Promise.all([
+      dbCarregaEstoque(),
+      dbCarregaReceitas(),
+      dbCarregaContatos(),
+      ...Array.from({length:12},(_,i)=>i!==CM?dbCarregaMes(i):Promise.resolve()),
+    ]).then(()=>{
+      // Só re-renderiza a aba atual para não travar
+      renderAbaAtual();
+    }).catch(e=>console.warn("Carregamento background:",e.message));
   }catch(e){$("lerr").textContent="Erro: "+e.message; console.error(e);}
+}
+
+function renderAbaAtual(){
+  switch(CT){
+    case"dashboard":renderDash();break;
+    case"dre":renderDRE();break;
+    case"catalogo":renderCatalogo();break;
+    case"catalogo-pub":renderCatalogoPub();break;
+    case"pdv":renderPDV();break;
+    case"caixa":renderCaixa();break;
+    case"pedidos":renderPedidos();break;
+    case"producao":renderProducao();break;
+    case"estoque":renderEstoque();break;
+    case"fichas":renderFichas();break;
+    case"custos":renderCustos();break;
+    case"contatos":renderContatos();break;
+    case"fidelidade":renderFidelidade();break;
+    case"kds":renderKDS();break;
+    case"relatorios":renderRelatorios();break;
+    case"cardapio-digital":renderCardapioDigital();break;
+    case"config":renderConfig();break;
+  }
 }
 
 function fazerLogout(){
@@ -2103,8 +2209,8 @@ function moverPedido(id,status){
     const val=(o.val||0)-(o.desc||0);
     const de={id:uid(),label:"Encomenda: "+o.cliente+(o.produto?" – "+o.produto.slice(0,30):""),val,data:hoje()};
     m.dre.receitas.push(de);o.dreId=de.id;
-    toast("✅ Finalizado! DRE atualizado 📊","ok");bip("done");
-  }else{bip("ok");toast("✅ Status atualizado!");}
+    toast("✅ Finalizado! DRE atualizado 📊","ok");bipEvento("pedido_pronto");
+  }else{bipEvento("confirmacao");toast("✅ Status atualizado!");}
   sm(CM,m);renderTudo();
 }
 function deletarPedidoPin(id){
@@ -2136,29 +2242,53 @@ function renderPDV(){
     return;
   }
   const cats=["Todos",...new Set(prods.map(p=>p.cat||"Outro"))];
-
-  // Build KDS orders panel for PDV
   const kdsOrders=getKDS();
-  const pdvCols=[
-    {k:"pendente",label:"Preparo",bg:"#E53E3E"},
-    {k:"pronto",label:"Finalizado",bg:"#38A169"},
-    {k:"entregue",label:"Entregue",bg:"#3182CE"},
+
+  // ── Cores e labels das colunas ─────────────────────────────
+  const COLS=[
+    {k:"pendente", label:"🔥 Preparo",   bg:"#E53E3E", next:"pronto",   nextLabel:"✅ Finalizar"},
+    {k:"pronto",   label:"✅ Finalizado", bg:"#38A169", next:"entregue", nextLabel:"🚀 Entregar"},
+    {k:"entregue", label:"🚀 Entregue",  bg:"#3182CE", next:null,       nextLabel:null},
   ];
-  function timeAgo(ts){if(!ts)return"";const m=Math.floor((Date.now()-ts)/60000);return m<1?"agora":m<60?m+"min":Math.floor(m/60)+"h";}
-  const pdvOrdersHtml=pdvCols.map(col=>{
-    const items=kdsOrders.filter(o=>(o.kdsStatus||"pendente")===col.k);
+
+  function timeAgo(ts){
+    if(!ts)return"";
+    const m=Math.floor((Date.now()-(+ts))/60000);
+    return m<1?"agora":m<60?m+"min":Math.floor(m/60)+"h"+(m%60?""+m%60+"m":"");
+  }
+
+  // ── Gera cards de pedidos por coluna ───────────────────────
+  function buildOrdersCol(col){
+    const items=kdsOrders.filter(o=>(o.kdsStatus||"pendente")===col.k)
+                         .sort((a,b)=>(+(b._at||b.criadoEm||0))-(+(a._at||a.criadoEm||0)));
     return`<div class="pdv-orders-col">
-      <div class="pdv-orders-col-h" style="background:${col.bg}22;color:${col.bg};border-bottom:2px solid ${col.bg}44">${col.label} <span style="opacity:.7">(${items.length})</span></div>
+      <div class="pdv-orders-col-h" style="background:${col.bg}22;color:${col.bg};border-bottom:2px solid ${col.bg}55">
+        ${col.label} <span style="opacity:.65">(${items.length})</span>
+      </div>
       <div class="pdv-orders-col-body">
-        ${items.slice(0,20).map(o=>`<div class="pdv-order-mini" style="background:${col.bg}18;border-color:${col.bg}44" title="${esc(o.cliente||"")} — ${(o.itens||[]).map(i=>i.qtd+"x "+i.nome).join(", ")||o.produto||""}"
-          onclick="(()=>{const l=JSON.parse(localStorage.getItem('ys_kds_${_tenant}')||'[]');const o=l.find(x=>x.id==='${o.id}');if(!o)return;const nx={pendente:'pronto',pronto:'entregue',entregue:'entregue'};o.kdsStatus=nx[o.kdsStatus||'pendente'];localStorage.setItem('ys_kds_${_tenant}',JSON.stringify(l));renderPDV();renderKDS();})()">
-          <div class="pdv-order-mini-num" style="color:${col.bg}">#${o.kdsNum||o.codigo||"—"} ${o.modo==="delivery"?"🛵":o.modo==="local"?"🪑":"🏪"}</div>
-          <div class="pdv-order-mini-cli">${esc(o.cliente||"Balcão")}</div>
-          <div class="pdv-order-mini-val" style="color:${col.bg}">R$ ${fmt(o.val||o.total||0)} · ${timeAgo(o.criadoEm||o._at)}</div>
-        </div>`).join("")||`<div style="font-size:.65rem;color:var(--text3);text-align:center;padding:8px;opacity:.5">—</div>`}
+        ${items.length?items.map(o=>{
+          const isMesOuPedido=gm(CM).pedidos.find(p=>p.id===o.id);
+          const itensStr=(o.itens||[]).map(i=>`${i.qtd}× ${i.nome}`).join(", ")||o.produto||"";
+          return`<div class="pdv-order-card" data-oid="${o.id}"
+            style="background:${col.bg}18;border-color:${col.bg}44;color:var(--text)">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div class="pdv-order-card-num" style="color:${col.bg}">#${o.kdsNum||"—"} ${o.modo==="delivery"?"🛵":o.modo==="local"?"🪑":"🏪"}</div>
+              <div style="font-size:.55rem;opacity:.6;font-family:monospace">${timeAgo(o._at||o.criadoEm)}</div>
+            </div>
+            <div class="pdv-order-card-cli">${esc(o.cliente||"Balcão")}</div>
+            <div class="pdv-order-card-itens">${esc(itensStr)}</div>
+            <div class="pdv-order-card-val" style="color:${col.bg}">R$ ${fmt(o.val||o.total||0)}</div>
+            <div class="pdv-order-card-btns">
+              <button class="poc-btn poc-ver"   data-oid="${o.id}" title="Ver detalhes">👁</button>
+              <button class="poc-btn poc-edit"  data-oid="${o.id}" title="Editar pedido">✏️</button>
+              ${col.next?`<button class="poc-btn poc-next" data-oid="${o.id}" data-next="${col.next}" data-col="${col.k}" title="${col.nextLabel}" style="flex:2;background:${col.bg};color:#fff">${col.nextLabel}</button>`:""}
+              <button class="poc-btn poc-del"   data-oid="${o.id}" title="Excluir" style="color:#fff;background:rgba(220,38,38,.5)">🗑</button>
+            </div>
+          </div>`;
+        }).join(""):`<div style="font-size:.62rem;color:var(--text3);text-align:center;padding:12px 6px;opacity:.5">Vazio</div>`}
       </div>
     </div>`;
-  }).join("");
+  }
 
   pg.innerHTML=`
   <!-- Barra topo -->
@@ -2181,21 +2311,21 @@ function renderPDV(){
       <button class="btn btn-s" style="padding:3px 8px;font-size:.68rem" id="btn-ver-mesas">Mesas</button>
     </div>`:""}
   </div>
-  <!-- Corpo principal: painel pedidos KDS + produtos + carrinho -->
+  <!-- Corpo: painel pedidos + produtos + carrinho -->
   <div style="display:flex;flex:1;min-height:0;overflow:hidden">
-    <!-- Painel KDS Orders (esquerda) -->
+    <!-- Painel Pedidos em Tempo Real (esquerda) -->
     <div class="pdv-orders-panel">
       <div class="pdv-orders-h">
         <span>📦 Pedidos em Tempo Real</span>
-        <span style="font-size:.65rem;opacity:.7">${kdsOrders.length}</span>
+        <span style="background:rgba(255,255,255,.2);padding:1px 8px;border-radius:10px;font-size:.65rem">${kdsOrders.length}</span>
       </div>
-      <div class="pdv-orders-cols">${pdvOrdersHtml}</div>
+      <div class="pdv-orders-cols">${COLS.map(buildOrdersCol).join("")}</div>
     </div>
     <!-- Produtos + Carrinho -->
     <div style="display:grid;grid-template-columns:1fr 320px;flex:1;min-height:0;overflow:hidden">
       <div class="pdv-esq" style="border-right:1px solid var(--brd)">
         <div style="padding:7px 9px;border-bottom:1px solid var(--brd);flex-shrink:0">
-          <input id="pdv-busca" placeholder="🔍 Buscar..." style="font-size:.82rem;padding:6px 10px">
+          <input id="pdv-busca" placeholder="🔍 Buscar produto..." style="font-size:.82rem;padding:6px 10px">
         </div>
         <div style="display:flex;gap:4px;padding:5px 8px;border-bottom:1px solid var(--brd);overflow-x:auto;scrollbar-width:none;flex-shrink:0" id="pdv-cats">
           ${cats.map(c=>`<div style="padding:3px 10px;border-radius:20px;background:${_pdvCat===c?"var(--brand-t)":"var(--bg3)"};border:1.5px solid ${_pdvCat===c?"var(--brand)":"var(--brd)"};font-size:.68rem;font-weight:600;color:${_pdvCat===c?"var(--brand)":"var(--text2)"};cursor:pointer;white-space:nowrap" class="pdv-cat" data-c="${c}">${c}</div>`).join("")}
@@ -2214,16 +2344,167 @@ function renderPDV(){
     </div>
   </div>`;
 
+  // ── Eventos barra topo ─────────────────────────────────────
   pg.querySelector("#btn-fecha-cx-pdv").addEventListener("click",abrirFechamentoCaixa);
   pg.querySelector("#btn-hist-pdv-top")?.addEventListener("click",abrirHistoricoCaixa);
-  pg.querySelector("#pdv-cli-label").addEventListener("click",()=>{$("pc-end-wrap").style.display=_modo==="delivery"?"block":"none";abreM("m-pdv-cli");});
+  pg.querySelector("#pdv-cli-label").addEventListener("click",()=>{
+    $("pc-end-wrap").style.display=_modo==="delivery"?"block":"none";abreM("m-pdv-cli");
+  });
   pg.querySelector("#pdv-busca").addEventListener("input",()=>renderProdsPDV());
   pg.querySelectorAll(".modo-tab").forEach(t=>t.addEventListener("click",()=>{_modo=t.dataset.m;renderPDV();}));
   pg.querySelectorAll(".pdv-cat").forEach(c=>c.addEventListener("click",()=>{_pdvCat=c.dataset.c;renderProdsPDV();}));
   const mesaSel=pg.querySelector("#pdv-mesa");
   if(mesaSel) mesaSel.addEventListener("change",()=>{_mesaNum=+mesaSel.value;});
   pg.querySelector("#btn-ver-mesas")?.addEventListener("click",abrirGestaoMesas);
-  renderProdsPDV();renderCarrinho();
+
+  // ── Botões nos cards de pedido ─────────────────────────────
+  // VER — mostra modal com detalhes completos do pedido
+  pg.querySelectorAll(".poc-ver").forEach(btn=>btn.addEventListener("click",e=>{
+    e.stopPropagation();
+    const oid=btn.dataset.oid;
+    const list=getKDS(); const o=list.find(x=>x.id===oid);
+    if(!o)return;
+    const col=COLS.find(c=>c.k===(o.kdsStatus||"pendente"))||COLS[0];
+    const itensHtml=(o.itens||[]).map(i=>`
+      <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--brd);font-size:.84rem">
+        <span>${i.qtd}× <strong>${esc(i.nome)}</strong>${i.obs?` <em style="color:var(--text3);font-size:.75rem">– ${esc(i.obs)}</em>`:""}</span>
+        <span style="font-family:monospace;color:var(--brand)">R$ ${fmt((i.preco||0)*i.qtd)}</span>
+      </div>`).join("")||`<div style="color:var(--text3);font-size:.84rem">${esc(o.produto||"—")}</div>`;
+    abrirModalSimples(`
+      <h3 style="margin-bottom:14px">📋 Pedido #${o.kdsNum||"—"}</h3>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+        <span style="background:${col.bg}22;color:${col.bg};border:1px solid ${col.bg}44;border-radius:20px;padding:3px 12px;font-size:.74rem;font-weight:700">${col.label}</span>
+        <span style="background:var(--bg3);border-radius:20px;padding:3px 12px;font-size:.74rem">${o.modo==="delivery"?"🛵 Delivery":o.modo==="local"?"🪑 Local":"🏪 Balcão"}</span>
+        <span style="background:var(--bg3);border-radius:20px;padding:3px 12px;font-size:.74rem">${PI[o.pagamento]||"💳"} ${PL[o.pagamento]||o.pagamento||"—"}</span>
+      </div>
+      <div style="margin-bottom:10px">
+        <strong>${esc(o.cliente||"Balcão")}</strong>${o.fone?`<span style="color:var(--text3);font-size:.8rem"> · ${esc(o.fone)}</span>`:""}
+        ${o.endereco&&o.endereco!=="Retirada no local"?`<div style="font-size:.78rem;color:var(--text3);margin-top:2px">📍 ${esc(o.endereco)}</div>`:""}
+      </div>
+      <div style="margin-bottom:12px">${itensHtml}</div>
+      <div style="display:flex;justify-content:space-between;font-weight:700;font-size:1rem;padding-top:8px;border-top:2px solid var(--brd)">
+        <span>Total</span><span style="color:var(--brand);font-family:monospace">R$ ${fmt(o.val||o.total||0)}</span>
+      </div>
+      ${o.obs?`<div style="margin-top:10px;background:var(--warn-t);border-radius:8px;padding:8px 11px;font-size:.8rem;color:var(--warn)">📝 ${esc(o.obs)}</div>`:""}
+      ${col.next?`<button class="btn btn-ok btn-fw" style="margin-top:14px;justify-content:center;font-size:.9rem" onclick="pdvAvancaKDS('${o.id}','${col.k}');fecharModalSimples()">
+        ${col.nextLabel}
+      </button>`:"<div style='text-align:center;color:var(--text3);font-size:.8rem;margin-top:12px'>✅ Pedido concluído</div>"}
+    `);
+  }));
+
+  // EDITAR — abre modal de edição com campos do pedido
+  pg.querySelectorAll(".poc-edit").forEach(btn=>btn.addEventListener("click",e=>{
+    e.stopPropagation();
+    const oid=btn.dataset.oid;
+    const list=getKDS(); const o=list.find(x=>x.id===oid);
+    if(!o)return;
+    const col=COLS.find(c=>c.k===(o.kdsStatus||"pendente"))||COLS[0];
+    const statusOpts=COLS.map(c=>`<option value="${c.k}" ${o.kdsStatus===c.k?"selected":""}>${c.label}</option>`).join("");
+    const pagOpts=Object.keys(PI).map(k=>`<option value="${k}" ${(o.pagamento||"pix")===k?"selected":""}>${PI[k]} ${PL[k]}</option>`).join("");
+    const modoOpts=[["balcao","🏪 Balcão"],["delivery","🛵 Delivery"],["local","🪑 Local"]].map(([v,l])=>`<option value="${v}" ${(o.modo||"balcao")===v?"selected":""}>${l}</option>`).join("");
+    abrirModalSimples(`
+      <h3 style="margin-bottom:14px">✏️ Editar Pedido #${o.kdsNum||"—"}</h3>
+      <div class="fg"><label>Cliente</label><input id="poe-cli" value="${esc(o.cliente||"")}" placeholder="Nome do cliente"></div>
+      <div class="fg"><label>Telefone</label><input id="poe-fone" value="${esc(o.fone||"")}" placeholder="(00) 00000-0000" inputmode="tel"></div>
+      <div class="fg"><label>Itens / Produto</label><textarea id="poe-itens" rows="2" style="resize:vertical">${esc((o.itens||[]).map(i=>i.qtd+"x "+i.nome).join(", ")||o.produto||"")}</textarea></div>
+      <div class="fg"><label>Observações</label><textarea id="poe-obs" rows="2" style="resize:vertical">${esc(o.obs||"")}</textarea></div>
+      <div class="fr c3">
+        <div class="fg"><label>Status</label><select id="poe-status">${statusOpts}</select></div>
+        <div class="fg"><label>Modo</label><select id="poe-modo">${modoOpts}</select></div>
+        <div class="fg"><label>Pagamento</label><select id="poe-pag">${pagOpts}</select></div>
+      </div>
+      <div class="fg"><label>Valor Total (R$)</label><input id="poe-val" inputmode="decimal" value="${fmt(o.val||o.total||0)}" style="font-size:1rem;font-weight:700;text-align:right"></div>
+      ${o.modo==="delivery"||$('#poe-modo')?.value==="delivery"?`<div class="fg"><label>Endereço</label><input id="poe-end" value="${esc(o.endereco||"")}" placeholder="Rua, número, bairro..."></div>`:`<input type="hidden" id="poe-end" value="${esc(o.endereco||"")}">`}
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button class="btn btn-p btn-fw" style="justify-content:center" id="btn-poe-salvar">💾 Salvar Alterações</button>
+        <button class="btn btn-s" style="padding:8px 14px" onclick="fecharModalSimples()">Cancelar</button>
+      </div>
+    `);
+    // Listener do botão salvar
+    setTimeout(()=>{
+      document.getElementById("btn-poe-salvar")?.addEventListener("click",()=>{
+        const parseV=s=>parseFloat((s||"").replace(",",".").replace(/[^\d.-]/g,""))||0;
+        const novoStatus=document.getElementById("poe-status")?.value||o.kdsStatus;
+        const novoModo=document.getElementById("poe-modo")?.value||o.modo;
+        const novoPag=document.getElementById("poe-pag")?.value||o.pagamento;
+        const novoCli=document.getElementById("poe-cli")?.value.trim()||o.cliente;
+        const novoFone=document.getElementById("poe-fone")?.value.trim()||o.fone||"";
+        const novoObs=document.getElementById("poe-obs")?.value.trim()||"";
+        const novoEnd=document.getElementById("poe-end")?.value.trim()||o.endereco||"";
+        const novoVal=parseV(document.getElementById("poe-val")?.value)||o.val||o.total||0;
+        const novoItens=document.getElementById("poe-itens")?.value.trim()||"";
+        // Atualiza no KDS local
+        const l=getKDS(); const ord=l.find(x=>x.id===oid);
+        if(ord){
+          ord.kdsStatus=novoStatus; ord.modo=novoModo; ord.pagamento=novoPag;
+          ord.cliente=novoCli; ord.fone=novoFone; ord.obs=novoObs;
+          ord.endereco=novoEnd; ord.val=novoVal; ord.total=novoVal;
+          ord.produto=novoItens;
+          // Toca som de acordo com novo status
+          if(novoStatus!==o.kdsStatus){
+            const somEvt={pendente:"pedido_preparo",pronto:"pedido_pronto",entregue:"pedido_entregue"};
+            bipEvento(somEvt[novoStatus]||"confirmacao");
+          }
+          localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(l));
+        }
+        // Atualiza também no mês se existir
+        const m=gm(CM); const mp=m.pedidos.find(x=>x.id===oid);
+        if(mp){
+          mp.cliente=novoCli; mp.fone=novoFone; mp.obs=novoObs;
+          mp.pagamento=novoPag; mp.modo=novoModo; mp.val=novoVal;
+          mp.status=novoStatus==="entregue"?"done":novoStatus==="pronto"?"ready":"pending";
+          sm(CM,m);
+        }
+        fecharModalSimples();
+        renderPDV(); renderKDS();
+        toast("✅ Pedido atualizado!","ok");
+      });
+    },80);
+  }));
+
+  // AVANÇAR STATUS — botão direto
+  pg.querySelectorAll(".poc-next").forEach(btn=>btn.addEventListener("click",e=>{
+    e.stopPropagation();
+    pdvAvancaKDS(btn.dataset.oid, btn.dataset.col);
+  }));
+
+  // EXCLUIR
+  pg.querySelectorAll(".poc-del").forEach(btn=>btn.addEventListener("click",e=>{
+    e.stopPropagation();
+    const oid=btn.dataset.oid;
+    const l=getKDS(); const o=l.find(x=>x.id===oid);
+    if(!o)return;
+    if(!confirm(`Excluir pedido #${o.kdsNum||"—"} — ${o.cliente||"Balcão"}?`))return;
+    const novo=l.filter(x=>x.id!==oid);
+    localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(novo));
+    // Remove do mês também
+    const m=gm(CM); m.pedidos=m.pedidos.filter(x=>x.id!==oid); sm(CM,m);
+    renderPDV(); renderKDS(); toast("Pedido removido","ok");
+  }));
+
+  renderProdsPDV(); renderCarrinho();
+}
+
+// pdvAvancaKDS — alias para compatibilidade com botões do painel PDV
+function pdvAvancaKDS(oid, colAtual){ kdsAvanca(oid, colAtual); }
+
+// ── Modal simples genérico (para PDV) ─────────────────────────
+function abrirModalSimples(html){
+  let m=document.getElementById("modal-simples");
+  if(!m){
+    m=document.createElement("div");
+    m.id="modal-simples";
+    m.className="mbg";
+    m.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:800;display:flex;align-items:center;justify-content:center;padding:16px";
+    document.body.appendChild(m);
+    m.addEventListener("click",e=>{if(e.target===m)fecharModalSimples();});
+  }
+  m.innerHTML=`<div class="modal" style="max-width:520px;max-height:90vh;overflow-y:auto">${html}</div>`;
+  m.style.display="flex";
+}
+function fecharModalSimples(){
+  const m=document.getElementById("modal-simples");
+  if(m)m.style.display="none";
 }
 
 function renderProdsPDV(){
@@ -2288,7 +2569,7 @@ function abreSeletorTamanho(p){
 function addCarrinho(item){
   const ex=_cart.find(i=>i.nome===item.nome);
   if(ex)ex.qtd++;else _cart.push(item);
-  renderCarrinho();bip("ok");
+  renderCarrinho();bipEvento("adicionar_item");
 }
 
 function calcTotais(){
@@ -2328,19 +2609,63 @@ function renderCarrinho(){
   if(!_cart.length){
     items.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;padding:28px;text-align:center;color:var(--text3)"><div style="font-size:2.5rem;opacity:.3;margin-bottom:8px">🛒</div><p>Carrinho vazio</p><small>Clique nos produtos</small></div>`;
   }else{
-    items.innerHTML=_cart.map(i=>`<div class="ci">
+    items.innerHTML=_cart.map(i=>`<div class="ci" data-cid="${i.id}">
       <span style="font-size:1rem;flex-shrink:0">${i.img?`<img src="${i.img}" style="width:26px;height:26px;border-radius:5px;object-fit:cover">`:i.emoji}</span>
-      <div class="ci-n">${esc(i.nome)}</div>
+      <div style="flex:1;min-width:0">
+        <div class="ci-n">${esc(i.nome)}</div>
+        <div style="display:flex;align-items:center;gap:4px;margin-top:2px">
+          <span style="font-size:.62rem;color:var(--text3)">R$</span>
+          <input class="ci-preco-inp" data-cid="${i.id}" value="${i.preco.toFixed(2).replace(".",",")}"
+            inputmode="decimal"
+            style="font-size:.75rem;font-family:'DM Mono',monospace;font-weight:700;color:var(--brand);
+            width:64px;padding:1px 4px;border-radius:4px;border:1px solid var(--brd);background:var(--bg3);text-align:right"
+            title="Clique para editar o preço">
+          <span style="font-size:.62rem;color:var(--text3)">/un</span>
+        </div>
+      </div>
       <div class="ci-ctrl">
         <button class="qb" data-cid="${i.id}" data-d="-1">−</button>
         <span style="font-family:monospace;font-size:.85rem;font-weight:700;min-width:22px;text-align:center">${i.qtd}</span>
         <button class="qb" data-cid="${i.id}" data-d="1">+</button>
       </div>
-      <span class="ci-tot">R$ ${fmt(i.preco*i.qtd)}</span>
+      <span class="ci-tot" id="ci-tot-${i.id}">R$ ${fmt(i.preco*i.qtd)}</span>
       <button style="background:none;border:none;color:rgba(239,68,68,.3);cursor:pointer;font-size:.8rem;transition:color .15s" class="ci-del" data-cid="${i.id}">✕</button>
     </div>`).join("");
-    items.querySelectorAll(".qb").forEach(b=>b.addEventListener("click",()=>{const item=_cart.find(i=>i.id===b.dataset.cid);if(!item)return;item.qtd=Math.max(0,item.qtd+(+b.dataset.d));if(item.qtd===0)_cart=_cart.filter(i=>i.id!==b.dataset.cid);renderCarrinho();}));
-    items.querySelectorAll(".ci-del").forEach(b=>b.addEventListener("click",()=>{_cart=_cart.filter(i=>i.id!==b.dataset.cid);renderCarrinho();}));
+
+    // Qtd buttons
+    items.querySelectorAll(".qb").forEach(b=>b.addEventListener("click",()=>{
+      const item=_cart.find(i=>i.id===b.dataset.cid);if(!item)return;
+      item.qtd=Math.max(0,item.qtd+(+b.dataset.d));
+      if(item.qtd===0)_cart=_cart.filter(i=>i.id!==b.dataset.cid);
+      renderCarrinho();
+    }));
+
+    // Del buttons
+    items.querySelectorAll(".ci-del").forEach(b=>b.addEventListener("click",()=>{
+      _cart=_cart.filter(i=>i.id!==b.dataset.cid);renderCarrinho();
+    }));
+
+    // Preço editável — atualiza só o subtotal da linha sem re-renderizar tudo
+    items.querySelectorAll(".ci-preco-inp").forEach(inp=>{
+      const parseP=s=>parseFloat((s||"").replace(",",".").replace(/[^\d.]/g,""))||0;
+      inp.addEventListener("input",()=>{
+        const item=_cart.find(i=>i.id===inp.dataset.cid);if(!item)return;
+        item.preco=parseP(inp.value);
+        // Atualiza subtotal da linha
+        const tot=document.getElementById("ci-tot-"+inp.dataset.cid);
+        if(tot) tot.textContent="R$ "+fmt(item.preco*item.qtd);
+        atualizaTotalDisplay();
+      });
+      inp.addEventListener("blur",()=>{
+        const item=_cart.find(i=>i.id===inp.dataset.cid);if(!item)return;
+        item.preco=parseP(inp.value);
+        // Formata ao sair
+        inp.value=item.preco.toFixed(2).replace(".",",");
+        renderCarrinho();
+      });
+      // Seleciona tudo ao focar para facilitar edição
+      inp.addEventListener("focus",()=>inp.select());
+    });
   }
   const{sub,descVal,gorjVal,total}=calcTotais();
   const modos=[{k:"pix",l:"💠 PIX"},{k:"dinheiro",l:"💵 Dinheiro"},{k:"credito",l:"💳 Crédito"},{k:"debito",l:"🔵 Débito"},{k:"misto",l:"🔀 Misto"}];
@@ -2385,20 +2710,23 @@ function renderCarrinho(){
   <!-- Misto: campos individuais -->
   ${_pag==="misto"&&_cart.length?`
   <div class="misto-grid" style="margin-bottom:8px">
-    ${["pix","dinheiro","credito","debito"].map(k=>`<div class="misto-row"><label>${PI[k]} ${PL[k]}</label><input inputmode="decimal" value="${_misto[k]||""}" class="misto-inp" data-k="${k}" placeholder="0,00" style="font-size:.82rem;padding:5px 8px"></div>`).join("")}
-    <div style="font-size:.75rem;color:${Math.abs(Object.values(_misto).reduce((a,v)=>a+(+v||0),0)-total)<0.01?"var(--ok)":"var(--er)"}">Total misto: R$ ${fmt(Object.values(_misto).reduce((a,v)=>a+(+v||0),0))} / R$ ${fmt(total)}</div>
+    ${["pix","dinheiro","credito","debito"].map(k=>`<div class="misto-row"><label>${PI[k]} ${PL[k]}</label><input inputmode="decimal" value="${_misto[k]||""}" class="misto-inp" data-k="${k}" placeholder="0,00" style="font-size:.88rem;padding:6px 9px;font-weight:600"></div>`).join("")}
+    <div id="misto-total-ind" style="font-size:.78rem;font-weight:700;padding:4px 0;color:${Math.abs(Object.values(_misto).reduce((a,v)=>a+(+v||0),0)-total)<0.01?"var(--ok)":"var(--er)"}">
+      Total misto: R$ ${fmt(Object.values(_misto).reduce((a,v)=>a+(+v||0),0))} / R$ ${fmt(total)}
+    </div>
   </div>`:""}
-  <!-- Troco automático para dinheiro -->
   ${_pag==="dinheiro"&&_cart.length?`
   <div style="background:var(--bg3);border-radius:9px;padding:8px 10px;margin-bottom:8px">
     <div style="display:flex;gap:7px;align-items:center;margin-bottom:6px">
       <span style="font-size:.74rem;color:var(--text2);white-space:nowrap;font-weight:600">💵 Recebido:</span>
-      <input id="troco-recebido" inputmode="decimal" placeholder="0,00" value="${_trocoRecebido||""}" style="font-size:.9rem;padding:4px 9px;flex:1;font-weight:700;text-align:right">
+      <input id="troco-recebido" inputmode="decimal" placeholder="0,00" value="${_trocoRecebido||""}" style="font-size:.95rem;padding:5px 10px;flex:1;font-weight:700;text-align:right">
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:5px">
       ${[total,Math.ceil(total/10)*10,Math.ceil(total/50)*50,Math.ceil(total/100)*100].filter((v,i,a)=>a.indexOf(v)===i&&v>=total).slice(0,4).map(v=>`<button class="btn btn-s btn-xs troco-sug" data-v="${v}">R$ ${fmt(v)}</button>`).join("")}
     </div>
-    ${(_trocoRecebido>0)?`<div style="display:flex;justify-content:space-between;font-weight:700;font-size:.9rem;padding-top:5px;border-top:1px solid var(--brd)"><span>Troco:</span><span style="font-family:monospace;color:${_trocoRecebido>=total?"var(--ok)":"var(--er)"}">${_trocoRecebido>=total?"R$ "+fmt(_trocoRecebido-total):"⚠️ Insuficiente"}</span></div>`:""}
+    <div id="troco-display" style="display:${_trocoRecebido>0?"flex":"none"};justify-content:space-between;font-weight:700;font-size:.9rem;padding-top:5px;border-top:1px solid var(--brd);color:${_trocoRecebido>=total?"var(--ok)":"var(--er)"}">
+      ${_trocoRecebido>=total?`Troco: R$ ${fmt(_trocoRecebido-total)}`:"⚠️ Valor insuficiente"}
+    </div>
   </div>`:""}
   ${_cart.length?`<button style="width:100%;background:var(--er-t);color:var(--er);border:none;border-radius:8px;padding:7px;font-size:.78rem;font-weight:600;cursor:pointer;margin-bottom:8px;font-family:Inter,sans-serif" id="btn-limpa-cart">🗑 Limpar</button>`:""}
   <button style="width:100%;background:var(--brand-t2);color:var(--brand);border:1px solid var(--brand-t);border-radius:8px;padding:7px;font-size:.76rem;font-weight:600;cursor:pointer;margin-bottom:8px;font-family:Inter,sans-serif" id="btn-hist-cx-pdv">📋 Histórico do Caixa</button>
@@ -2406,23 +2734,99 @@ function renderCarrinho(){
     ${_cart.length?`✓ Finalizar — R$ ${fmt(total)}`:"Adicione produtos"}
   </button>`;
   const parseVal=s=>parseFloat((s||"").toString().replace(",",".").replace(/[^\d.-]/g,""))||0;
-  foot.querySelectorAll(".pb").forEach(b=>b.addEventListener("click",()=>{_pag=b.dataset.pm;_trocoRecebido=0;renderCarrinho();}));
-  foot.querySelectorAll(".misto-inp").forEach(inp=>inp.addEventListener("input",()=>{_misto[inp.dataset.k]=parseVal(inp.value);renderCarrinho();}));
-  $("troco-recebido")?.addEventListener("input",()=>{_trocoRecebido=parseVal($("troco-recebido").value);renderCarrinho();});
-  foot.querySelectorAll(".troco-sug").forEach(b=>b.addEventListener("click",()=>{_trocoRecebido=parseFloat(b.dataset.v);renderCarrinho();}));
+
+  foot.querySelectorAll(".pb").forEach(b=>b.addEventListener("click",()=>{
+    _pag=b.dataset.pm;_trocoRecebido=0;renderCarrinho();
+  }));
+
+  // ── Misto: NÃO re-renderiza ao digitar — só atualiza o indicador ──
+  foot.querySelectorAll(".misto-inp").forEach(inp=>{
+    // Restaura valor sem destruir o foco
+    inp.value = _misto[inp.dataset.k]||"";
+    inp.addEventListener("input",()=>{
+      _misto[inp.dataset.k]=parseVal(inp.value);
+      // Só atualiza o indicador de soma, não re-renderiza tudo
+      const soma=Object.values(_misto).reduce((a,v)=>a+(+v||0),0);
+      const ind=foot.querySelector("#misto-total-ind");
+      if(ind){
+        const ok=Math.abs(soma-total)<0.01;
+        ind.textContent=`Total misto: R$ ${fmt(soma)} / R$ ${fmt(total)}`;
+        ind.style.color=ok?"var(--ok)":"var(--er)";
+      }
+    });
+    // Só re-renderiza ao sair do campo (blur)
+    inp.addEventListener("blur",()=>{
+      _misto[inp.dataset.k]=parseVal(inp.value);
+    });
+  });
+
+  // ── Troco ──
+  const trocoInp=$("troco-recebido");
+  if(trocoInp){
+    trocoInp.value=_trocoRecebido||"";
+    trocoInp.addEventListener("input",()=>{
+      _trocoRecebido=parseVal(trocoInp.value);
+      const disp=foot.querySelector("#troco-display");
+      if(disp){
+        if(_trocoRecebido>0){
+          disp.textContent=_trocoRecebido>=total?`Troco: R$ ${fmt(_trocoRecebido-total)}`:"⚠️ Insuficiente";
+          disp.style.color=_trocoRecebido>=total?"var(--ok)":"var(--er)";
+          disp.style.display="flex";
+        } else { disp.style.display="none"; }
+      }
+    });
+  }
+  foot.querySelectorAll(".troco-sug").forEach(b=>b.addEventListener("click",()=>{
+    _trocoRecebido=parseFloat(b.dataset.v);
+    if(trocoInp)trocoInp.value=fmt(_trocoRecebido);
+    const disp=foot.querySelector("#troco-display");
+    if(disp){
+      disp.textContent=`Troco: R$ ${fmt(_trocoRecebido-total)}`;
+      disp.style.color="var(--ok)";disp.style.display="flex";
+    }
+  }));
+
   $("pdv-obs")?.addEventListener("input",()=>{_pdvObs=$("pdv-obs").value;});
-  $("desc-inp")?.addEventListener("input",()=>{_desc=parseVal($("desc-inp").value);renderCarrinho();});
+
+  // ── Desconto: atualiza só o total na tela, re-renderiza ao blur ──
+  const descInp=$("desc-inp");
+  if(descInp){
+    descInp.addEventListener("input",()=>{_desc=parseVal(descInp.value);atualizaTotalDisplay();});
+    descInp.addEventListener("blur",()=>{_desc=parseVal(descInp.value);renderCarrinho();});
+  }
   $("desc-val")?.addEventListener("click",()=>{_descTipo="val";renderCarrinho();});
   $("desc-pct")?.addEventListener("click",()=>{_descTipo="pct";renderCarrinho();});
   $("cupom-inp")?.addEventListener("keydown",e=>{if(e.key==="Enter")aplicarCupom($("cupom-inp").value);});
   $("btn-aplicar-cupom")?.addEventListener("click",()=>aplicarCupom($("cupom-inp")?.value||""));
-  $("gorj-inp")?.addEventListener("input",()=>{_gorj=parseVal($("gorj-inp").value);renderCarrinho();});
+
+  // ── Gorjeta: mesma abordagem ──
+  const gorjInp=$("gorj-inp");
+  if(gorjInp){
+    gorjInp.addEventListener("input",()=>{_gorj=parseVal(gorjInp.value);atualizaTotalDisplay();});
+    gorjInp.addEventListener("blur",()=>{_gorj=parseVal(gorjInp.value);renderCarrinho();});
+  }
   $("gorj-val")?.addEventListener("click",()=>{_gorjTipo="val";renderCarrinho();});
   $("gorj-pct")?.addEventListener("click",()=>{_gorjTipo="pct";renderCarrinho();});
   $("gorj-sem")?.addEventListener("click",()=>{_gorjTipo="none";_gorj=0;renderCarrinho();});
-  $("btn-limpa-cart")?.addEventListener("click",()=>{if(confirm("Limpar carrinho?")){_cart=[];_desc=0;_descTipo="val";_cupom="";_cupomVal=0;_cupomTipo="none";_gorj=0;_gorjTipo="none";_cli=null;_pag="pix";_pdvObs="";_trocoRecebido=0;renderCarrinho();}});
+
+  $("btn-limpa-cart")?.addEventListener("click",()=>{
+    if(confirm("Limpar carrinho?")){
+      _cart=[];_desc=0;_descTipo="val";_cupom="";_cupomVal=0;_cupomTipo="none";
+      _gorj=0;_gorjTipo="none";_cli=null;_pag="pix";_pdvObs="";_trocoRecebido=0;
+      renderCarrinho();
+    }
+  });
   $("btn-hist-cx-pdv")?.addEventListener("click",abrirHistoricoCaixa);
   $("btn-finalizar")?.addEventListener("click",finalizarVenda);
+}
+
+// Atualiza só o display do total sem re-renderizar tudo
+function atualizaTotalDisplay(){
+  const{sub,descVal,gorjVal,total}=calcTotais();
+  const el=document.querySelector(".fin-btn");
+  if(el&&_cart.length) el.textContent=`✓ Finalizar — R$ ${fmt(total)}`;
+  const telDiv=document.getElementById("total-display");
+  if(telDiv) telDiv.textContent=`R$ ${fmt(total)}`;
 }
 
 function gerarCodigoPedido(){
@@ -2460,7 +2864,7 @@ function finalizarVenda(){
   addKDS(ped);
   const saved=total,cNome=ped.cliente,troco=_pag==="dinheiro"&&_trocoRecebido>total?_trocoRecebido-total:0;
   _cart=[];_desc=0;_descTipo="val";_cupom="";_cupomVal=0;_cupomTipo="none";_gorj=0;_gorjTipo="none";_cli=null;_pag="pix";_misto={pix:0,dinheiro:0,credito:0,debito:0};_pdvObs="";_trocoRecebido=0;
-  renderTudo();bip("cash");
+  renderTudo();bipEvento("venda_pdv");
   toast(`✅ #${codigoPed} — R$ ${fmt(saved)}${troco?` · Troco R$ ${fmt(troco)}`:""} ✓`,"ok");
 }
 
@@ -2479,7 +2883,7 @@ async function confirmarAbertura(){
     abertoEm:Date.now(),abertoStr:$("cx-dt-abre").value,
     trocoInicial:parseFloat($("cx-troco").value)||0,
     obsAbertura:$("cx-obs-abre").value.trim(),vendas:[],mes:CM};
-  await dbSalvaCaixa(cx);fechaM("m-abre-cx");renderTudo();toast("🟢 Caixa aberto!","ok");bip("done");
+  await dbSalvaCaixa(cx);fechaM("m-abre-cx");renderTudo();toast("🟢 Caixa aberto!","ok");bipEvento("confirmacao");
 }
 
 function abrirFechamentoCaixa(){
@@ -2534,7 +2938,7 @@ async function confirmarFechamento(){
   await dbSalvaCaixa(cx);fechaM("m-fecha-cx");
   // Mostrar relatório completo antes de fechar
   abrirRelatorioFechamentoCaixa(cx,tGeral,tPix,tDin,tCred,tDeb,tMis,expDin);
-  renderTudo();toast("🔴 Caixa fechado!","ok");bip("done");
+  renderTudo();toast("🔴 Caixa fechado!","ok");bipEvento("confirmacao");
 }
 
 function abrirRelatorioFechamentoCaixa(cx,tGeral,tPix,tDin,tCred,tDeb,tMis,expDin){
@@ -3300,84 +3704,229 @@ function atualizaTotalMesa(num,valor){
   if(m){m.total=(m.total||0)+valor;m.itens=[...(m.itens||[]),..._cart];setMesas(ms);}
 }
 
-// ════ KDS ═════════════════════════════════════════════════════
 function renderKDS(){
   const pg=$("pg-kds");if(!pg)return;
   const allOrders=getKDS();
-  const cols=[
-    {k:"pendente",label:"🔥 Em Preparo",bg:"#E53E3E",text:"#fff",count:0},
-    {k:"pronto",label:"✅ Finalizado",bg:"#38A169",text:"#fff",count:0},
-    {k:"entregue",label:"🚀 Entregue",bg:"#3182CE",text:"#fff",count:0},
+  const COLS=[
+    {k:"pendente", label:"🔥 Em Preparo",  bg:"#E53E3E", next:"pronto",   nextLabel:"✅ Finalizar"},
+    {k:"pronto",   label:"✅ Finalizado",   bg:"#38A169", next:"entregue", nextLabel:"🚀 Entregar"},
+    {k:"entregue", label:"🚀 Entregue",     bg:"#3182CE", next:null,       nextLabel:null},
   ];
-  cols.forEach(c=>c.orders=allOrders.filter(o=>(o.kdsStatus||"pendente")===c.k));
 
   function timeAgo(ts){
     if(!ts)return"";
-    const m=Math.floor((Date.now()-ts)/60000);
-    if(m<1)return"agora";if(m<60)return m+"min";return Math.floor(m/60)+"h"+m%60+"m";
+    const m=Math.floor((Date.now()-(+ts))/60000);
+    const urgente=m>15&&!COLS.find(c=>c.k==="entregue");
+    const str=m<1?"agora":m<60?m+"min":Math.floor(m/60)+"h"+(m%60?""+m%60+"m":"");
+    return str+(m>20?" ⚠️":"");
   }
-  function modeLabel(m){return m==="delivery"?"🛵":m==="local"?"🪑":"🏪";}
+
+  function modoIcon(m){return m==="delivery"?"🛵":m==="local"?"🪑":"🏪";}
+  function pagIcon(p){return PI[p]||"💳";}
+
+  function buildCard(o,col){
+    const itens=(o.itens||[]);
+    const temMuitosItens=itens.length>4;
+    const itensHtml=itens.length
+      ? itens.map(i=>`<div style="display:flex;justify-content:space-between;align-items:baseline;gap:4px">
+          <span><strong>${i.qtd}×</strong> ${esc(i.nome)}${i.obs?` <em style="opacity:.7;font-size:.6rem">· ${esc(i.obs)}</em>`:""}</span>
+          ${i.preco?`<span style="font-family:monospace;font-size:.62rem;opacity:.7;flex-shrink:0">R$${fmt(i.preco*i.qtd)}</span>`:""}
+        </div>`).join("")
+      : `<div style="opacity:.7">${esc(o.produto||"—")}</div>`;
+
+    return`<div class="kds-mini" data-oid="${o.id}"
+      style="background:${col.bg}18;border-color:${col.bg}44;color:var(--text)">
+      <!-- Cabeçalho -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:3px">
+        <span class="kds-mini-num" style="color:${col.bg}">#${o.kdsNum||"—"} ${modoIcon(o.modo)} ${pagIcon(o.pagamento)}</span>
+        <span class="kds-mini-time">${timeAgo(o._at||o.criadoEm)}</span>
+      </div>
+      <!-- Cliente -->
+      <div class="kds-mini-cli">${esc(o.cliente||"Balcão")}</div>
+      ${o.fone?`<div class="kds-mini-info">📱 ${esc(o.fone)}</div>`:""}
+      ${o.endereco&&o.modo==="delivery"?`<div class="kds-mini-info">📍 ${esc(o.endereco)}</div>`:""}
+      <!-- Itens — todos visíveis, sem truncar -->
+      <div class="kds-mini-items" style="background:rgba(255,255,255,.07);border-radius:5px;padding:5px 6px;margin-top:4px">
+        ${itensHtml}
+      </div>
+      <!-- Total -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:5px">
+        <span style="font-size:.68rem;font-weight:700;color:${col.bg};font-family:'DM Mono',monospace">R$ ${fmt(o.val||o.total||0)}</span>
+        ${o.obs?`<span style="font-size:.6rem;background:rgba(255,200,0,.2);color:#f6ad55;border-radius:4px;padding:1px 5px">📝 Obs</span>`:""}
+      </div>
+      ${o.obs?`<div style="font-size:.65rem;font-style:italic;background:rgba(246,173,85,.12);border-radius:5px;padding:4px 6px;margin-top:4px;color:#f6ad55">📝 ${esc(o.obs)}</div>`:""}
+      <!-- Botões de ação -->
+      <div class="kds-mini-actions">
+        <button class="kds-mini-btn kds-ver" data-oid="${o.id}" title="Ver completo">👁</button>
+        <button class="kds-mini-btn kds-edit" data-oid="${o.id}" title="Editar">✏️</button>
+        ${col.next?`<button class="kds-mini-btn next kds-next" data-oid="${o.id}" data-col="${col.k}" title="${col.nextLabel}" style="background:${col.bg};color:#fff">${col.nextLabel}</button>`:""}
+        <button class="kds-mini-btn kds-del" data-oid="${o.id}" title="Excluir" style="background:rgba(220,38,38,.6);color:#fff">🗑</button>
+      </div>
+    </div>`;
+  }
 
   pg.innerHTML=`
   <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;flex-shrink:0;border-bottom:1px solid var(--brd);background:#fff">
-    <div style="font-size:1rem;font-weight:800;display:flex;align-items:center;gap:8px">📺 KDS Cozinha <span style="font-size:.7rem;color:var(--text3);font-weight:400">${allOrders.length} pedidos total</span></div>
+    <div style="font-size:1rem;font-weight:800;display:flex;align-items:center;gap:8px">
+      📺 KDS Cozinha
+      <span style="font-size:.7rem;color:var(--text3);font-weight:400">${allOrders.length} pedidos total</span>
+    </div>
     <div style="display:flex;gap:8px">
       <button class="btn btn-s btn-sm" id="btn-kds-cfg">⚙️ Config</button>
-      <button class="btn btn-er btn-sm" id="btn-kds-limpar">🗑 Limpar Prontos</button>
+      <button class="btn btn-er btn-sm" id="btn-kds-limpar">🗑 Limpar Entregues</button>
     </div>
   </div>
-  <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);min-height:0;border-top:1px solid var(--brd)">
-    ${cols.map(col=>`
-    <div class="kds-col" style="border-right:1px solid var(--brd)">
-      <div class="kds-col-h" style="background:${col.bg}">
-        <span>${col.label}</span>
-        <span style="background:rgba(255,255,255,.2);padding:2px 9px;border-radius:12px;font-size:.7rem">${col.orders.length}</span>
-      </div>
-      <div class="kds-col-body" id="kds-col-${col.k}">
-        ${col.orders.length?col.orders.map(o=>`
-        <div class="kds-mini" style="background:${col.bg}22;border-color:${col.bg}44;color:var(--text)" data-id="${o.id}">
-          <button class="kds-mini-btn" data-id="${o.id}" data-col="${col.k}" style="background:${col.bg};color:#fff">→</button>
-          <div class="kds-mini-num" style="color:${col.bg}">#${o.kdsNum||o.codigo||"—"} ${modeLabel(o.modo)}</div>
-          <div class="kds-mini-cli">${esc(o.cliente||"Balcão")}</div>
-          <div class="kds-mini-items">${(o.itens||[]).map(i=>`${i.qtd}x ${i.nome}`).join(", ")||esc(o.produto||"")}</div>
-          ${o.obs?`<div class="kds-mini-info" style="color:var(--warn)">📝 ${esc(o.obs)}</div>`:""}
-          <div class="kds-mini-time">${timeAgo(o.criadoEm||o._at)}</div>
-        </div>`).join(""):`<div style="text-align:center;padding:20px;color:var(--text3);font-size:.8rem;opacity:.5">Vazio</div>`}
-      </div>
-    </div>`).join("")}
+  <div style="flex:1;display:grid;grid-template-columns:repeat(3,1fr);min-height:0;border-top:1px solid var(--brd);overflow:hidden">
+    ${COLS.map(col=>{
+      const orders=allOrders.filter(o=>(o.kdsStatus||"pendente")===col.k)
+                            .sort((a,b)=>(+(a._at||a.criadoEm||0))-(+(b._at||b.criadoEm||0)));
+      return`<div class="kds-col" style="border-right:1px solid var(--brd)">
+        <div class="kds-col-h" style="background:${col.bg}">
+          <span>${col.label}</span>
+          <span style="background:rgba(255,255,255,.2);padding:2px 9px;border-radius:12px;font-size:.7rem">${orders.length}</span>
+        </div>
+        <div class="kds-col-body" id="kds-col-${col.k}">
+          ${orders.length
+            ? orders.map(o=>buildCard(o,col)).join("")
+            : `<div style="text-align:center;padding:28px 12px;color:var(--text3);font-size:.82rem;opacity:.5">Vazio</div>`}
+        </div>
+      </div>`;
+    }).join("")}
   </div>`;
 
-  // Avançar status
-  pg.querySelectorAll(".kds-mini-btn").forEach(btn=>btn.addEventListener("click",e=>{
+  // ── VER detalhes completos ──────────────────────────────────
+  pg.querySelectorAll(".kds-ver").forEach(btn=>btn.addEventListener("click",e=>{
     e.stopPropagation();
-    const id=btn.dataset.id, col=btn.dataset.col;
-    const next={pendente:"pronto",pronto:"entregue",entregue:"entregue"};
-    const list=getKDS();
-    const o=list.find(x=>x.id===id);
-    if(o){o.kdsStatus=next[col]||"pronto";localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(list));renderKDS();}
+    const o=getKDS().find(x=>x.id===btn.dataset.oid);if(!o)return;
+    const col=COLS.find(c=>c.k===(o.kdsStatus||"pendente"))||COLS[0];
+    const itensHtml=(o.itens||[]).map(i=>`
+      <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--brd)">
+        <div>
+          <strong>${i.qtd}×</strong> ${esc(i.nome)}
+          ${i.obs?`<div style="font-size:.75rem;color:var(--text3);font-style:italic">└ ${esc(i.obs)}</div>`:""}
+        </div>
+        <span style="font-family:monospace;font-weight:700;color:var(--brand)">R$ ${fmt((i.preco||0)*i.qtd)}</span>
+      </div>`).join("")||`<div style="padding:8px 0;color:var(--text3)">${esc(o.produto||"—")}</div>`;
+    abrirModalSimples(`
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <h3 style="margin:0">📋 Pedido #${o.kdsNum||"—"}</h3>
+        <span style="background:${col.bg};color:#fff;border-radius:20px;padding:3px 12px;font-size:.74rem;font-weight:700">${col.label}</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+        <span style="background:var(--bg3);border-radius:20px;padding:3px 12px;font-size:.74rem">${o.modo==="delivery"?"🛵 Delivery":o.modo==="local"?"🪑 Mesa/Local":"🏪 Balcão"}</span>
+        <span style="background:var(--bg3);border-radius:20px;padding:3px 12px;font-size:.74rem">${PI[o.pagamento]||"💳"} ${PL[o.pagamento]||o.pagamento||"—"}</span>
+      </div>
+      <div style="margin-bottom:12px">
+        <div style="font-weight:700;font-size:1rem">${esc(o.cliente||"Balcão")}</div>
+        ${o.fone?`<div style="font-size:.8rem;color:var(--text3)">📱 ${esc(o.fone)}</div>`:""}
+        ${o.endereco?`<div style="font-size:.8rem;color:var(--text3)">📍 ${esc(o.endereco)}</div>`:""}
+      </div>
+      <div style="margin-bottom:12px">${itensHtml}</div>
+      <div style="display:flex;justify-content:space-between;font-weight:800;font-size:1.1rem;padding-top:8px;border-top:2px solid var(--brd)">
+        <span>Total</span>
+        <span style="color:var(--brand);font-family:monospace">R$ ${fmt(o.val||o.total||0)}</span>
+      </div>
+      ${o.obs?`<div style="margin-top:10px;background:rgba(246,173,85,.12);border-radius:8px;padding:8px 11px;color:#f6ad55;font-size:.82rem">📝 ${esc(o.obs)}</div>`:""}
+      ${col.next?`
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button class="btn btn-ok btn-fw" style="justify-content:center;font-size:.9rem" onclick="kdsAvanca('${o.id}','${col.k}');fecharModalSimples()">
+          ${col.nextLabel}
+        </button>
+        <button class="btn btn-s" style="padding:8px 14px" onclick="fecharModalSimples()">Fechar</button>
+      </div>`:`<button class="btn btn-s btn-fw" style="justify-content:center;margin-top:14px" onclick="fecharModalSimples()">Fechar</button>`}
+    `);
   }));
 
-  // Clique no card abre detalhes
-  pg.querySelectorAll(".kds-mini").forEach(card=>card.addEventListener("click",e=>{
-    if(e.target.classList.contains("kds-mini-btn"))return;
-    const id=card.dataset.id;
-    const list=getKDS();
-    const o=list.find(x=>x.id===id);if(!o)return;
-    const cur=o.kdsStatus||"pendente";
-    const next={pendente:"pronto",pronto:"entregue",entregue:"entregue"};
-    const nxt=next[cur];
-    const nxtLabel={pronto:"✅ Marcar Finalizado",entregue:"🚀 Marcar Entregue",}[nxt]||"—";
-    if(nxt===cur)return;
-    if(confirm(`${nxtLabel}?\n#${o.kdsNum||o.codigo||"—"} — ${o.cliente||"Balcão"}`)){
-      o.kdsStatus=nxt;localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(list));renderKDS();toast(`Pedido ${o.kdsNum?"#"+o.kdsNum:""} → ${nxt==="pronto"?"Finalizado":"Entregue"}`,"ok");
-    }
+  // ── EDITAR ──────────────────────────────────────────────────
+  pg.querySelectorAll(".kds-edit").forEach(btn=>btn.addEventListener("click",e=>{
+    e.stopPropagation();
+    const o=getKDS().find(x=>x.id===btn.dataset.oid);if(!o)return;
+    const statusOpts=COLS.map(c=>`<option value="${c.k}"${o.kdsStatus===c.k?" selected":""}>${c.label}</option>`).join("");
+    const pagOpts=Object.keys(PI).map(k=>`<option value="${k}"${(o.pagamento||"pix")===k?" selected":""}>${PI[k]} ${PL[k]}</option>`).join("");
+    const modoOpts=[["balcao","🏪 Balcão"],["delivery","🛵 Delivery"],["local","🪑 Local"]].map(([v,l])=>`<option value="${v}"${(o.modo||"balcao")===v?" selected":""}>${l}</option>`).join("");
+    abrirModalSimples(`
+      <h3 style="margin-bottom:14px">✏️ Editar Pedido #${o.kdsNum||"—"}</h3>
+      <div class="fg"><label>Cliente</label><input id="ke-cli" value="${esc(o.cliente||"")}"></div>
+      <div class="fg"><label>Telefone</label><input id="ke-fone" value="${esc(o.fone||"")}" inputmode="tel"></div>
+      <div class="fg"><label>Observações</label><textarea id="ke-obs" rows="2" style="resize:vertical">${esc(o.obs||"")}</textarea></div>
+      <div class="fr c3">
+        <div class="fg"><label>Status</label><select id="ke-status">${statusOpts}</select></div>
+        <div class="fg"><label>Modo</label><select id="ke-modo">${modoOpts}</select></div>
+        <div class="fg"><label>Pagamento</label><select id="ke-pag">${pagOpts}</select></div>
+      </div>
+      <div class="fg"><label>Valor Total (R$)</label>
+        <input id="ke-val" inputmode="decimal" value="${fmt(o.val||o.total||0)}" style="font-size:1.1rem;font-weight:700;text-align:right">
+      </div>
+      <div class="fg"><label>Endereço</label><input id="ke-end" value="${esc(o.endereco||"")}" placeholder="Endereço de entrega..."></div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button class="btn btn-p btn-fw" style="justify-content:center" id="btn-ke-salvar">💾 Salvar</button>
+        <button class="btn btn-s" style="padding:8px 14px" onclick="fecharModalSimples()">Cancelar</button>
+      </div>
+    `);
+    setTimeout(()=>{
+      document.getElementById("btn-ke-salvar")?.addEventListener("click",()=>{
+        const pV=s=>parseFloat((s||"").replace(",",".").replace(/[^\d.-]/g,""))||0;
+        const l=getKDS(); const ord=l.find(x=>x.id===o.id); if(!ord)return;
+        const novoStatus=document.getElementById("ke-status")?.value;
+        if(novoStatus!==ord.kdsStatus){
+          const somEvt={pendente:"pedido_preparo",pronto:"pedido_pronto",entregue:"pedido_entregue"};
+          bipEvento(somEvt[novoStatus]||"confirmacao");
+        }
+        ord.cliente=document.getElementById("ke-cli")?.value.trim()||ord.cliente;
+        ord.fone=document.getElementById("ke-fone")?.value.trim()||"";
+        ord.obs=document.getElementById("ke-obs")?.value.trim()||"";
+        ord.kdsStatus=novoStatus||ord.kdsStatus;
+        ord.modo=document.getElementById("ke-modo")?.value||ord.modo;
+        ord.pagamento=document.getElementById("ke-pag")?.value||ord.pagamento;
+        ord.val=ord.total=pV(document.getElementById("ke-val")?.value)||ord.val;
+        ord.endereco=document.getElementById("ke-end")?.value.trim()||"";
+        localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(l));
+        const m=gm(CM); const mp=m.pedidos.find(x=>x.id===o.id);
+        if(mp){mp.cliente=ord.cliente;mp.obs=ord.obs;mp.val=ord.val;mp.modo=ord.modo;mp.pagamento=ord.pagamento;sm(CM,m);}
+        fecharModalSimples(); renderKDS(); renderPDV();
+        toast("✅ Pedido atualizado!","ok");
+      });
+    },80);
   }));
 
-  pg.querySelector("#btn-kds-cfg")?.addEventListener("click",()=>{irPara("config",null);buildNav();});
+  // ── AVANÇAR ─────────────────────────────────────────────────
+  pg.querySelectorAll(".kds-next").forEach(btn=>btn.addEventListener("click",e=>{
+    e.stopPropagation();
+    kdsAvanca(btn.dataset.oid, btn.dataset.col);
+  }));
+
+  // ── EXCLUIR ─────────────────────────────────────────────────
+  pg.querySelectorAll(".kds-del").forEach(btn=>btn.addEventListener("click",e=>{
+    e.stopPropagation();
+    const o=getKDS().find(x=>x.id===btn.dataset.oid);if(!o)return;
+    if(!confirm(`Excluir pedido #${o.kdsNum||"—"} — ${o.cliente||"Balcão"}?`))return;
+    const l=getKDS().filter(x=>x.id!==o.id);
+    localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(l));
+    renderKDS(); renderPDV(); toast("Pedido removido","ok");
+  }));
+
+  pg.querySelector("#btn-kds-cfg")?.addEventListener("click",()=>irPara("config",null));
   pg.querySelector("#btn-kds-limpar")?.addEventListener("click",()=>{
-    const l=getKDS().filter(o=>o.kdsStatus!=="entregue");
-    localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(l));renderKDS();toast("Pedidos entregues removidos","ok");
+    const l=getKDS().filter(o=>(o.kdsStatus||"pendente")!=="entregue");
+    localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(l));
+    renderKDS(); renderPDV(); toast("Pedidos entregues removidos","ok");
   });
+}
+
+// Avança status KDS — chamado de qualquer lugar
+function kdsAvanca(oid, colAtual){
+  const next={pendente:"pronto", pronto:"entregue", entregue:"entregue"};
+  const somEvt={pendente:"pedido_preparo", pronto:"pedido_pronto", entregue:"pedido_entregue"};
+  const labels={pronto:"✅ Finalizado", entregue:"🚀 Entregue"};
+  const l=getKDS(); const o=l.find(x=>x.id===oid); if(!o)return;
+  const nxt=next[colAtual]; if(!nxt||nxt===colAtual)return;
+  o.kdsStatus=nxt;
+  localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(l));
+  bipEvento(somEvt[colAtual]||"confirmacao");
+  const m=gm(CM); const mp=m.pedidos.find(x=>x.id===oid);
+  if(mp){mp.status=nxt==="entregue"?"done":nxt==="pronto"?"ready":"pending";sm(CM,m);}
+  renderKDS(); renderPDV();
+  toast(`Pedido #${o.kdsNum||"—"} → ${labels[nxt]||nxt}`,"ok");
 }
 // ════ CONFIGURAÇÕES ═══════════════════════════════════════════
 const EMOJIS=["🍒","🎂","🍫","🍬","🍰","🧁","🍩","🍪","🎁","⭐","💎","🌸","🌺","🏅","🍓","🥐","🥧","☕","🍮","🛍️"];
@@ -3775,68 +4324,132 @@ function bindEvents(){
 // ── Referência para coleção de pedidos externos do cardápio ──
 const kdsCol = () => collection(db,"companies",_tenant,"kds_pedidos");
 
-// ── Listener em tempo real para novos pedidos do cardápio ────
+// ── Listener em tempo real — PEDIDOS DO CARDÁPIO DIGITAL ─────
 let _kdsUnsubscribe = null;
+let _kdsInicializado = false; // evita som na carga inicial
+
 function iniciarKDSListener(){
-  if(_kdsUnsubscribe) _kdsUnsubscribe(); // cancela listener anterior
+  if(_kdsUnsubscribe){ _kdsUnsubscribe(); _kdsUnsubscribe=null; }
+  _kdsInicializado = false;
   try{
-    const q = query(kdsCol(), orderBy("criadoEm","desc"), limit(100));
+    // Sem orderBy para evitar necessidade de índice composto
+    // Pega os últimos 200 pedidos sem filtro de tempo
+    const q = query(kdsCol(), limit(200));
     _kdsUnsubscribe = onSnapshot(q, snap => {
+      let houveNovo = false;
+
       snap.docChanges().forEach(change => {
         if(change.type === "added"){
-          const ped = {id: change.doc.id, ...change.doc.data()};
-          // Verifica se já está no KDS local para evitar duplicatas
+          const raw = change.doc.data();
+          const ped = {
+            ...raw,
+            id: change.doc.id,
+            // criadoEm pode ser null no primeiro snapshot (serverTimestamp pendente)
+            criadoEm: raw.criadoEm?.toMillis?.() || raw.criadoEm || Date.now(),
+          };
+
           const local = JSON.parse(localStorage.getItem("ys_kds_"+_tenant)||"[]");
           if(!local.find(k=>k.id===ped.id)){
-            const list = local;
-            const num = (list.length % 99) + 1;
-            list.unshift({
+            const num = (local.length % 99) + 1;
+            local.unshift({
               ...ped,
               kdsStatus: ped.kdsStatus || "pendente",
-              kdsNum: num,
-              origem: "cardapio-digital"
+              kdsNum:    num,
+              origem:    "cardapio-digital",
+              _at:       ped.criadoEm || Date.now(),
             });
-            localStorage.setItem("ys_kds_"+_tenant, JSON.stringify(list.slice(0,200)));
-            // Notificação sonora
-            bip("done");
-            toast(`🛒 Novo pedido do Cardápio! #${num} — ${ped.cliente||"Cliente"}`, "ok");
-            // Atualiza KDS se visível
-            if(CT==="kds") renderKDS();
-            // Registra também como pedido no mês atual
-            const m = gm(CM);
-            const novoPed = {
-              id: ped.id,
-              cliente: ped.cliente || "Cliente Cardápio",
-              fone: ped.fone || "",
-              produto: (ped.itens||[]).map(i=>i.nome).join(", "),
-              itens: ped.itens || [],
-              val: ped.total || 0,
-              status: "pendente",
-              statusPag: "pending",
-              pagamento: ped.pagamento || "pix",
-              modo: ped.modo || "delivery",
-              data: hoje(),
-              dataEntrega: hoje(),
-              obs: ped.obs || "",
-              origem: "cardapio-digital",
-              _at: Date.now()
-            };
-            m.pedidos.push(novoPed);
-            // Registra na DRE como receita
-            m.dre.receitas.push({
-              id: uid(), label: `Pedido Cardápio — ${novoPed.cliente}`,
-              val: novoPed.val, data: hoje()
-            });
-            sm(CM, m);
-            if(CT==="pedidos") renderPedidos();
-            if(CT==="dashboard") renderDash();
+            localStorage.setItem("ys_kds_"+_tenant, JSON.stringify(local.slice(0,200)));
+
+            if(_kdsInicializado){
+              // ── SOM e NOTIFICAÇÃO só para pedidos novos (não na carga inicial) ──
+              bipEvento("novo_pedido_kds");
+              toast(`🛒 NOVO PEDIDO #${num} — ${ped.cliente||"Cliente"} · R$ ${(+ped.total||0).toFixed(2).replace(".",",")}`, "ok");
+
+              // Registra no mês atual
+              const m = gm(CM);
+              const novoPed = {
+                id:         ped.id,
+                cliente:    ped.cliente || "Cliente Cardápio",
+                fone:       ped.fone || "",
+                produto:    (ped.itens||[]).map(i=>`${i.qtd}x ${i.nome}`).join(", "),
+                itens:      ped.itens || [],
+                val:        ped.total || 0,
+                desc:       0,
+                status:     "pending",
+                statusPag:  "pending",
+                pagamento:  ped.pagamento || "pix",
+                modo:       ped.modo || "delivery",
+                endereco:   ped.endereco || "",
+                data:       hoje(),
+                dataEntrega:hoje(),
+                obs:        ped.obs || "",
+                origem:     "cardapio-digital",
+                criadoEm:   Date.now(),
+              };
+              // Evita duplicata no mês
+              if(!m.pedidos.find(x=>x.id===ped.id)){
+                m.pedidos.push(novoPed);
+              }
+              sm(CM, m);
+              houveNovo = true;
+            }
           }
         }
       });
+
+      // Marca como inicializado após o primeiro snapshot (carga histórica)
+      if(!_kdsInicializado){
+        _kdsInicializado = true;
+      }
+
+      // Atualiza KDS e PDV em qualquer aba sempre que houver mudança
+      if(houveNovo){
+        if(CT==="kds")      renderKDS();
+        if(CT==="pdv")      renderPDV();
+        if(CT==="pedidos")  renderPedidos();
+        if(CT==="dashboard")renderDash();
+        // Atualiza o painel de pedidos no PDV mesmo se não estiver na aba
+        _pdvPedidosPendentes = JSON.parse(localStorage.getItem("ys_kds_"+_tenant)||"[]")
+          .filter(o=>(o.kdsStatus||"pendente")!=="entregue").length;
+        atualizarBadgeKDS();
+      }
     }, err => {
       console.warn("KDS listener erro:", err.message);
+      // Tenta reiniciar após 5s
+      setTimeout(()=>{ if(_user) iniciarKDSListener(); }, 5000);
     });
-  } catch(e){ console.warn("KDS listener não iniciado:", e.message); }
+    console.log("✅ KDS listener iniciado para tenant:", _tenant);
+  } catch(e){
+    console.warn("KDS listener não iniciado:", e.message);
+  }
+}
+
+// Badge visual no menu KDS e PDV
+let _pdvPedidosPendentes = 0;
+function atualizarBadgeKDS(){
+  const total = JSON.parse(localStorage.getItem("ys_kds_"+_tenant)||"[]")
+    .filter(o=>(o.kdsStatus||"pendente")==="pendente").length;
+  // Atualiza badge no botão KDS do sidebar
+  document.querySelectorAll('.sb-btn[data-pg="kds"]').forEach(b=>{
+    let badge=b.querySelector(".kds-badge");
+    if(total>0){
+      if(!badge){badge=document.createElement("span");badge.className="kds-badge";
+        badge.style.cssText="background:var(--er);color:#fff;border-radius:10px;padding:1px 6px;font-size:.6rem;font-weight:800;margin-left:auto";
+        b.appendChild(badge);
+      }
+      badge.textContent=total;
+    } else if(badge){ badge.remove(); }
+  });
+  document.querySelectorAll('.sb-btn[data-pg="pdv"]').forEach(b=>{
+    let badge=b.querySelector(".pdv-badge");
+    if(total>0){
+      if(!badge){badge=document.createElement("span");badge.className="pdv-badge";
+        badge.style.cssText="background:var(--brand);color:#fff;border-radius:10px;padding:1px 6px;font-size:.6rem;font-weight:800;margin-left:auto";
+        b.appendChild(badge);
+      }
+      badge.textContent=total;
+    } else if(badge){ badge.remove(); }
+  });
 }
 
 // ── Render da página Cardápio Digital ────────────────────────
