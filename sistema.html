@@ -1228,7 +1228,7 @@ const PAGINAS=[
   {id:"dre",ic:"📊",label:"DRE"},
   {id:"catalogo",ic:"🎂",label:"Catálogo"},
   {id:"catalogo-pub",ic:"🛍️",label:"Catálogo Público"},
-  {id:"producao",ic:"🏭",label:"Produção"},
+  {id:"pedidos",ic:"📋",label:"Pedidos"},
   {id:"pedidos",ic:"📋",label:"Pedidos"},
   {id:"pdv",ic:"🛒",label:"PDV / Caixa"},
   {id:"caixa",ic:"💰",label:"Gestão Caixa"},
@@ -1388,7 +1388,6 @@ function renderAbaAtual(){
     case"pdv":renderPDV();break;
     case"caixa":renderCaixa();break;
     case"pedidos":renderPedidos();break;
-    case"producao":renderProducao();break;
     case"estoque":renderEstoque();break;
     case"fichas":renderFichas();break;
     case"custos":renderCustos();break;
@@ -1456,7 +1455,7 @@ function buildNav(){
     {sec:"Vendas"},{id:"catalogo",ic:"🎂",label:"Catálogo"},
     {id:"catalogo-pub",ic:"🛍️",label:"Catálogo Público"},
     {id:"pdv",ic:"🛒",label:"PDV / Caixa"},{id:"caixa",ic:"💰",label:"Gestão Caixa"},
-    {id:"pedidos",ic:"📋",label:"Pedidos"},{id:"producao",ic:"🏭",label:"Produção"},
+    {id:"pedidos",ic:"📋",label:"Pedidos"},
     {sec:"Operacional"},{id:"estoque",ic:"📦",label:"Estoque"},
     {id:"fichas",ic:"🧪",label:"Fichas Técnicas"},{id:"contatos",ic:"👥",label:"Cadastros"},
     {sec:"Extras"},{id:"fidelidade",ic:"⭐",label:"Fidelidade"},
@@ -1497,7 +1496,7 @@ function irPara(pg,btn){
 }
 
 function renderTudo(){
-  renderDash();renderDRE();renderCatalogo();renderCatalogoPub();renderProducao();renderPedidos();
+  renderDash();renderDRE();renderCatalogo();renderCatalogoPub();renderPedidos();
   renderPDV();renderCaixa();renderEstoque();renderFichas();renderCustos();
   renderContatos();renderFidelidade();renderKDS();renderCardapioDigital();renderConfig();renderRelatorios();
 }
@@ -1557,7 +1556,7 @@ function renderDash(){
       <div style="display:flex;flex-direction:column;gap:8px">
         <button class="btn btn-p btn-fw dash-ir" data-pg="pdv">🛒 Abrir PDV</button>
         <button class="btn btn-s btn-fw dash-ir" data-pg="pedidos" data-new="1">+ Nova Encomenda</button>
-        <button class="btn btn-s btn-fw dash-ir" data-pg="producao">🏭 Produção</button>
+        <button class="btn btn-s btn-fw dash-ir" data-pg="pedidos">📋 Pedidos</button>
         <button class="btn btn-s btn-fw dash-ir" data-pg="estoque">📦 Estoque</button>
         <button class="btn btn-s btn-fw dash-ir" data-pg="dre">📊 DRE</button>
       </div>
@@ -2039,40 +2038,108 @@ function renderPedidos(){
   const pg=$("pg-pedidos");
   let all=[];
   MN.forEach((_,i)=>{const mo=_meses[i];if(mo?.pedidos)mo.pedidos.forEach(o=>all.push({...o,mes:MN[i],mi:i}));});
-  all.sort((a,b)=>b.criadoEm-a.criadoEm);
+  all.sort((a,b)=>(b.criadoEm||0)-(a.criadoEm||0));
   const cur=gm(CM).pedidos||[];
   const tMes=cur.reduce((a,o)=>a+(+o.val||0)-(+o.desc||0),0);
   const receber=cur.filter(o=>o.statusPag==="pending").reduce((a,o)=>a+(+o.val||0)-(+o.desc||0),0);
-  const flts=[{k:"all",l:"Todos"},{k:"pending",l:"🕐 Pendentes"},{k:"started",l:"🔥 Em Prod."},{k:"done",l:"✅ Finalizados"},{k:"paid",l:"💚 Pagos"},{k:"unpaid",l:"🔴 A Receber"}];
-  const filt=all.filter(o=>{if(_filtPed==="all")return true;if(_filtPed==="paid")return o.statusPag==="paid";if(_filtPed==="unpaid")return o.statusPag==="pending"||o.statusPag==="partial";return o.status===_filtPed;});
-  const sM={pending:"b-warn",started:"b-brand",done:"b-ok"},sL={pending:"Pendente",started:"Em Produção",done:"Finalizado"};
-  const pS={pending:"b-er",paid:"b-ok",partial:"b-warn"},pL={pending:"Pendente",paid:"Pago",partial:"Parcial"};
-  pg.innerHTML=`<div class="ph"><div class="ph-title">📋 Gestão de Pedidos</div><button class="btn btn-p" id="btn-novo-ped-m">+ Novo Pedido</button></div>
+
+  // Filtros de status
+  const flts=[
+    {k:"all",l:"Todos"},
+    {k:"pending",l:"🕐 Pendentes"},
+    {k:"done",l:"✅ Finalizados"},
+    {k:"paid",l:"💚 Pagos"},
+    {k:"unpaid",l:"🔴 A Receber"},
+  ];
+  // Filtros de origem/canal
+  const origemFlts=[
+    {k:"all",    l:"🔀 Todos os canais"},
+    {k:"balcao", l:"🏪 Balcão"},
+    {k:"delivery",l:"🛵 Delivery"},
+    {k:"local",  l:"🪑 Mesa/Local"},
+    {k:"cardapio-digital",l:"📱 Cardápio Digital"},
+    {k:"pdv",    l:"🛒 PDV"},
+  ];
+
+  // Estado do filtro de origem
+  if(typeof _filtOrigem==="undefined") window._filtOrigem="all";
+
+  // Aplica filtros
+  let filt=all.filter(o=>{
+    // Filtro status
+    const statusOk=(()=>{
+      if(_filtPed==="all")return true;
+      if(_filtPed==="paid")return o.statusPag==="paid";
+      if(_filtPed==="unpaid")return o.statusPag==="pending"||o.statusPag==="partial";
+      return o.status===_filtPed;
+    })();
+    // Filtro origem/canal
+    const origemOk=(()=>{
+      if(_filtOrigem==="all")return true;
+      if(_filtOrigem==="pdv")return o.origem==="pdv"||(!o.origem&&(o.modo==="balcao"||!o.modo));
+      if(_filtOrigem==="cardapio-digital")return o.origem==="cardapio-digital";
+      return (o.modo||"balcao")===_filtOrigem;
+    })();
+    return statusOk&&origemOk;
+  });
+
+  const sM={pending:"b-warn",started:"b-brand",done:"b-ok"};
+  const sL={pending:"Pendente",started:"Em Prod.",done:"Finalizado"};
+  const pS={pending:"b-er",paid:"b-ok",partial:"b-warn"};
+  const pL={pending:"Pendente",paid:"Pago",partial:"Parcial"};
+
+  pg.innerHTML=`
+  <div class="ph">
+    <div class="ph-title">📋 Gestão de Pedidos</div>
+    <button class="btn btn-p" id="btn-novo-ped-m">+ Novo Pedido</button>
+  </div>
   <div class="krow">
     <div class="kpi kb"><div class="kpi-l">Total ${MN[CM]}</div><div class="kpi-v">${cur.length}</div><div class="kpi-s">R$ ${fmt(tMes)}</div></div>
     <div class="kpi ${receber>0?"ke":"ko"}"><div class="kpi-l">A Receber</div><div class="kpi-v">R$ ${fmt(receber)}</div><div class="kpi-s">${cur.filter(o=>o.statusPag==="pending").length} pedidos</div></div>
     <div class="kpi kg"><div class="kpi-l">Finalizados</div><div class="kpi-v">${cur.filter(o=>o.status==="done").length}</div><div class="kpi-s">de ${cur.length}</div></div>
     <div class="kpi"><div class="kpi-l">Histórico</div><div class="kpi-v">${all.length}</div><div class="kpi-s">todos os meses</div></div>
   </div>
+  <!-- Filtro de canal/origem -->
+  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;padding:10px 12px;background:var(--bg3);border-radius:11px;border:1px solid var(--brd)">
+    <span style="font-size:.7rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;align-self:center;margin-right:4px">Canal:</span>
+    ${origemFlts.map(f=>`<button class="btn ${_filtOrigem===f.k?"btn-p":"btn-s"} btn-sm filt-orig" data-o="${f.k}">${f.l}</button>`).join("")}
+  </div>
+  <!-- Filtro de status -->
   <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px">
     ${flts.map(f=>`<button class="btn ${_filtPed===f.k?"btn-p":"btn-s"} btn-sm filt-ped" data-f="${f.k}">${f.l}</button>`).join("")}
+    <span style="margin-left:auto;font-size:.74rem;color:var(--text3);align-self:center">${filt.length} resultado${filt.length!==1?"s":""}</span>
   </div>
-  <div class="tw"><table class="yt"><thead><tr><th>Cliente</th><th>Produto</th><th>Mês</th><th>Data</th><th>Pag.</th><th>St.Pag</th><th>Status</th><th>Valor</th><th></th></tr></thead><tbody>
-  ${filt.length?filt.map(o=>`<tr>
-    <td><strong>${esc(o.cliente)}</strong>${o.fone?`<br><span style="font-size:.7rem;color:var(--text3)">${esc(o.fone)}</span>`:""}</td>
-    <td style="font-size:.8rem;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(o.produto||"")}${o.qtd>1?" ×"+o.qtd:""}</td>
-    <td style="font-family:monospace;font-size:.72rem;color:var(--brand)">${o.mes||""}</td>
-    <td style="font-family:monospace;font-size:.75rem">${fmtD(o.dataEntrega)}</td>
-    <td>${PI[o.pagamento]||"—"} <span style="font-size:.74rem">${PL[o.pagamento]||"—"}</span></td>
-    <td><span class="badge ${pS[o.statusPag]||""}">${pL[o.statusPag]||"—"}</span></td>
-    <td><span class="badge ${sM[o.status]||""}">${sL[o.status]||o.status}</span></td>
-    <td class="mc">R$ ${fmt((+o.val||0)-(+o.desc||0))}</td>
-    <td class="ac"><button class="btn btn-s btn-xs ped-edit" data-id="${o.id}">✏️</button><button class="btn btn-s btn-xs ped-data" data-id="${o.id}" title="Alterar Data">📅</button><button class="btn btn-er btn-xs ped-del" data-id="${o.id}">🗑</button></td></tr>`).join("")
-  :`<tr><td class="empty-st" colspan="9">Nenhum pedido encontrado.</td></tr>`}
-  ${filt.length?`<tr style="background:var(--bg3);font-weight:700"><td colspan="7">TOTAL FILTRADO</td><td class="mc">R$ ${fmt(filt.reduce((a,o)=>a+(+o.val||0)-(+o.desc||0),0))}</td><td></td></tr>`:""}
-  </tbody></table></div>`;
+  <div class="tw"><table class="yt">
+    <thead><tr><th>Canal</th><th>Cliente</th><th>Produto</th><th>Mês</th><th>Data</th><th>Pag.</th><th>St.Pag</th><th>Status</th><th>Valor</th><th></th></tr></thead>
+    <tbody>
+    ${filt.length?filt.map(o=>{
+      const canal=o.origem==="cardapio-digital"?"📱":o.modo==="delivery"?"🛵":o.modo==="local"?"🪑":"🏪";
+      const canalLabel=o.origem==="cardapio-digital"?"Digital":o.modo==="delivery"?"Delivery":o.modo==="local"?"Mesa":"Balcão";
+      return`<tr>
+        <td><span title="${canalLabel}" style="font-size:1rem">${canal}</span> <span style="font-size:.68rem;color:var(--text3)">${canalLabel}</span></td>
+        <td><strong>${esc(o.cliente||"—")}</strong>${o.fone?`<br><span style="font-size:.7rem;color:var(--text3)">${esc(o.fone)}</span>`:""}</td>
+        <td style="font-size:.8rem;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(o.produto||"")}${o.qtd>1?" ×"+o.qtd:""}</td>
+        <td style="font-family:monospace;font-size:.72rem;color:var(--brand)">${o.mes||""}</td>
+        <td style="font-family:monospace;font-size:.75rem">${fmtD(o.dataEntrega)}</td>
+        <td>${PI[o.pagamento]||"—"} <span style="font-size:.74rem">${PL[o.pagamento]||"—"}</span></td>
+        <td><span class="badge ${pS[o.statusPag]||""}">${pL[o.statusPag]||"—"}</span></td>
+        <td><span class="badge ${sM[o.status]||""}">${sL[o.status]||o.status}</span></td>
+        <td class="mc">R$ ${fmt((+o.val||0)-(+o.desc||0))}</td>
+        <td class="ac">
+          <button class="btn btn-s btn-xs ped-edit" data-id="${o.id}">✏️</button>
+          <button class="btn btn-s btn-xs ped-data" data-id="${o.id}" title="Alterar Data">📅</button>
+          <button class="btn btn-er btn-xs ped-del" data-id="${o.id}">🗑</button>
+        </td>
+      </tr>`;
+    }).join("")
+    :`<tr><td class="empty-st" colspan="10">Nenhum pedido encontrado para este filtro.</td></tr>`}
+    ${filt.length?`<tr style="background:var(--bg3);font-weight:700"><td colspan="8">TOTAL FILTRADO</td><td class="mc">R$ ${fmt(filt.reduce((a,o)=>a+(+o.val||0)-(+o.desc||0),0))}</td><td></td></tr>`:""}
+    </tbody>
+  </table></div>`;
+
   pg.querySelector("#btn-novo-ped-m").addEventListener("click",()=>abreModalPedido(""));
   pg.querySelectorAll(".filt-ped").forEach(b=>b.addEventListener("click",()=>{_filtPed=b.dataset.f;renderPedidos();}));
+  pg.querySelectorAll(".filt-orig").forEach(b=>b.addEventListener("click",()=>{window._filtOrigem=b.dataset.o;renderPedidos();}));
   pg.querySelectorAll(".ped-edit").forEach(b=>b.addEventListener("click",()=>abreModalPedido(b.dataset.id)));
   pg.querySelectorAll(".ped-data").forEach(b=>b.addEventListener("click",()=>abrirAlterarDataVenda(b.dataset.id)));
   pg.querySelectorAll(".ped-del").forEach(b=>b.addEventListener("click",()=>deletarPedidoPin(b.dataset.id)));
@@ -4279,7 +4346,7 @@ function bindEvents(){
   $("btn-pdf-op").addEventListener("click",()=>{if(_editFicha)gerarOrdemProducao(_editFicha);else{salvarFicha(null);setTimeout(()=>{if(_editFicha)gerarOrdemProducao(_editFicha);},200);}});
   // Usuário
   $("btn-cancela-usr").addEventListener("click",()=>fechaM("m-usuario"));
-  $("uu-perfil").addEventListener("change",()=>{const r=$("uu-perfil").value;const all=PAGINAS.map(p=>p.id).filter(p=>p!=="config");const map={admin:all,op:["dashboard","dre","catalogo","producao","pedidos","pdv","caixa","estoque","fichas","custos","contatos","fidelidade","kds"],view:["dashboard","dre","catalogo"],custom:[]};buildPermGrid(map[r]||[]);});
+  $("uu-perfil").addEventListener("change",()=>{const r=$("uu-perfil").value;const all=PAGINAS.map(p=>p.id).filter(p=>p!=="config");const map={admin:all,op:["dashboard","dre","catalogo","pedidos","pdv","caixa","estoque","fichas","custos","contatos","fidelidade","kds"],view:["dashboard","dre","catalogo"],custom:[]};buildPermGrid(map[r]||[]);});
   $("btn-salva-usr").addEventListener("click",()=>{
     const nome=$("uu-nome").value.trim(),user=$("uu-user").value.trim(),pass=$("uu-pass").value,perfil=$("uu-perfil").value,email=$("uu-email").value.trim();
     if(!nome||!user){alert("Preencha nome e usuário.");return;}

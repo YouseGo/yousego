@@ -187,7 +187,7 @@
   <!-- HEADER -->
   <header class="site-header">
     <div class="header-inner">
-      <div class="brand" id="store-brand">🍽️ <span>Cardápio</span></div>
+      <div class="brand" id="store-brand"><span>Cardápio</span></div>
       <button class="cart-badge-btn" onclick="abrirCarrinho()" aria-label="Ver carrinho">
         🛒 <div class="cart-count-bubble" id="header-count">0</div>
       </button>
@@ -380,7 +380,7 @@
 
     // Atualiza DOM
     document.getElementById('store-name').textContent       = storeNome;
-    document.getElementById('store-brand').innerHTML        = `🍽️ <span>${storeNome}</span>`;
+    document.getElementById('store-brand').innerHTML        = `<span>${storeNome}</span>`;
     document.getElementById('store-logo').innerHTML         = storeLogo;
     document.getElementById('store-subtitle').textContent   = storeSub;
     document.title = `Cardápio — ${storeNome}`;
