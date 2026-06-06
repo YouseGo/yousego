@@ -33,9 +33,11 @@
     .cart-count-bubble { background:var(--accent); color:#fff; border-radius:999px; width:20px; height:20px; display:flex; align-items:center; justify-content:center; font-size:.65rem; font-weight:800; font-family:var(--font-m); }
 
     /* ── Hero ── */
-    .store-hero { padding:36px 20px 28px; text-align:center; position:relative; overflow:hidden; border-bottom:1px solid var(--brd); }
+    .store-hero { padding:36px 20px 28px; text-align:center; position:relative; overflow:hidden; border-bottom:1px solid var(--brd); background-size:cover; background-position:center; background-repeat:no-repeat; }
     .store-hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse 60% 60% at 50% -20%, rgba(255,92,53,.18), transparent); pointer-events:none; }
-    .store-logo { width:80px; height:80px; border-radius:20px; background:var(--bg3); border:2px solid var(--brd2); display:flex; align-items:center; justify-content:center; font-size:2.2rem; margin:0 auto 14px; overflow:hidden; }
+    .store-hero.has-bg::before { background:linear-gradient(to bottom, rgba(0,0,0,.55) 0%, rgba(0,0,0,.35) 60%, rgba(0,0,0,.7) 100%); }
+    .store-hero.has-bg .store-name, .store-hero.has-bg .store-subtitle { color:#fff; text-shadow:0 2px 8px rgba(0,0,0,.5); }
+    .store-logo { width:80px; height:80px; border-radius:20px; background:var(--bg3); border:2px solid var(--brd2); display:flex; align-items:center; justify-content:center; font-size:2.2rem; margin:0 auto 14px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,.3); }
     .store-logo img { width:100%; height:100%; object-fit:cover; }
     .store-name { font-family:var(--font-h); font-size:1.7rem; font-weight:800; margin-bottom:6px; letter-spacing:-.5px; }
     .store-subtitle { font-size:.82rem; color:var(--text2); max-width:300px; margin:0 auto; }
@@ -323,7 +325,7 @@
 
   let CARDAPIO = [], carrinho = [], catAtiva = 'Todos';
   let storeNome = 'Cardápio Digital', storeLogo = '🍽️', storeSub = 'Peça online e receba em casa 🛵';
-  let ACCENT = '#ff5c35', TEMA = 'dark', CATS_OCULTAS = [], HORARIOS = null;
+  let ACCENT = '#ff5c35', TEMA = 'dark', CATS_OCULTAS = [], HORARIOS = null, BGIMG = '';
 
   const fmtBRL = v => 'R$ ' + (+v||0).toFixed(2).replace('.',',');
   const calcTotal    = () => carrinho.reduce((a,i) => a + i.preco * i.qtd, 0);
@@ -366,6 +368,7 @@
         TEMA        = cfg.temaCardapio || 'dark';
         CATS_OCULTAS= cfg.catsOcultas || [];
         HORARIOS    = cfg.horarios || null;
+        BGIMG       = cfg.cardapioBgImg || '';
         if(cfg.logoImg){
           storeLogo = `<img src="${cfg.logoImg}" alt="Logo">`;
         } else {
@@ -404,9 +407,23 @@
       document.documentElement.style.setProperty('--bg', ACCENT+'22');
       document.documentElement.style.setProperty('--bg2', ACCENT+'11');
     }
-    // Atualiza gradiente do hero
+    // Atualiza hero: imagem de fundo OU gradiente de cor
     const hero = document.getElementById('store-hero');
-    if(hero) hero.style.background = `linear-gradient(135deg, ${ACCENT}22 0%, ${ACCENT}11 50%, var(--bg) 100%)`;
+    if(hero){
+      if(BGIMG){
+        hero.style.backgroundImage = `url('${BGIMG}')`;
+        hero.style.backgroundSize = 'cover';
+        hero.style.backgroundPosition = 'center';
+        hero.classList.add('has-bg');
+        // Remove gradiente de cor quando há imagem
+        hero.style.background = '';
+        hero.style.backgroundImage = `url('${BGIMG}')`;
+      } else {
+        hero.style.backgroundImage = '';
+        hero.classList.remove('has-bg');
+        hero.style.background = `linear-gradient(135deg, ${ACCENT}22 0%, ${ACCENT}11 50%, var(--bg) 100%)`;
+      }
+    }
   }
 
   // ── Horários ─────────────────────────────────────────────────

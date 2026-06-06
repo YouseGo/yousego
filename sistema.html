@@ -406,6 +406,7 @@ tr:hover .dre-del{display:inline}.dre-del:hover{color:var(--er)}
       <input class="lf" id="co-busca" placeholder="Digite o nome da empresa..." autocomplete="off" style="margin-bottom:0">
       <div id="co-sug-box" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1.5px solid var(--brd2);border-radius:0 0 var(--r) var(--r);z-index:200;display:none;max-height:220px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.12)"></div>
     </div>
+    <!-- Lista oculta — só aparece via busca -->
     <div id="co-list-home" style="display:none"></div>
     <!-- Separador criar -->
     <div style="display:flex;align-items:center;gap:10px;margin:14px 0;color:var(--text3);font-size:.75rem">
@@ -1184,12 +1185,20 @@ function atualizaPontos(nome,fone,val){
   setPontos(pts);
 }
 
-// ── KDS (localStorage) ───────────────────────────────────────
+// ── KDS (localStorage + Firebase autosave) ───────────────────
 function getKDS(){ try{return JSON.parse(localStorage.getItem("ys_kds_"+_tenant)||"[]")}catch(e){return[]} }
+function setKDS(list){
+  const trimmed=list.slice(0,200);
+  localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(trimmed));
+  debounced("kds_sync",()=>{
+    if(!_tenant||!db) return;
+    setDoc(doc(db,"companies",_tenant,"meta","kds_local"),{list:trimmed,_at:Date.now()}).catch(e=>console.warn("KDS sync:",e.message));
+  },800);
+}
 function addKDS(pedido){
   const list=getKDS(); const num=(list.length%99)+1;
   list.unshift({...pedido,kdsStatus:"pendente",kdsNum:num});
-  localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(list.slice(0,200)));
+  setKDS(list);
 }
 
 // ── Wrappers síncronos ────────────────────────────────────────
@@ -1254,28 +1263,14 @@ let _coBuscaBound=false;
 async function renderEmpresas(){
   const status=$("firebase-status");
   const el=$("co-list-home");
-  if(el){ el.style.display="block"; el.innerHTML=`<div style="text-align:center;padding:16px;color:var(--text3);font-size:.82rem">🔄 Conectando...</div>`; }
+  // Nunca exibe a lista automaticamente — só via busca
+  if(el){ el.style.display="none"; el.innerHTML=""; }
   try{
     const cos=await dbEmpresas();
     if(status) status.innerHTML=cos.length
-      ? `<span style="color:var(--ok)">🟢 Firebase Conectado</span> · dados sincronizados`
+      ? `<span style="color:var(--ok)">🟢 Firebase Conectado</span> · ${cos.length} empresa(s)`
       : `<span style="color:var(--warn)">🟡 Conectado</span> · nenhuma empresa ainda`;
-    // Mostra lista com botões Entrar (como v7)
-    if(el){
-      if(!cos.length){
-        el.innerHTML=`<p style="text-align:center;padding:18px;color:var(--text3);font-size:.85rem">Nenhuma empresa cadastrada.<br>Crie a primeira abaixo.</p>`;
-      } else {
-        el.innerHTML=`<div style="font-size:.68rem;text-transform:uppercase;letter-spacing:1px;color:var(--text3);font-weight:700;margin-bottom:8px">Empresas cadastradas</div>`
-          +cos.map(co=>`<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg3);border:1.5px solid var(--brd);border-radius:var(--r);margin-bottom:8px;cursor:pointer;transition:all .18s" class="co-item-home" data-id="${co.id}">
-            <div style="width:42px;height:42px;border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:1.3rem;background:var(--brand-t);flex-shrink:0;border:2px solid var(--brand-t2)">${co.logoImg?`<img src="${co.logoImg}" style="width:100%;height:100%;object-fit:cover">`:co.logo||"🏪"}</div>
-            <div style="flex:1"><div style="font-weight:700;font-size:.9rem;color:var(--text)">${esc(co.nome||co.name||"")}</div><div style="font-size:.72rem;color:var(--text3);font-family:monospace">${esc(co.tipo||co.type||"—")}</div></div>
-            <button class="btn btn-p btn-sm co-entrar" data-id="${co.id}" style="flex-shrink:0">Entrar →</button>
-          </div>`).join("");
-        el.querySelectorAll(".co-entrar").forEach(btn=>btn.addEventListener("click",e=>{e.stopPropagation();selecionaEmpresa(btn.dataset.id);}));
-        el.querySelectorAll(".co-item-home").forEach(item=>item.addEventListener("click",()=>selecionaEmpresa(item.dataset.id)));
-      }
-    }
-    // Campo de busca também funciona (para muitas empresas)
+    // Campo de busca com sugestões — mostra resultados inline no dropdown
     const input=$("co-busca");
     const box=$("co-sug-box");
     if(input&&box&&!_coBuscaBound){
@@ -1284,10 +1279,15 @@ async function renderEmpresas(){
         const q=input.value.trim().toLowerCase();
         if(q.length<1){box.style.display="none";return;}
         const filt=cos.filter(c=>(c.nome||c.name||"").toLowerCase().includes(q));
-        if(!filt.length){box.style.display="none";return;}
+        if(!filt.length){
+          box.innerHTML=`<div style="padding:12px 14px;font-size:.82rem;color:var(--text3)">Nenhuma empresa encontrada.</div>`;
+          box.style.display="block";
+          return;
+        }
         box.innerHTML=filt.map(co=>`<div class="co-sug-item" data-id="${co.id}" style="display:flex;align-items:center;gap:10px;padding:10px 13px;cursor:pointer;border-bottom:1px solid var(--brd);transition:background .15s">
-          <div style="font-size:1.2rem;width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--brand-t);border-radius:8px;flex-shrink:0">${co.logoImg?`<img src="${co.logoImg}" style="width:100%;height:100%;object-fit:cover;border-radius:8px">`:co.logo||"🏪"}</div>
-          <div><div style="font-weight:700;font-size:.88rem">${esc(co.nome||co.name||"")}</div><div style="font-size:.7rem;color:var(--text3)">${esc(co.tipo||co.type||"—")}</div></div>
+          <div style="font-size:1.2rem;width:36px;height:36px;display:flex;align-items:center;justify-content:center;background:var(--brand-t);border-radius:9px;flex-shrink:0;overflow:hidden">${co.logoImg?`<img src="${co.logoImg}" style="width:100%;height:100%;object-fit:cover">`:co.logo||"🏪"}</div>
+          <div style="flex:1"><div style="font-weight:700;font-size:.88rem">${esc(co.nome||co.name||"")}</div><div style="font-size:.7rem;color:var(--text3)">${esc(co.tipo||co.type||"—")}</div></div>
+          <span style="font-size:.72rem;color:var(--brand);font-weight:600">Entrar →</span>
         </div>`).join("");
         box.style.display="block";
         box.querySelectorAll(".co-sug-item").forEach(it=>{
@@ -1300,7 +1300,6 @@ async function renderEmpresas(){
     }
   }catch(e){
     if(status) status.innerHTML=`<span style="color:var(--er)">🔴 Firebase offline</span> · verifique conexão`;
-    if(el) el.innerHTML=`<div style="color:var(--er);text-align:center;padding:16px;font-size:.82rem">Erro: ${e.message}<br><button onclick="location.reload()" style="margin-top:8px;background:var(--brand);color:#fff;border:none;padding:7px 14px;border-radius:8px;cursor:pointer">🔄 Recarregar</button></div>`;
     console.error("renderEmpresas error:",e);
   }
 }
@@ -1502,6 +1501,7 @@ function renderTudo(){
 }
 
 function salvarTudo(){
+  // Salva células editáveis do DRE
   $$("td[contenteditable][data-sec]").forEach(td=>{
     const m=gm(CM),s=td.dataset.sec,id=td.dataset.id;
     const r=m.dre[s]?.find(x=>x.id===id); if(!r)return;
@@ -1509,7 +1509,14 @@ function salvarTudo(){
     if(td.dataset.f==="val"){const v=parseFloat(td.textContent.replace(/[^\d,.\-]/g,"").replace(",","."));r.val=isNaN(v)?0:v;}
     sm(CM,m);
   });
-  toast("✅ Salvo!","ok"); renderTudo();
+  // Força sync do KDS para Firebase imediatamente
+  if(_tenant&&db){
+    const kdsList=getKDS();
+    if(kdsList.length){
+      setDoc(doc(db,"companies",_tenant,"meta","kds_local"),{list:kdsList,_at:Date.now()}).catch(e=>console.warn("KDS sync manual:",e.message));
+    }
+  }
+  toast("✅ Tudo salvo e sincronizado!","ok"); renderTudo();
 }
 
 // ════════════════════════════════════════════════════════════
@@ -2512,7 +2519,7 @@ function renderPDV(){
             const somEvt={pendente:"pedido_preparo",pronto:"pedido_pronto",entregue:"pedido_entregue"};
             bipEvento(somEvt[novoStatus]||"confirmacao");
           }
-          localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(l));
+          setKDS(l);
         }
         // Atualiza também no mês se existir
         const m=gm(CM); const mp=m.pedidos.find(x=>x.id===oid);
@@ -2543,7 +2550,7 @@ function renderPDV(){
     if(!o)return;
     if(!confirm(`Excluir pedido #${o.kdsNum||"—"} — ${o.cliente||"Balcão"}?`))return;
     const novo=l.filter(x=>x.id!==oid);
-    localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(novo));
+    setKDS(novo);
     // Remove do mês também
     const m=gm(CM); m.pedidos=m.pedidos.filter(x=>x.id!==oid); sm(CM,m);
     renderPDV(); renderKDS(); toast("Pedido removido","ok");
@@ -3947,7 +3954,7 @@ function renderKDS(){
         ord.pagamento=document.getElementById("ke-pag")?.value||ord.pagamento;
         ord.val=ord.total=pV(document.getElementById("ke-val")?.value)||ord.val;
         ord.endereco=document.getElementById("ke-end")?.value.trim()||"";
-        localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(l));
+        setKDS(l);
         const m=gm(CM); const mp=m.pedidos.find(x=>x.id===o.id);
         if(mp){mp.cliente=ord.cliente;mp.obs=ord.obs;mp.val=ord.val;mp.modo=ord.modo;mp.pagamento=ord.pagamento;sm(CM,m);}
         fecharModalSimples(); renderKDS(); renderPDV();
@@ -3968,14 +3975,14 @@ function renderKDS(){
     const o=getKDS().find(x=>x.id===btn.dataset.oid);if(!o)return;
     if(!confirm(`Excluir pedido #${o.kdsNum||"—"} — ${o.cliente||"Balcão"}?`))return;
     const l=getKDS().filter(x=>x.id!==o.id);
-    localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(l));
+    setKDS(l);
     renderKDS(); renderPDV(); toast("Pedido removido","ok");
   }));
 
   pg.querySelector("#btn-kds-cfg")?.addEventListener("click",()=>irPara("config",null));
   pg.querySelector("#btn-kds-limpar")?.addEventListener("click",()=>{
     const l=getKDS().filter(o=>(o.kdsStatus||"pendente")!=="entregue");
-    localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(l));
+    setKDS(l);
     renderKDS(); renderPDV(); toast("Pedidos entregues removidos","ok");
   });
 }
@@ -3988,7 +3995,7 @@ function kdsAvanca(oid, colAtual){
   const l=getKDS(); const o=l.find(x=>x.id===oid); if(!o)return;
   const nxt=next[colAtual]; if(!nxt||nxt===colAtual)return;
   o.kdsStatus=nxt;
-  localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(l));
+  setKDS(l);
   bipEvento(somEvt[colAtual]||"confirmacao");
   const m=gm(CM); const mp=m.pedidos.find(x=>x.id===oid);
   if(mp){mp.status=nxt==="entregue"?"done":nxt==="pronto"?"ready":"pending";sm(CM,m);}
@@ -4425,7 +4432,7 @@ function iniciarKDSListener(){
               origem:    "cardapio-digital",
               _at:       ped.criadoEm || Date.now(),
             });
-            localStorage.setItem("ys_kds_"+_tenant, JSON.stringify(local.slice(0,200)));
+            setKDS(local);
 
             if(_kdsInicializado){
               // ── SOM e NOTIFICAÇÃO só para pedidos novos (não na carga inicial) ──
@@ -4597,6 +4604,17 @@ function renderCardapioDigital(){
             <div class="fg"><label>Subtítulo</label><input id="cd-subtitulo" value="${esc(cfg.sub||"")}" placeholder="Peça online 🛵"></div>
           </div>
         </div>
+        <!-- Imagem de fundo do banner/hero -->
+        <label style="font-size:.74rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">🖼️ Imagem de Fundo (atrás da logo)</label>
+        <div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:10px">
+          <div id="cd-bgimg-prev" style="width:80px;height:52px;border-radius:10px;border:1.5px solid var(--brd2);background:var(--bg3);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.4rem">${cfg.cardapioBgImg?`<img src="${cfg.cardapioBgImg}" style="width:100%;height:100%;object-fit:cover">`:"🖼️"}</div>
+          <div style="flex:1;display:flex;flex-direction:column;gap:5px">
+            <input type="file" id="cd-bgimg-file" accept="image/*" style="display:none">
+            <button class="btn btn-s btn-xs" id="btn-cd-bgimg-up">📁 Enviar Imagem</button>
+            <button class="btn btn-er btn-xs" id="btn-cd-bgimg-rm">✕ Remover Fundo</button>
+            <div style="font-size:.65rem;color:var(--text3);line-height:1.4">Aparece atrás da logo no cardápio. Recomendado: 1200×400px.</div>
+          </div>
+        </div>
         <!-- Cor de destaque do cardápio -->
         <label style="font-size:.74rem;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;display:block;margin-bottom:6px">Cor de Destaque</label>
         <div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px">
@@ -4747,6 +4765,23 @@ function renderCardapioDigital(){
       aplicaBranding();toast("✅ Logo salva!","ok");
     };r.readAsDataURL(f);
   });
+  // ── Imagem de fundo do hero ──────────────────────────────────
+  pg.querySelector("#btn-cd-bgimg-up")?.addEventListener("click",()=>pg.querySelector("#cd-bgimg-file")?.click());
+  pg.querySelector("#cd-bgimg-file")?.addEventListener("change",function(){
+    const f=this.files[0];if(!f)return;
+    const r=new FileReader();r.onload=ev=>{
+      const cfg=getCfg();cfg.cardapioBgImg=ev.target.result;setCfg(cfg);
+      const prev=pg.querySelector("#cd-bgimg-prev");
+      if(prev)prev.innerHTML=`<img src="${ev.target.result}" style="width:100%;height:100%;object-fit:cover">`;
+      toast("✅ Imagem de fundo salva!","ok");
+    };r.readAsDataURL(f);
+  });
+  pg.querySelector("#btn-cd-bgimg-rm")?.addEventListener("click",()=>{
+    const cfg=getCfg();cfg.cardapioBgImg="";setCfg(cfg);
+    const prev=pg.querySelector("#cd-bgimg-prev");
+    if(prev)prev.innerHTML="🖼️";
+    toast("🗑️ Imagem de fundo removida","ok");
+  });
   pg.querySelectorAll(".co-sw[data-vc]").forEach(el=>el.addEventListener("click",()=>{
     pg.querySelectorAll(".co-sw[data-vc]").forEach(x=>x.classList.remove("sel"));
     el.classList.add("sel");
@@ -4768,6 +4803,7 @@ function renderCardapioDigital(){
     const ocultas=[];
     pg.querySelectorAll(".cd-cat-vis").forEach(cb=>{if(!cb.checked)ocultas.push(cb.dataset.cat);});
     cfg.catsOcultas=ocultas;
+    // cardapioBgImg já é salvo no upload, mantém o valor existente
     setCfg(cfg);aplicaBranding();toast("✅ Aparência do cardápio salva!","ok");
     renderCardapioDigital();
   });
