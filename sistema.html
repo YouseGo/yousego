@@ -1190,10 +1190,11 @@ function getKDS(){ try{return JSON.parse(localStorage.getItem("ys_kds_"+_tenant)
 function setKDS(list){
   const trimmed=list.slice(0,200);
   localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(trimmed));
-  debounced("kds_sync",()=>{
-    if(!_tenant||!db) return;
-    setDoc(doc(db,"companies",_tenant,"meta","kds_local"),{list:trimmed,_at:Date.now()}).catch(e=>console.warn("KDS sync:",e.message));
-  },800);
+  // Salva imediatamente no Firebase (sem debounce) para garantir persistência
+  if(_tenant&&db){
+    setDoc(doc(db,"companies",_tenant,"meta","kds_local"),{list:trimmed,_at:Date.now()})
+      .catch(e=>console.warn("KDS sync:",e.message));
+  }
 }
 function addKDS(pedido){
   const list=getKDS(); const num=(list.length%99)+1;
@@ -4402,9 +4403,38 @@ const kdsCol = () => collection(db,"companies",_tenant,"kds_pedidos");
 let _kdsUnsubscribe = null;
 let _kdsInicializado = false; // evita som na carga inicial
 
+// Restaura status dos pedidos KDS do Firebase (kds_local) — garante persistência ao reabrir
+async function restaurarStatusKDS(){
+  if(!_tenant||!db) return;
+  try{
+    const snap = await getDoc(doc(db,"companies",_tenant,"meta","kds_local"));
+    if(snap.exists()){
+      const dados = snap.data();
+      const listFirebase = dados.list || [];
+      if(listFirebase.length > 0){
+        // Firebase tem prioridade: sobrescreve localStorage com o que foi salvo
+        localStorage.setItem("ys_kds_"+_tenant, JSON.stringify(listFirebase));
+        console.log("✅ KDS restaurado do Firebase:", listFirebase.length, "pedidos");
+      }
+    }
+  } catch(e){
+    console.warn("Restauração KDS (não crítico):", e.message);
+  }
+}
+
 function iniciarKDSListener(){
   if(_kdsUnsubscribe){ _kdsUnsubscribe(); _kdsUnsubscribe=null; }
   _kdsInicializado = false;
+  // Restaura status persistidos no Firebase ANTES de iniciar o listener
+  // para garantir que o snapshot inicial não sobrescreva status avançados
+  restaurarStatusKDS().then(()=>{
+    if(CT==="kds") renderKDS();
+    if(CT==="pdv") renderPDV();
+    _iniciarKDSListenerInterno();
+  }).catch(()=>{ _iniciarKDSListenerInterno(); });
+}
+
+function _iniciarKDSListenerInterno(){
   try{
     // Sem orderBy para evitar necessidade de índice composto
     // Pega os últimos 200 pedidos sem filtro de tempo
@@ -4423,11 +4453,15 @@ function iniciarKDSListener(){
           };
 
           const local = JSON.parse(localStorage.getItem("ys_kds_"+_tenant)||"[]");
-          if(!local.find(k=>k.id===ped.id)){
+          // Verifica se já existe no localStorage (pode ter status avançado)
+          const existente = local.find(k=>k.id===ped.id);
+          if(!existente){
             const num = (local.length % 99) + 1;
+            // Usa kdsStatus salvo no Firebase (kds_local) se disponível, senão "pendente"
+            const statusSalvo = ped.kdsStatus || "pendente";
             local.unshift({
               ...ped,
-              kdsStatus: ped.kdsStatus || "pendente",
+              kdsStatus: statusSalvo,
               kdsNum:    num,
               origem:    "cardapio-digital",
               _at:       ped.criadoEm || Date.now(),
