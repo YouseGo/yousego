@@ -1190,7 +1190,7 @@ function getKDS(){ try{return JSON.parse(localStorage.getItem("ys_kds_"+_tenant)
 function setKDS(list){
   const trimmed=list.slice(0,200);
   localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(trimmed));
-  // Salva imediatamente no Firebase (sem debounce) para garantir persistência
+  // Salva IMEDIATAMENTE no Firebase (sem debounce) para garantir persistência total
   if(_tenant&&db){
     setDoc(doc(db,"companies",_tenant,"meta","kds_local"),{list:trimmed,_at:Date.now()})
       .catch(e=>console.warn("KDS sync:",e.message));
@@ -2551,6 +2551,7 @@ function renderPDV(){
     if(!o)return;
     if(!confirm(`Excluir pedido #${o.kdsNum||"—"} — ${o.cliente||"Balcão"}?`))return;
     const novo=l.filter(x=>x.id!==oid);
+    // Salva no localStorage e Firebase imediatamente
     setKDS(novo);
     // Remove do mês também
     const m=gm(CM); m.pedidos=m.pedidos.filter(x=>x.id!==oid); sm(CM,m);
@@ -3011,6 +3012,8 @@ async function confirmarFechamento(){
   cx.status="fechado";cx.fechadoEm=Date.now();cx.fechadoStr=$("cx-dt-fecha").value;
   cx.contado=contado;cx.diferenca=contado-expDin;cx.totalFinal=tGeral;cx.obsFechamento=$("cx-obs-fecha").value.trim();
   await dbSalvaCaixa(cx);fechaM("m-fecha-cx");
+  // ── Limpa KDS: remove todos os pedidos ao fechar o caixa ──
+  setKDS([]);
   // Mostrar relatório completo antes de fechar
   abrirRelatorioFechamentoCaixa(cx,tGeral,tPix,tDin,tCred,tDeb,tMis,expDin);
   renderTudo();toast("🔴 Caixa fechado!","ok");bipEvento("confirmacao");
@@ -3996,10 +3999,13 @@ function kdsAvanca(oid, colAtual){
   const l=getKDS(); const o=l.find(x=>x.id===oid); if(!o)return;
   const nxt=next[colAtual]; if(!nxt||nxt===colAtual)return;
   o.kdsStatus=nxt;
+  // Salva imediatamente no localStorage e Firebase
   setKDS(l);
   bipEvento(somEvt[colAtual]||"confirmacao");
+  // Atualiza também no mês (para pedidos do tipo encomenda/mês)
   const m=gm(CM); const mp=m.pedidos.find(x=>x.id===oid);
   if(mp){mp.status=nxt==="entregue"?"done":nxt==="pronto"?"ready":"pending";sm(CM,m);}
+  // Re-renderiza imediatamente
   renderKDS(); renderPDV();
   toast(`Pedido #${o.kdsNum||"—"} → ${labels[nxt]||nxt}`,"ok");
 }
@@ -4404,22 +4410,28 @@ let _kdsUnsubscribe = null;
 let _kdsInicializado = false; // evita som na carga inicial
 
 // Restaura status dos pedidos KDS do Firebase (kds_local) — garante persistência ao reabrir
+// Retorna mapa {id -> kdsStatus} com os status salvos no Firebase
 async function restaurarStatusKDS(){
-  if(!_tenant||!db) return;
+  if(!_tenant||!db) return {};
   try{
     const snap = await getDoc(doc(db,"companies",_tenant,"meta","kds_local"));
     if(snap.exists()){
       const dados = snap.data();
       const listFirebase = dados.list || [];
       if(listFirebase.length > 0){
-        // Firebase tem prioridade: sobrescreve localStorage com o que foi salvo
+        // Firebase tem prioridade ABSOLUTA: sobrescreve localStorage integralmente
         localStorage.setItem("ys_kds_"+_tenant, JSON.stringify(listFirebase));
         console.log("✅ KDS restaurado do Firebase:", listFirebase.length, "pedidos");
+        // Retorna mapa de status para uso no listener
+        const mapa = {};
+        listFirebase.forEach(p=>{ if(p.id) mapa[p.id] = p.kdsStatus || "pendente"; });
+        return mapa;
       }
     }
   } catch(e){
     console.warn("Restauração KDS (não crítico):", e.message);
   }
+  return {};
 }
 
 function iniciarKDSListener(){
@@ -4427,14 +4439,15 @@ function iniciarKDSListener(){
   _kdsInicializado = false;
   // Restaura status persistidos no Firebase ANTES de iniciar o listener
   // para garantir que o snapshot inicial não sobrescreva status avançados
-  restaurarStatusKDS().then(()=>{
+  restaurarStatusKDS().then((mapaStatus)=>{
     if(CT==="kds") renderKDS();
     if(CT==="pdv") renderPDV();
-    _iniciarKDSListenerInterno();
-  }).catch(()=>{ _iniciarKDSListenerInterno(); });
+    _iniciarKDSListenerInterno(mapaStatus);
+  }).catch(()=>{ _iniciarKDSListenerInterno({}); });
 }
 
-function _iniciarKDSListenerInterno(){
+function _iniciarKDSListenerInterno(mapaStatus){
+  mapaStatus = mapaStatus || {};
   try{
     // Sem orderBy para evitar necessidade de índice composto
     // Pega os últimos 200 pedidos sem filtro de tempo
@@ -4457,8 +4470,8 @@ function _iniciarKDSListenerInterno(){
           const existente = local.find(k=>k.id===ped.id);
           if(!existente){
             const num = (local.length % 99) + 1;
-            // Usa kdsStatus salvo no Firebase (kds_local) se disponível, senão "pendente"
-            const statusSalvo = ped.kdsStatus || "pendente";
+            // Prioridade de status: 1) mapa restaurado do Firebase (kds_local), 2) campo do pedido, 3) "pendente"
+            const statusSalvo = mapaStatus[ped.id] || ped.kdsStatus || "pendente";
             local.unshift({
               ...ped,
               kdsStatus: statusSalvo,
@@ -4468,8 +4481,8 @@ function _iniciarKDSListenerInterno(){
             });
             setKDS(local);
 
-            if(_kdsInicializado){
-              // ── SOM e NOTIFICAÇÃO só para pedidos novos (não na carga inicial) ──
+            if(_kdsInicializado && statusSalvo === "pendente"){
+              // ── SOM e NOTIFICAÇÃO só para pedidos NOVOS e PENDENTES (não na carga inicial) ──
               bipEvento("novo_pedido_kds");
               toast(`🛒 NOVO PEDIDO #${num} — ${ped.cliente||"Cliente"} · R$ ${(+ped.total||0).toFixed(2).replace(".",",")}`, "ok");
 
