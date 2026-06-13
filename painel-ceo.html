@@ -138,6 +138,11 @@ tr:hover td{background:rgba(255,255,255,.015)}
 .plan-pro{background:rgba(124,92,252,.15);color:#a78bfa}
 .plan-premium{background:rgba(245,158,11,.15);color:#f59e0b}
 
+/* FINANCEIRO */
+.badge-orange{background:rgba(249,115,22,.15);color:#fb923c}
+.fin-row-atrasado td{background:rgba(239,68,68,.04)!important}
+.fin-row-atrasado td:first-child{border-left:3px solid var(--red)}
+
 .spinner{width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading-row{color:var(--text2);font-size:.85rem;text-align:center;padding:32px;display:flex;align-items:center;justify-content:center;gap:8px}
@@ -187,6 +192,7 @@ input:checked+.slider:before{transform:translateX(18px);background:#fff}
       <button class="ceo-nav-btn" data-tab="empresas">🏢 Empresas</button>
       <button class="ceo-nav-btn" data-tab="config">⚙️ Configurações</button>
       <button class="ceo-nav-btn" data-tab="planos">💎 Planos</button>
+      <button class="ceo-nav-btn" data-tab="financeiro">💰 Financeiro</button>
     </nav>
     <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
       <span id="ceo-user-email" style="font-size:.8rem;color:var(--text2)"></span>
@@ -200,6 +206,7 @@ input:checked+.slider:before{transform:translateX(18px);background:#fff}
     <button class="ceo-nav-btn" data-tab="empresas" style="white-space:nowrap;font-size:.75rem">🏢 Empresas</button>
     <button class="ceo-nav-btn" data-tab="config" style="white-space:nowrap;font-size:.75rem">⚙️ Config</button>
     <button class="ceo-nav-btn" data-tab="planos" style="white-space:nowrap;font-size:.75rem">💎 Planos</button>
+    <button class="ceo-nav-btn" data-tab="financeiro" style="white-space:nowrap;font-size:.75rem">💰 Financeiro</button>
   </div>
 
   <div class="ceo-content">
@@ -386,6 +393,85 @@ input:checked+.slider:before{transform:translateX(18px);background:#fff}
       </div>
     </div>
 
+    <!-- ── FINANCEIRO ── -->
+    <div class="tab-section" id="tab-financeiro">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+        <div>
+          <h2 style="font-size:1.3rem;margin-bottom:4px">Financeiro & Assinaturas</h2>
+          <p style="color:var(--text2);font-size:.85rem">Acompanhe planos, datas de início e status de pagamento de cada empresa</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input id="fin-search" type="text" placeholder="🔍 Buscar empresa..." oninput="filterFinanceiro()" style="width:200px">
+          <select id="fin-filter-status" onchange="filterFinanceiro()" style="width:160px">
+            <option value="">Todos status</option>
+            <option value="pago">✅ Pago</option>
+            <option value="pendente">⏳ Pendente</option>
+            <option value="atrasado">🔴 Atrasado</option>
+            <option value="isento">🎁 Isento</option>
+          </select>
+          <select id="fin-filter-plan" onchange="filterFinanceiro()" style="width:130px">
+            <option value="">Todos planos</option>
+            <option value="free">Free</option>
+            <option value="basic">Basic</option>
+            <option value="pro">Pro</option>
+            <option value="premium">Premium</option>
+          </select>
+          <select id="fin-filter-mes" onchange="filterFinanceiro()" style="width:140px" id="fin-filter-mes"></select>
+          <button class="btn btn-primary btn-sm" onclick="refreshFinanceiro()">↻ Atualizar</button>
+          <button class="btn btn-success btn-sm" onclick="openModalNovaFatura()">+ Nova Fatura</button>
+        </div>
+      </div>
+
+      <!-- Métricas financeiras -->
+      <div class="metrics-grid" style="margin-bottom:28px">
+        <div class="metric-card" style="--mc:#22c55e">
+          <div class="metric-icon">✅</div>
+          <div class="metric-label">Faturas Pagas</div>
+          <div class="metric-value" id="fin-m-pagas">—</div>
+          <div class="metric-sub" id="fin-m-pagas-val">no mês atual</div>
+        </div>
+        <div class="metric-card" style="--mc:#f59e0b">
+          <div class="metric-icon">⏳</div>
+          <div class="metric-label">Pendentes</div>
+          <div class="metric-value" id="fin-m-pendentes">—</div>
+          <div class="metric-sub">aguardando pagamento</div>
+        </div>
+        <div class="metric-card" style="--mc:#ef4444">
+          <div class="metric-icon">🔴</div>
+          <div class="metric-label">Em Atraso</div>
+          <div class="metric-value" id="fin-m-atrasadas">—</div>
+          <div class="metric-sub">faturas vencidas</div>
+        </div>
+        <div class="metric-card" style="--mc:#7c5cfc">
+          <div class="metric-icon">💵</div>
+          <div class="metric-label">Receita do Mês</div>
+          <div class="metric-value" id="fin-m-receita">—</div>
+          <div class="metric-sub">faturas pagas no mês</div>
+        </div>
+      </div>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Empresa</th>
+              <th>Plano</th>
+              <th>Início na plataforma</th>
+              <th>Mês de referência</th>
+              <th>Valor</th>
+              <th>Vencimento</th>
+              <th>Status Pagamento</th>
+              <th>Pago em</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="financeiro-tbody">
+            <tr><td colspan="9"><div class="loading-row"><div class="spinner"></div> Carregando...</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
   </div><!-- /ceo-content -->
 </div><!-- /ceo-app -->
 
@@ -442,6 +528,64 @@ input:checked+.slider:before{transform:translateX(18px);background:#fff}
     <div class="modal-footer">
       <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-plano')">Cancelar</button>
       <button class="btn btn-primary btn-sm" onclick="savePlano()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FATURA -->
+<div class="modal-bg" id="modal-fatura">
+  <div class="modal" style="max-width:540px">
+    <h3 id="modal-fatura-title">💰 Nova Fatura</h3>
+    <input type="hidden" id="fat-id">
+    <div class="field">
+      <label>Empresa</label>
+      <select id="fat-empresa"></select>
+    </div>
+    <div class="form-row">
+      <div class="field">
+        <label>Mês de Referência</label>
+        <input id="fat-mes" type="month">
+      </div>
+      <div class="field">
+        <label>Vencimento</label>
+        <input id="fat-vencimento" type="date">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="field">
+        <label>Plano Cobrado</label>
+        <select id="fat-plano">
+          <option value="free">Free — R$ 0,00</option>
+          <option value="basic">Basic — R$ 49,90</option>
+          <option value="pro">Pro — R$ 99,90</option>
+          <option value="premium">Premium — R$ 199,90</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Valor (R$)</label>
+        <input id="fat-valor" type="number" step="0.01" placeholder="0.00">
+      </div>
+    </div>
+    <div class="field">
+      <label>Status de Pagamento</label>
+      <select id="fat-status">
+        <option value="pendente">⏳ Pendente</option>
+        <option value="pago">✅ Pago</option>
+        <option value="atrasado">🔴 Atrasado</option>
+        <option value="isento">🎁 Isento (Free/Cortesia)</option>
+      </select>
+    </div>
+    <div class="field" id="fat-data-pag-wrap">
+      <label>Data de Pagamento</label>
+      <input id="fat-data-pagamento" type="date">
+    </div>
+    <div class="field">
+      <label>Observações</label>
+      <textarea id="fat-obs" rows="2" placeholder="Ex: Pago via PIX, link de boleto, etc."></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-fatura')">Cancelar</button>
+      <button class="btn btn-primary btn-sm" onclick="salvarFatura()">Salvar Fatura</button>
     </div>
   </div>
 </div>
@@ -578,6 +722,7 @@ window.goTab = function(tab) {
   if(tab==='empresas') renderEmpresas();
   if(tab==='config') renderConfig();
   if(tab==='planos') renderPlanos();
+  if(tab==='financeiro') renderFinanceiro();
 }
 
 // ── LOAD ALL ──
@@ -946,6 +1091,282 @@ window.savePlano=async function(){
 }
 
 window.openModal=openModal;
+
+// ── FINANCEIRO ──
+let _faturas = [];
+let _fatMesAtual = '';
+
+function mesAtual() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+
+function fmtMes(ym) {
+  if(!ym) return '—';
+  const [y,m] = ym.split('-');
+  const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  return `${meses[parseInt(m)-1]}/${y}`;
+}
+
+function fmtData(str) {
+  if(!str) return '—';
+  const [y,m,d] = str.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function fatStatusBadge(s) {
+  if(s==='pago')     return '<span class="badge badge-green">✅ Pago</span>';
+  if(s==='atrasado') return '<span class="badge badge-red">🔴 Atrasado</span>';
+  if(s==='isento')   return '<span class="badge badge-purple">🎁 Isento</span>';
+  return '<span class="badge badge-yellow">⏳ Pendente</span>';
+}
+
+function planoPreco(planId) {
+  const p = _plans.find(x=>x.id===planId);
+  return p ? p.price : 0;
+}
+
+async function loadFaturas() {
+  try {
+    const snap = await getDocs(collection(db,'invoices'));
+    _faturas = snap.docs.map(d=>({id:d.id,...d.data()}));
+    // Verificar atrasos automaticamente
+    const hoje = new Date().toISOString().slice(0,10);
+    let algumAtualizado = false;
+    for(const f of _faturas) {
+      if(f.status==='pendente' && f.vencimento && f.vencimento < hoje) {
+        f.status='atrasado';
+        await updateDoc(doc(db,'invoices',f.id),{status:'atrasado'});
+        algumAtualizado=true;
+      }
+    }
+  } catch(e) { toast('Erro ao carregar faturas','err'); }
+}
+
+function renderMetricasFinanceiro(lista) {
+  const mes = $('fin-filter-mes')?.value || mesAtual();
+  const doMes = lista.filter(f=>f.mes===mes);
+  const pagas = doMes.filter(f=>f.status==='pago').length;
+  const pendentes = lista.filter(f=>f.status==='pendente').length;
+  const atrasadas = lista.filter(f=>f.status==='atrasado').length;
+  const receita = doMes.filter(f=>f.status==='pago').reduce((s,f)=>s+(Number(f.valor)||0),0);
+  $('fin-m-pagas').textContent = pagas;
+  $('fin-m-pagas-val').textContent = `em ${fmtMes(mes)}`;
+  $('fin-m-pendentes').textContent = pendentes;
+  $('fin-m-atrasadas').textContent = atrasadas;
+  $('fin-m-receita').textContent = 'R$ '+fmt(receita);
+}
+
+function popularMesesSelect() {
+  const sel = $('fin-filter-mes');
+  if(!sel) return;
+  // Gera últimos 12 meses + próximo mês
+  const meses = [];
+  const d = new Date();
+  d.setMonth(d.getMonth()+1);
+  for(let i=0;i<13;i++) {
+    const ym = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    meses.push(ym);
+    d.setMonth(d.getMonth()-1);
+  }
+  sel.innerHTML = meses.map(m=>`<option value="${m}" ${m===mesAtual()?'selected':''}>${fmtMes(m)}</option>`).join('');
+}
+
+window.renderFinanceiro = async function() {
+  if(!_faturas.length) {
+    $('financeiro-tbody').innerHTML='<tr><td colspan="9"><div class="loading-row"><div class="spinner"></div> Carregando...</div></td></tr>';
+    await loadFaturas();
+  }
+  popularMesesSelect();
+  filterFinanceiro();
+}
+
+window.filterFinanceiro = function() {
+  const q = ($('fin-search')?.value||'').toLowerCase();
+  const fs = $('fin-filter-status')?.value||'';
+  const fp = $('fin-filter-plan')?.value||'';
+  const fm = $('fin-filter-mes')?.value||'';
+
+  let lista = [..._faturas];
+  if(q) lista = lista.filter(f=>{
+    const co = _companies.find(c=>c.id===f.empresaId);
+    return co?.name?.toLowerCase().includes(q);
+  });
+  if(fs) lista = lista.filter(f=>f.status===fs);
+  if(fp) lista = lista.filter(f=>f.plano===fp);
+  if(fm) lista = lista.filter(f=>f.mes===fm);
+
+  lista.sort((a,b)=>{
+    // Atrasados primeiro, depois por vencimento desc
+    const ord = {atrasado:0,pendente:1,pago:2,isento:3};
+    const oa = ord[a.status]??4, ob = ord[b.status]??4;
+    if(oa!==ob) return oa-ob;
+    return (b.vencimento||'')>(a.vencimento||'') ? -1 : 1;
+  });
+
+  renderMetricasFinanceiro(lista.length ? lista : _faturas);
+
+  $('financeiro-tbody').innerHTML = lista.length ? lista.map(f=>{
+    const co = _companies.find(c=>c.id===f.empresaId);
+    const rowClass = f.status==='atrasado'?'fin-row-atrasado':'';
+    return `<tr class="${rowClass}">
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:1.1rem">${co?.emoji||'🏢'}</span>
+          <div>
+            <div style="font-weight:600;font-size:.85rem">${esc(co?.name||f.empresaId)}</div>
+            <div style="font-size:.7rem;color:var(--text3)">${co?.email||''}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="badge plan-${f.plano||'free'}">${(f.plano||'free').toUpperCase()}</span></td>
+      <td style="font-size:.8rem;color:var(--text2)">${co?.createdAt?new Date(co.createdAt).toLocaleDateString('pt-BR'):'—'}</td>
+      <td style="font-size:.82rem;font-weight:600">${fmtMes(f.mes)}</td>
+      <td style="font-size:.85rem;font-weight:700;color:var(--accent2)">${f.valor>0?'R$ '+fmt(f.valor):'<span style="color:var(--text3)">Grátis</span>'}</td>
+      <td style="font-size:.8rem;color:${f.status==='atrasado'?'var(--red)':'var(--text2)'};font-weight:${f.status==='atrasado'?'700':'400'}">${fmtData(f.vencimento)}</td>
+      <td>${fatStatusBadge(f.status)}</td>
+      <td style="font-size:.8rem;color:var(--green)">${f.dataPagamento?fmtData(f.dataPagamento):'—'}</td>
+      <td>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" onclick="editarFatura('${f.id}')">✏</button>
+          ${f.status==='pendente'||f.status==='atrasado'
+            ?`<button class="btn btn-success btn-sm" onclick="marcarPago('${f.id}')">✅</button>`:''}
+          <button class="btn btn-danger btn-sm" onclick="excluirFatura('${f.id}')">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('')
+  : '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text3)">Nenhuma fatura encontrada</td></tr>';
+}
+
+window.refreshFinanceiro = async function() {
+  $('financeiro-tbody').innerHTML='<tr><td colspan="9"><div class="loading-row"><div class="spinner"></div> Atualizando...</div></td></tr>';
+  await loadFaturas();
+  filterFinanceiro();
+  toast('Financeiro atualizado!');
+}
+
+function popularEmpresasSelect() {
+  const sel = $('fat-empresa');
+  if(!sel) return;
+  sel.innerHTML = _companies
+    .sort((a,b)=>(a.name||'').localeCompare(b.name||''))
+    .map(c=>`<option value="${c.id}">${c.emoji||'🏢'} ${esc(c.name)} (${(c.plan||'free').toUpperCase()})</option>`)
+    .join('');
+}
+
+window.openModalNovaFatura = function() {
+  popularEmpresasSelect();
+  $('fat-id').value='';
+  $('modal-fatura-title').textContent='💰 Nova Fatura';
+  // Defaults
+  const hoje = new Date();
+  const mes = mesAtual();
+  $('fat-mes').value = mes;
+  // Vencimento padrão: dia 10 do mês atual
+  $('fat-vencimento').value = `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}-10`;
+  $('fat-status').value='pendente';
+  $('fat-data-pagamento').value='';
+  $('fat-obs').value='';
+  // Preencher plano e valor com base na empresa selecionada
+  atualizarValorFatura();
+  $('fat-empresa').onchange = atualizarValorFatura;
+  $('fat-plano').onchange = () => {
+    const plan = $('fat-plano').value;
+    $('fat-valor').value = planoPreco(plan)||0;
+  };
+  $('fat-status').onchange = () => {
+    $('fat-data-pag-wrap').style.display=$('fat-status').value==='pago'?'block':'none';
+  };
+  $('fat-data-pag-wrap').style.display='none';
+  openModal('modal-fatura');
+}
+
+function atualizarValorFatura() {
+  const coId = $('fat-empresa')?.value;
+  const co = _companies.find(c=>c.id===coId);
+  if(co) {
+    $('fat-plano').value = co.plan||'free';
+    $('fat-valor').value = planoPreco(co.plan||'free')||0;
+  }
+}
+
+window.editarFatura = function(id) {
+  const f = _faturas.find(x=>x.id===id); if(!f) return;
+  popularEmpresasSelect();
+  $('fat-id').value = id;
+  $('modal-fatura-title').textContent='✏️ Editar Fatura';
+  $('fat-empresa').value = f.empresaId||'';
+  $('fat-mes').value = f.mes||mesAtual();
+  $('fat-vencimento').value = f.vencimento||'';
+  $('fat-plano').value = f.plano||'free';
+  $('fat-valor').value = f.valor||0;
+  $('fat-status').value = f.status||'pendente';
+  $('fat-data-pagamento').value = f.dataPagamento||'';
+  $('fat-obs').value = f.obs||'';
+  $('fat-data-pag-wrap').style.display = f.status==='pago'?'block':'none';
+  $('fat-status').onchange = () => {
+    $('fat-data-pag-wrap').style.display=$('fat-status').value==='pago'?'block':'none';
+  };
+  $('fat-plano').onchange = () => {
+    $('fat-valor').value = planoPreco($('fat-plano').value)||0;
+  };
+  openModal('modal-fatura');
+}
+
+window.salvarFatura = async function() {
+  const id = $('fat-id').value;
+  const data = {
+    empresaId: $('fat-empresa').value,
+    mes:       $('fat-mes').value,
+    vencimento:$('fat-vencimento').value,
+    plano:     $('fat-plano').value,
+    valor:     Number($('fat-valor').value)||0,
+    status:    $('fat-status').value,
+    dataPagamento: $('fat-status').value==='pago' ? ($('fat-data-pagamento').value||new Date().toISOString().slice(0,10)) : null,
+    obs:       $('fat-obs').value.trim(),
+    updatedAt: Date.now()
+  };
+  try {
+    if(id) {
+      await updateDoc(doc(db,'invoices',id), data);
+      const i = _faturas.findIndex(x=>x.id===id);
+      if(i>=0) _faturas[i]={..._faturas[i],...data};
+    } else {
+      data.createdAt = Date.now();
+      const ref = await addDoc(collection(db,'invoices'), data);
+      _faturas.push({id:ref.id,...data});
+    }
+    closeModal('modal-fatura');
+    filterFinanceiro();
+    toast('Fatura salva!');
+  } catch(e){ toast('Erro: '+e.message,'err'); }
+}
+
+window.marcarPago = async function(id) {
+  const hoje = new Date().toISOString().slice(0,10);
+  await updateDoc(doc(db,'invoices',id),{status:'pago',dataPagamento:hoje,updatedAt:Date.now()});
+  const f = _faturas.find(x=>x.id===id);
+  if(f){f.status='pago';f.dataPagamento=hoje;}
+  filterFinanceiro();
+  toast('Marcado como pago! ✅');
+}
+
+window.excluirFatura = function(id) {
+  const f = _faturas.find(x=>x.id===id);
+  const co = _companies.find(c=>c.id===f?.empresaId);
+  $('confirm-title').textContent='Excluir Fatura';
+  $('confirm-msg').textContent=`Excluir fatura de ${co?.name||f?.empresaId} (${fmtMes(f?.mes)})?`;
+  $('confirm-btn').onclick=async()=>{
+    await deleteDoc(doc(db,'invoices',id));
+    _faturas=_faturas.filter(x=>x.id!==id);
+    closeModal('modal-confirm');
+    filterFinanceiro();
+    toast('Fatura excluída.');
+  };
+  openModal('modal-confirm');
+}
+
 </script>
 </body>
 </html>
