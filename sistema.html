@@ -1187,19 +1187,53 @@ function atualizaPontos(nome,fone,val){
 
 // ── KDS (localStorage + Firebase autosave) ───────────────────
 function getKDS(){ try{return JSON.parse(localStorage.getItem("ys_kds_"+_tenant)||"[]")}catch(e){return[]} }
+
+// Salva KDS no localStorage E no Firebase (kds_local) de forma robusta
 function setKDS(list){
   const trimmed=list.slice(0,200);
   localStorage.setItem("ys_kds_"+_tenant,JSON.stringify(trimmed));
-  // Salva IMEDIATAMENTE no Firebase (sem debounce) para garantir persistência total
-  if(_tenant&&db){
-    setDoc(doc(db,"companies",_tenant,"meta","kds_local"),{list:trimmed,_at:Date.now()})
-      .catch(e=>console.warn("KDS sync:",e.message));
-  }
+  _syncKDSFirebase(trimmed);
 }
+
+// Sincroniza com Firebase — tenta até 3 vezes antes de desistir
+function _syncKDSFirebase(list, tentativa=1){
+  if(!_tenant||!db) return;
+  setDoc(doc(db,"companies",_tenant,"meta","kds_local"),{list,_at:Date.now()})
+    .catch(e=>{
+      console.warn("KDS sync tentativa "+tentativa+":", e.message);
+      if(tentativa<3) setTimeout(()=>_syncKDSFirebase(list,tentativa+1), 1500*tentativa);
+    });
+}
+
+// Salva o status de um pedido individual no Firebase (garantia extra)
+function _salvarStatusIndividual(oid, kdsStatus){
+  if(!_tenant||!db) return;
+  setDoc(doc(db,"companies",_tenant,"kds_status",oid),{kdsStatus,_at:Date.now()},{merge:true})
+    .catch(e=>console.warn("KDS status individual:",e.message));
+}
+
+// Carrega todos os status individuais do Firebase (fallback robusto)
+async function _carregarStatusIndividuais(){
+  const mapa={};
+  try{
+    const snap=await getDocs(collection(db,"companies",_tenant,"kds_status"));
+    snap.forEach(d=>{
+      const data=d.data();
+      // Ignora arquivados/deletados
+      if(data._deleted||data.kdsStatus==="arquivado") return;
+      mapa[d.id]=data.kdsStatus||"pendente";
+    });
+  }catch(e){ console.warn("kds_status load:",e.message); }
+  return mapa;
+}
+
 function addKDS(pedido){
   const list=getKDS(); const num=(list.length%99)+1;
-  list.unshift({...pedido,kdsStatus:"pendente",kdsNum:num});
+  const novoItem={...pedido,kdsStatus:"pendente",kdsNum:num};
+  list.unshift(novoItem);
   setKDS(list);
+  // Salva status individual também
+  _salvarStatusIndividual(pedido.id,"pendente");
 }
 
 // ── Wrappers síncronos ────────────────────────────────────────
@@ -1511,11 +1545,11 @@ function salvarTudo(){
     sm(CM,m);
   });
   // Força sync do KDS para Firebase imediatamente
-  if(_tenant&&db){
-    const kdsList=getKDS();
-    if(kdsList.length){
-      setDoc(doc(db,"companies",_tenant,"meta","kds_local"),{list:kdsList,_at:Date.now()}).catch(e=>console.warn("KDS sync manual:",e.message));
-    }
+  const kdsList=getKDS();
+  if(kdsList.length){
+    _syncKDSFirebase(kdsList);
+    // Salva cada status individualmente também
+    kdsList.forEach(p=>{ if(p.id) _salvarStatusIndividual(p.id, p.kdsStatus||"pendente"); });
   }
   toast("✅ Tudo salvo e sincronizado!","ok"); renderTudo();
 }
@@ -2521,6 +2555,8 @@ function renderPDV(){
             bipEvento(somEvt[novoStatus]||"confirmacao");
           }
           setKDS(l);
+          // Salva status individual no Firebase
+          _salvarStatusIndividual(ord.id, ord.kdsStatus);
         }
         // Atualiza também no mês se existir
         const m=gm(CM); const mp=m.pedidos.find(x=>x.id===oid);
@@ -2550,9 +2586,7 @@ function renderPDV(){
     const l=getKDS(); const o=l.find(x=>x.id===oid);
     if(!o)return;
     if(!confirm(`Excluir pedido #${o.kdsNum||"—"} — ${o.cliente||"Balcão"}?`))return;
-    const novo=l.filter(x=>x.id!==oid);
-    // Salva no localStorage e Firebase imediatamente
-    setKDS(novo);
+    excluirPedidoKDS(oid);
     // Remove do mês também
     const m=gm(CM); m.pedidos=m.pedidos.filter(x=>x.id!==oid); sm(CM,m);
     renderPDV(); renderKDS(); toast("Pedido removido","ok");
@@ -3012,8 +3046,8 @@ async function confirmarFechamento(){
   cx.status="fechado";cx.fechadoEm=Date.now();cx.fechadoStr=$("cx-dt-fecha").value;
   cx.contado=contado;cx.diferenca=contado-expDin;cx.totalFinal=tGeral;cx.obsFechamento=$("cx-obs-fecha").value.trim();
   await dbSalvaCaixa(cx);fechaM("m-fecha-cx");
-  // ── Limpa KDS: remove todos os pedidos ao fechar o caixa ──
-  setKDS([]);
+  // ── Arquiva todos os pedidos do turno: nunca voltam ao KDS ──
+  await arquivarTodosKDS();
   // Mostrar relatório completo antes de fechar
   abrirRelatorioFechamentoCaixa(cx,tGeral,tPix,tDin,tCred,tDeb,tMis,expDin);
   renderTudo();toast("🔴 Caixa fechado!","ok");bipEvento("confirmacao");
@@ -3959,6 +3993,8 @@ function renderKDS(){
         ord.val=ord.total=pV(document.getElementById("ke-val")?.value)||ord.val;
         ord.endereco=document.getElementById("ke-end")?.value.trim()||"";
         setKDS(l);
+        // Salva status individual no Firebase
+        _salvarStatusIndividual(ord.id, ord.kdsStatus);
         const m=gm(CM); const mp=m.pedidos.find(x=>x.id===o.id);
         if(mp){mp.cliente=ord.cliente;mp.obs=ord.obs;mp.val=ord.val;mp.modo=ord.modo;mp.pagamento=ord.pagamento;sm(CM,m);}
         fecharModalSimples(); renderKDS(); renderPDV();
@@ -3978,13 +4014,20 @@ function renderKDS(){
     e.stopPropagation();
     const o=getKDS().find(x=>x.id===btn.dataset.oid);if(!o)return;
     if(!confirm(`Excluir pedido #${o.kdsNum||"—"} — ${o.cliente||"Balcão"}?`))return;
-    const l=getKDS().filter(x=>x.id!==o.id);
-    setKDS(l);
+    excluirPedidoKDS(o.id);
     renderKDS(); renderPDV(); toast("Pedido removido","ok");
   }));
 
   pg.querySelector("#btn-kds-cfg")?.addEventListener("click",()=>irPara("config",null));
   pg.querySelector("#btn-kds-limpar")?.addEventListener("click",()=>{
+    const entregues=getKDS().filter(o=>(o.kdsStatus||"pendente")==="entregue");
+    entregues.forEach(o=>{
+      _kdsArquivados.add(o.id);
+      // Marca no Firebase também
+      if(o.id) setDoc(doc(db,"companies",_tenant,"kds_status",o.id),
+        {kdsStatus:"arquivado",_deleted:true,_at:Date.now()},{merge:true}).catch(()=>{});
+    });
+    salvarArquivados();
     const l=getKDS().filter(o=>(o.kdsStatus||"pendente")!=="entregue");
     setKDS(l);
     renderKDS(); renderPDV(); toast("Pedidos entregues removidos","ok");
@@ -4001,6 +4044,8 @@ function kdsAvanca(oid, colAtual){
   o.kdsStatus=nxt;
   // Salva imediatamente no localStorage e Firebase
   setKDS(l);
+  // Salva status individual no Firebase (garantia extra contra perda)
+  _salvarStatusIndividual(oid, nxt);
   bipEvento(somEvt[colAtual]||"confirmacao");
   // Atualiza também no mês (para pedidos do tipo encomenda/mês)
   const m=gm(CM); const mp=m.pedidos.find(x=>x.id===oid);
@@ -4402,144 +4447,252 @@ function bindEvents(){
 
 // ════ CARDÁPIO DIGITAL — FIRESTORE KDS ══════════════════════
 
+// ── Limpeza automática: arquiva pedidos entregues com mais de 12h ──────
+function limparPedidosAntigos(){
+  const agora12h = Date.now() - (12 * 60 * 60 * 1000); // 12 horas atrás
+  const lista = getKDS();
+  const antigos = lista.filter(o=>{
+    const ts = +(o._at||o.criadoEm||0);
+    return (o.kdsStatus==="entregue") && ts > 0 && ts < agora12h;
+  });
+  if(!antigos.length) return;
+  antigos.forEach(o=>{
+    _kdsArquivados.add(o.id);
+    if(o.id) setDoc(doc(db,"companies",_tenant,"kds_status",o.id),
+      {kdsStatus:"arquivado",_deleted:true,_at:Date.now()},{merge:true}).catch(()=>{});
+  });
+  salvarArquivados();
+  const nova = lista.filter(o=>!antigos.find(a=>a.id===o.id));
+  if(nova.length !== lista.length){
+    localStorage.setItem("ys_kds_"+_tenant, JSON.stringify(nova));
+    _syncKDSFirebase(nova);
+  }
+}
+
 // ── Referência para coleção de pedidos externos do cardápio ──
 const kdsCol = () => collection(db,"companies",_tenant,"kds_pedidos");
 
 // ── Listener em tempo real — PEDIDOS DO CARDÁPIO DIGITAL ─────
 let _kdsUnsubscribe = null;
-let _kdsInicializado = false; // evita som na carga inicial
+let _kdsInicializado = false;
 
-// Restaura status dos pedidos KDS do Firebase (kds_local) — garante persistência ao reabrir
-// Retorna mapa {id -> kdsStatus} com os status salvos no Firebase
-async function restaurarStatusKDS(){
-  if(!_tenant||!db) return {};
+// ── IDs arquivados: pedidos que foram excluídos/finalizados e NÃO devem voltar ──
+// Salvo em Firebase para persistir entre sessões
+let _kdsArquivados = new Set(); // Set de IDs
+
+async function carregarArquivados(){
   try{
-    const snap = await getDoc(doc(db,"companies",_tenant,"meta","kds_local"));
+    const snap = await getDoc(doc(db,"companies",_tenant,"meta","kds_arquivados"));
     if(snap.exists()){
-      const dados = snap.data();
-      const listFirebase = dados.list || [];
-      if(listFirebase.length > 0){
-        // Firebase tem prioridade ABSOLUTA: sobrescreve localStorage integralmente
-        localStorage.setItem("ys_kds_"+_tenant, JSON.stringify(listFirebase));
-        console.log("✅ KDS restaurado do Firebase:", listFirebase.length, "pedidos");
-        // Retorna mapa de status para uso no listener
-        const mapa = {};
-        listFirebase.forEach(p=>{ if(p.id) mapa[p.id] = p.kdsStatus || "pendente"; });
-        return mapa;
-      }
+      const ids = snap.data().ids || [];
+      _kdsArquivados = new Set(ids);
     }
-  } catch(e){
-    console.warn("Restauração KDS (não crítico):", e.message);
+  } catch(e){ _kdsArquivados = new Set(); }
+}
+
+async function salvarArquivados(){
+  try{
+    await setDoc(doc(db,"companies",_tenant,"meta","kds_arquivados"),
+      {ids:[..._kdsArquivados], _at:Date.now()});
+  } catch(e){ console.warn("kds_arquivados save:", e.message); }
+}
+
+// Arquiva todos os IDs atuais do KDS (chamado ao fechar caixa)
+async function arquivarTodosKDS(){
+  const list = getKDS();
+  list.forEach(p=>{ if(p.id) _kdsArquivados.add(p.id); });
+  await salvarArquivados();
+  setKDS([]); // limpa KDS local e Firebase
+  // Limpa status individuais do Firebase para todos os pedidos arquivados
+  try{
+    const batch = writeBatch(db);
+    list.forEach(p=>{
+      if(p.id) batch.delete(doc(db,"companies",_tenant,"kds_status",p.id));
+    });
+    batch.commit().catch(e=>console.warn("Limpeza status individuais:",e.message));
+  }catch(e){}
+}
+
+// Remove um ID dos arquivados e do KDS (excluir pedido individual)
+async function excluirPedidoKDS(oid){
+  _kdsArquivados.add(oid);
+  await salvarArquivados();
+  const novo = getKDS().filter(x=>x.id!==oid);
+  setKDS(novo);
+  // Marca status como arquivado no Firebase (impede restauração)
+  if(_tenant&&db){
+    setDoc(doc(db,"companies",_tenant,"kds_status",oid),
+      {kdsStatus:"arquivado",_deleted:true,_at:Date.now()},{merge:true})
+      .catch(()=>{});
   }
-  return {};
+}
+
+// Restaura o KDS salvo (status avançados) do Firebase kds_local
+// CORREÇÃO: faz merge com status individuais para garantir que nenhum avanço seja perdido
+async function restaurarStatusKDS(){
+  try{
+    // 1) Carrega lista completa do kds_local
+    const snap = await getDoc(doc(db,"companies",_tenant,"meta","kds_local"));
+    let listFirebase = [];
+    if(snap.exists()){
+      listFirebase = (snap.data().list || []).filter(p => !_kdsArquivados.has(p.id));
+    }
+
+    // 2) Carrega status individuais (fonte mais confiável — salva a cada avanço)
+    const statusIndividuais = await _carregarStatusIndividuais();
+
+    // 3) Lista local atual (pode ter pedidos mais recentes ainda não sincronizados)
+    let listLocal = [];
+    try{ listLocal = JSON.parse(localStorage.getItem("ys_kds_"+_tenant)||"[]"); }catch(e){}
+
+    // 4) Mescla: usa Firebase como base, complementa com local
+    // Garante que todos os IDs do Firebase estejam na lista
+    const mapaFinal = {};
+    listFirebase.forEach(p=>{ mapaFinal[p.id]=p; });
+    listLocal.forEach(p=>{
+      if(!mapaFinal[p.id] && !_kdsArquivados.has(p.id)){
+        mapaFinal[p.id]=p; // pedido só no local, inclui
+      }
+    });
+
+    // 5) Aplica status individuais (mais confiáveis) sobre a lista mesclada
+    const mapa = {};
+    Object.values(mapaFinal).forEach(p=>{
+      // Status individual bate: usa ele. Senão usa o da lista
+      const statusFinal = statusIndividuais[p.id] || p.kdsStatus || "pendente";
+      // Não restaura pedidos já arquivados
+      if(!_kdsArquivados.has(p.id)){
+        mapa[p.id] = statusFinal;
+        p.kdsStatus = statusFinal;
+      }
+    });
+
+    // 6) Salva lista mesclada e corrigida no localStorage
+    const listaMesclada = Object.values(mapaFinal)
+      .filter(p=>!_kdsArquivados.has(p.id))
+      .sort((a,b)=>(+(b._at||b.criadoEm||0))-(+(a._at||a.criadoEm||0)));
+
+    if(listaMesclada.length > 0){
+      localStorage.setItem("ys_kds_"+_tenant, JSON.stringify(listaMesclada));
+      // Re-sincroniza Firebase com a lista corrigida
+      _syncKDSFirebase(listaMesclada);
+    }
+
+    return mapa;
+  } catch(e){
+    console.warn("Restauração KDS:", e.message);
+    return {};
+  }
 }
 
 function iniciarKDSListener(){
   if(_kdsUnsubscribe){ _kdsUnsubscribe(); _kdsUnsubscribe=null; }
   _kdsInicializado = false;
-  // Restaura status persistidos no Firebase ANTES de iniciar o listener
-  // para garantir que o snapshot inicial não sobrescreva status avançados
-  restaurarStatusKDS().then((mapaStatus)=>{
+  // 1) Carrega arquivados, 2) restaura status (mescla kds_local + status individuais), 3) inicia listener
+  carregarArquivados().then(()=>
+    restaurarStatusKDS()
+  ).then((mapaStatus)=>{
+    // Aplica status individuais sobre a lista local atual (corrige qualquer divergência)
+    const lista = getKDS();
+    let houveCorrecao = false;
+    lista.forEach(p=>{
+      if(mapaStatus[p.id] && mapaStatus[p.id] !== p.kdsStatus){
+        p.kdsStatus = mapaStatus[p.id];
+        houveCorrecao = true;
+      }
+    });
+    if(houveCorrecao){
+      localStorage.setItem("ys_kds_"+_tenant, JSON.stringify(lista));
+    }
+    // Limpa pedidos entregues antigos (mais de 12h) automaticamente
+    limparPedidosAntigos();
     if(CT==="kds") renderKDS();
     if(CT==="pdv") renderPDV();
-    _iniciarKDSListenerInterno(mapaStatus);
+    _iniciarKDSListenerInterno(mapaStatus||{});
   }).catch(()=>{ _iniciarKDSListenerInterno({}); });
 }
 
 function _iniciarKDSListenerInterno(mapaStatus){
   mapaStatus = mapaStatus || {};
   try{
-    // Sem orderBy para evitar necessidade de índice composto
-    // Pega os últimos 200 pedidos sem filtro de tempo
     const q = query(kdsCol(), limit(200));
     _kdsUnsubscribe = onSnapshot(q, snap => {
       let houveNovo = false;
 
       snap.docChanges().forEach(change => {
-        if(change.type === "added"){
-          const raw = change.doc.data();
-          const ped = {
-            ...raw,
-            id: change.doc.id,
-            // criadoEm pode ser null no primeiro snapshot (serverTimestamp pendente)
-            criadoEm: raw.criadoEm?.toMillis?.() || raw.criadoEm || Date.now(),
-          };
+        if(change.type !== "added") return;
 
-          const local = JSON.parse(localStorage.getItem("ys_kds_"+_tenant)||"[]");
-          // Verifica se já existe no localStorage (pode ter status avançado)
-          const existente = local.find(k=>k.id===ped.id);
-          if(!existente){
-            const num = (local.length % 99) + 1;
-            // Prioridade de status: 1) mapa restaurado do Firebase (kds_local), 2) campo do pedido, 3) "pendente"
-            const statusSalvo = mapaStatus[ped.id] || ped.kdsStatus || "pendente";
-            local.unshift({
-              ...ped,
-              kdsStatus: statusSalvo,
-              kdsNum:    num,
-              origem:    "cardapio-digital",
-              _at:       ped.criadoEm || Date.now(),
-            });
-            setKDS(local);
+        const raw = change.doc.data();
+        const ped = {
+          ...raw,
+          id: change.doc.id,
+          criadoEm: raw.criadoEm?.toMillis?.() || raw.criadoEm || Date.now(),
+        };
 
-            if(_kdsInicializado && statusSalvo === "pendente"){
-              // ── SOM e NOTIFICAÇÃO só para pedidos NOVOS e PENDENTES (não na carga inicial) ──
-              bipEvento("novo_pedido_kds");
-              toast(`🛒 NOVO PEDIDO #${num} — ${ped.cliente||"Cliente"} · R$ ${(+ped.total||0).toFixed(2).replace(".",",")}`, "ok");
+        // ── REGRA PRINCIPAL: ignora IDs arquivados (excluídos / caixa fechado) ──
+        if(_kdsArquivados.has(ped.id)) return;
 
-              // Registra no mês atual
-              const m = gm(CM);
-              const novoPed = {
-                id:         ped.id,
-                cliente:    ped.cliente || "Cliente Cardápio",
-                fone:       ped.fone || "",
-                produto:    (ped.itens||[]).map(i=>`${i.qtd}x ${i.nome}`).join(", "),
-                itens:      ped.itens || [],
-                val:        ped.total || 0,
-                desc:       0,
-                status:     "pending",
-                statusPag:  "pending",
-                pagamento:  ped.pagamento || "pix",
-                modo:       ped.modo || "delivery",
-                endereco:   ped.endereco || "",
-                data:       hoje(),
-                dataEntrega:hoje(),
-                obs:        ped.obs || "",
-                origem:     "cardapio-digital",
-                criadoEm:   Date.now(),
-              };
-              // Evita duplicata no mês
-              if(!m.pedidos.find(x=>x.id===ped.id)){
-                m.pedidos.push(novoPed);
-              }
-              sm(CM, m);
-              houveNovo = true;
-            }
+        const local = JSON.parse(localStorage.getItem("ys_kds_"+_tenant)||"[]");
+        const existente = local.find(k=>k.id===ped.id);
+
+        // Se já existe no KDS local, apenas atualiza o status se necessário
+        if(existente){
+          const statusSalvo = mapaStatus[ped.id];
+          if(statusSalvo && statusSalvo !== existente.kdsStatus){
+            existente.kdsStatus = statusSalvo;
+            localStorage.setItem("ys_kds_"+_tenant, JSON.stringify(local));
           }
+          return;
+        }
+
+        const num = (local.length % 99) + 1;
+        // Status: usa mapaStatus (mais confiável), depois kdsStatus do pedido, depois "pendente"
+        const statusSalvo = mapaStatus[ped.id] || ped.kdsStatus || "pendente";
+
+        local.unshift({
+          ...ped,
+          kdsStatus: statusSalvo,
+          kdsNum:    num,
+          origem:    "cardapio-digital",
+          _at:       ped.criadoEm || Date.now(),
+        });
+        setKDS(local);
+
+        if(_kdsInicializado && statusSalvo === "pendente"){
+          bipEvento("novo_pedido_kds");
+          toast(`🛒 NOVO PEDIDO #${num} — ${ped.cliente||"Cliente"} · R$ ${(+ped.total||0).toFixed(2).replace(".",",")}`, "ok");
+
+          const m = gm(CM);
+          if(!m.pedidos.find(x=>x.id===ped.id)){
+            m.pedidos.push({
+              id: ped.id, cliente: ped.cliente||"Cliente Cardápio",
+              fone: ped.fone||"", produto: (ped.itens||[]).map(i=>`${i.qtd}x ${i.nome}`).join(", "),
+              itens: ped.itens||[], val: ped.total||0, desc: 0,
+              status:"pending", statusPag:"pending", pagamento: ped.pagamento||"pix",
+              modo: ped.modo||"delivery", endereco: ped.endereco||"",
+              data: hoje(), dataEntrega: hoje(), obs: ped.obs||"",
+              origem:"cardapio-digital", criadoEm: Date.now(),
+            });
+            sm(CM, m);
+          }
+          houveNovo = true;
         }
       });
 
-      // Marca como inicializado após o primeiro snapshot (carga histórica)
-      if(!_kdsInicializado){
-        _kdsInicializado = true;
-      }
+      if(!_kdsInicializado) _kdsInicializado = true;
 
-      // Atualiza KDS e PDV em qualquer aba sempre que houver mudança
       if(houveNovo){
         if(CT==="kds")      renderKDS();
         if(CT==="pdv")      renderPDV();
         if(CT==="pedidos")  renderPedidos();
         if(CT==="dashboard")renderDash();
-        // Atualiza o painel de pedidos no PDV mesmo se não estiver na aba
-        _pdvPedidosPendentes = JSON.parse(localStorage.getItem("ys_kds_"+_tenant)||"[]")
-          .filter(o=>(o.kdsStatus||"pendente")!=="entregue").length;
+        _pdvPedidosPendentes = getKDS().filter(o=>(o.kdsStatus||"pendente")!=="entregue").length;
         atualizarBadgeKDS();
       }
     }, err => {
       console.warn("KDS listener erro:", err.message);
-      // Tenta reiniciar após 5s
       setTimeout(()=>{ if(_user) iniciarKDSListener(); }, 5000);
     });
-    console.log("✅ KDS listener iniciado para tenant:", _tenant);
   } catch(e){
     console.warn("KDS listener não iniciado:", e.message);
   }
