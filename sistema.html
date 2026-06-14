@@ -2627,17 +2627,22 @@ function renderPDV(){
     pdvAvancaKDS(btn.dataset.oid, btn.dataset.col);
   }));
 
-  // EXCLUIR
+  // FINALIZAR/OCULTAR (lixeira) — pedido some da tela mas fica no faturamento
   pg.querySelectorAll(".poc-del").forEach(btn=>btn.addEventListener("click",e=>{
     e.stopPropagation();
     const oid=btn.dataset.oid;
     const l=getKDS(); const o=l.find(x=>x.id===oid);
     if(!o)return;
-    if(!confirm(`Excluir pedido #${o.kdsNum||"—"} — ${o.cliente||"Balcão"}?`))return;
-    excluirPedidoKDS(oid);
-    // Remove do mês também
-    const m=gm(CM); m.pedidos=m.pedidos.filter(x=>x.id!==oid); sm(CM,m);
-    renderPDV(); renderKDS(); toast("Pedido removido","ok");
+    // Oculta da tela — NÃO remove do mês (faturamento preservado)
+    _kdsArquivados.add(oid);
+    salvarArquivados();
+    const novo=getKDS().filter(x=>x.id!==oid);
+    setKDS(novo);
+    if(_tenant&&db){
+      setDoc(doc(db,"companies",_tenant,"kds_status",oid),
+        {kdsStatus:"arquivado",_at:Date.now()},{merge:true}).catch(()=>{});
+    }
+    renderPDV(); renderKDS(); toast("✅ Pedido finalizado e ocultado","ok");
   }));
 
   renderProdsPDV(); renderCarrinho();
@@ -3046,6 +3051,19 @@ async function confirmarAbertura(){
 
 function abrirFechamentoCaixa(){
   const cx=_caixas.find(c=>c.status==="aberto");if(!cx){toast("Nenhum caixa aberto","twn");return;}
+  // Mescla cx.vendas com pedidos do mês (todos os modos) que ainda não foram registrados no caixa
+  const m=gm(CM);
+  const idsCaixa=new Set((cx.vendas||[]).map(v=>v.id));
+  const pedidosMes=(m.pedidos||[]).filter(p=>
+    (p.status==="done"||p.statusPag==="paid"||(p.origem==="cardapio-digital"&&(p.val||0)>0))
+    && !idsCaixa.has(p.id)
+    && (p.data===hoje()||p.dataEntrega===hoje())
+  );
+  pedidosMes.forEach(p=>{
+    cx.vendas=cx.vendas||[];
+    cx.vendas.push({id:p.id,codigo:p.codigo||"",cliente:p.cliente||"",total:p.val||0,pagamento:p.pagamento||"pix",itens:p.itens||[],ts:p.criadoEm||Date.now(),modo:p.modo||"",obs:p.origem||""});
+    idsCaixa.add(p.id);
+  });
   const vendas=cx.vendas||[];
   const tPix=vendas.filter(v=>v.pagamento==="pix").reduce((a,v)=>a+v.total,0);
   const tDin=vendas.filter(v=>v.pagamento==="dinheiro").reduce((a,v)=>a+v.total,0);
@@ -3688,7 +3706,8 @@ let _relFiltro={ini:"",fim:""};
 function renderRelatorios(){
   const pg=$("pg-relatorios");if(!pg)return;
   const m=gm(CM);
-  const pedidos=(m.pedidos||[]).filter(p=>p.status==="done"||p.statusPag==="paid");
+  // Todos os pedidos válidos: done/paid + cardápio digital (status=done) + qualquer origem com valor
+  const pedidos=(m.pedidos||[]).filter(p=>p.status==="done"||p.statusPag==="paid"||(p.origem==="cardapio-digital"&&(p.val||0)>0));
 
   // Aplicar filtro de período
   const pFilt=pedidos.filter(p=>{
@@ -4057,13 +4076,20 @@ function renderKDS(){
     kdsAvanca(btn.dataset.oid, btn.dataset.col);
   }));
 
-  // ── EXCLUIR ─────────────────────────────────────────────────
+  // ── FINALIZAR/OCULTAR (lixeira) ─────────────────────────────
   pg.querySelectorAll(".kds-del").forEach(btn=>btn.addEventListener("click",e=>{
     e.stopPropagation();
     const o=getKDS().find(x=>x.id===btn.dataset.oid);if(!o)return;
-    if(!confirm(`Excluir pedido #${o.kdsNum||"—"} — ${o.cliente||"Balcão"}?`))return;
-    excluirPedidoKDS(o.id);
-    renderKDS(); renderPDV(); toast("Pedido removido","ok");
+    // Só oculta da tela — pedido permanece no faturamento e vendas
+    _kdsArquivados.add(o.id);
+    salvarArquivados();
+    const novo=getKDS().filter(x=>x.id!==o.id);
+    setKDS(novo);
+    if(_tenant&&db){
+      setDoc(doc(db,"companies",_tenant,"kds_status",o.id),
+        {kdsStatus:"arquivado",_at:Date.now()},{merge:true}).catch(()=>{});
+    }
+    renderKDS(); renderPDV(); toast("✅ Pedido finalizado e ocultado","ok");
   }));
 
   pg.querySelector("#btn-kds-cfg")?.addEventListener("click",()=>irPara("config",null));
@@ -4917,16 +4943,39 @@ function _iniciarKDSListenerInterno(mapaStatus){
 
           const m = gm(CM);
           if(!m.pedidos.find(x=>x.id===ped.id)){
-            m.pedidos.push({
+            const pedMes = {
               id: ped.id, cliente: ped.cliente||"Cliente Cardápio",
               fone: ped.fone||"", produto: (ped.itens||[]).map(i=>`${i.qtd}x ${i.nome}`).join(", "),
               itens: ped.itens||[], val: ped.total||0, desc: 0,
-              status:"pending", statusPag:"pending", pagamento: ped.pagamento||"pix",
+              status:"done", statusPag:"paid", pagamento: ped.pagamento||"pix",
               modo: ped.modo||"delivery", endereco: ped.endereco||"",
               data: hoje(), dataEntrega: hoje(), obs: ped.obs||"",
               origem:"cardapio-digital", criadoEm: Date.now(),
-            });
+              dreId: null,
+            };
+            // Adiciona DRE receita
+            const dreEntry = {id:uid(), label:`Cardápio Digital: ${pedMes.cliente} (${pedMes.produto.slice(0,40)})`, val: pedMes.val, data: hoje()};
+            m.dre.receitas.push(dreEntry);
+            pedMes.dreId = dreEntry.id;
+            m.pedidos.push(pedMes);
             sm(CM, m);
+            // Adiciona ao caixa aberto (se houver)
+            const cxAberto = _caixas.find(c=>c.status==="aberto");
+            if(cxAberto){
+              if(!cxAberto.vendas) cxAberto.vendas = [];
+              cxAberto.vendas.push({
+                id: ped.id,
+                codigo: "CD-"+String(num),
+                cliente: pedMes.cliente,
+                total: pedMes.val,
+                pagamento: pedMes.pagamento,
+                itens: pedMes.itens,
+                ts: Date.now(),
+                modo: pedMes.modo,
+                obs: "Cardápio Digital",
+              });
+              dbSalvaCaixa(cxAberto);
+            }
           }
           houveNovo = true;
         }
