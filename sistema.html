@@ -873,7 +873,7 @@ import {
   initializeFirestore, persistentLocalCache,
   persistentMultipleTabManager,
   doc, getDoc, setDoc, getDocs,
-  collection, writeBatch,
+  collection, writeBatch, where,
   onSnapshot, query, orderBy, limit, addDoc, serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
 
@@ -1407,8 +1407,8 @@ async function criarEmpresa(){
     // Buscar nome do plano
     let planoNome="Gratuito";
     try{
-      const ps=await db.collection("ceo_planos").doc(plano).get();
-      if(ps.exists) planoNome=ps.data().nome||planoNome;
+      const ps=await getDoc(doc(db,"ceo_planos",plano));
+      if(ps.exists()) planoNome=ps.data().nome||planoNome;
     }catch(e){}
 
     const co={id:uid(),nome,name:nome,tipo,type:tipo,logo:"🏪",logoImg:"",
@@ -4115,15 +4115,12 @@ async function renderFaturasEmpresa(){
 
   try{
     // Busca faturas do tenant atual no Firebase
-    const snap=await db.collection("ceo_faturas")
-      .where("tenantId","==",_tenant)
-      .orderBy("vencimento","desc")
-      .get().catch(()=>null);
+    const snap=await getDocs(query(collection(db,"ceo_faturas"),where("tenantId","==",_tenant),orderBy("vencimento","desc"))).catch(()=>null);
 
     const faturas=snap?snap.docs.map(d=>({id:d.id,...d.data()})):[];
 
     // Busca plano ativo da empresa
-    const cfgSnap=await db.collection("tenants").doc(_tenant).get().catch(()=>null);
+    const cfgSnap=await getDoc(doc(db,"tenants",_tenant)).catch(()=>null);
     const planoAtivo=cfgSnap?.data()?.plano||"free";
     const planoNome=cfgSnap?.data()?.planoNome||"Gratuito";
 
@@ -4205,7 +4202,7 @@ async function carregarPlanosNoCadastro(){
   const grid=$("nc-planos-grid");
   if(!grid)return;
   try{
-    const snap=await db.collection("ceo_planos").orderBy("ordem","asc").get().catch(()=>null);
+    const snap=await getDocs(query(collection(db,"ceo_planos"),orderBy("ordem","asc"))).catch(()=>null);
     let planos=snap&&!snap.empty?snap.docs.map(d=>({id:d.id,...d.data()})):[];
     // Planos padrão se não houver no Firebase
     if(planos.length===0){
