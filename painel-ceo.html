@@ -580,8 +580,16 @@ input:checked+.slider:before{transform:translateX(18px);background:#fff}
       <input id="fat-data-pagamento" type="date">
     </div>
     <div class="field">
+      <label>PIX Copia e Cola (opcional)</label>
+      <textarea id="fat-pix" rows="2" placeholder="Cole aqui o código PIX para o cliente copiar"></textarea>
+    </div>
+    <div class="field">
+      <label>Link de Pagamento (opcional)</label>
+      <input id="fat-link" type="url" placeholder="https://pagamento.exemplo.com/...">
+    </div>
+    <div class="field">
       <label>Observações</label>
-      <textarea id="fat-obs" rows="2" placeholder="Ex: Pago via PIX, link de boleto, etc."></textarea>
+      <textarea id="fat-obs" rows="2" placeholder="Observações internas"></textarea>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-fatura')">Cancelar</button>
@@ -1231,6 +1239,7 @@ window.filterFinanceiro = function() {
           <button class="btn btn-ghost btn-sm" onclick="editarFatura('${f.id}')">✏</button>
           ${f.status==='pendente'||f.status==='atrasado'
             ?`<button class="btn btn-success btn-sm" onclick="marcarPago('${f.id}')">✅</button>`:''}
+          <button class="btn btn-sm" style="background:#25D366;color:#fff" onclick="enviarFaturaWhatsApp('${f.id}')" title="Enviar por WhatsApp">📲</button>
           <button class="btn btn-danger btn-sm" onclick="excluirFatura('${f.id}')">🗑</button>
         </div>
       </td>
@@ -1267,6 +1276,8 @@ window.openModalNovaFatura = function() {
   $('fat-vencimento').value = `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}-10`;
   $('fat-status').value='pendente';
   $('fat-data-pagamento').value='';
+  $('fat-pix').value='';
+  $('fat-link').value='';
   $('fat-obs').value='';
   // Preencher plano e valor com base na empresa selecionada
   atualizarValorFatura();
@@ -1303,6 +1314,8 @@ window.editarFatura = function(id) {
   $('fat-valor').value = f.valor||0;
   $('fat-status').value = f.status||'pendente';
   $('fat-data-pagamento').value = f.dataPagamento||'';
+  $('fat-pix').value = f.pixCopiaECola||'';
+  $('fat-link').value = f.linkPagamento||'';
   $('fat-obs').value = f.obs||'';
   $('fat-data-pag-wrap').style.display = f.status==='pago'?'block':'none';
   $('fat-status').onchange = () => {
@@ -1324,17 +1337,25 @@ window.salvarFatura = async function() {
     valor:     Number($('fat-valor').value)||0,
     status:    $('fat-status').value,
     dataPagamento: $('fat-status').value==='pago' ? ($('fat-data-pagamento').value||new Date().toISOString().slice(0,10)) : null,
+    pixCopiaECola: $('fat-pix').value.trim(),
+    linkPagamento: $('fat-link').value.trim(),
     obs:       $('fat-obs').value.trim(),
     updatedAt: Date.now()
   };
   try {
     if(id) {
       await updateDoc(doc(db,'invoices',id), data);
+      // Sincroniza no tenant da empresa para ela ver no sistema
+      try{ await updateDoc(doc(db,'ceo_faturas',id), {...data, tenantId: data.empresaId}); }catch(e){}
       const i = _faturas.findIndex(x=>x.id===id);
       if(i>=0) _faturas[i]={..._faturas[i],...data};
     } else {
       data.createdAt = Date.now();
       const ref = await addDoc(collection(db,'invoices'), data);
+      // Salva também em ceo_faturas para a empresa ver no sistema dela
+      try{
+        await setDoc(doc(db,'ceo_faturas',ref.id), {...data, tenantId: data.empresaId, faturaId: ref.id});
+      }catch(e){}
       _faturas.push({id:ref.id,...data});
     }
     closeModal('modal-fatura');
@@ -1351,6 +1372,49 @@ window.marcarPago = async function(id) {
   filterFinanceiro();
   toast('Marcado como pago! ✅');
 }
+
+/* ── ENVIAR FATURA POR WHATSAPP ── */
+window.enviarFaturaWhatsApp = async function(id) {
+  const f = _faturas.find(x=>x.id===id); if(!f) return;
+  const co = _companies.find(c=>c.id===f.empresaId);
+
+  // Pegar WhatsApp da empresa (salvo no tenant)
+  let wpp = co?.whatsapp || co?.phone || '';
+  if(!wpp){
+    wpp = prompt(`📲 WhatsApp da empresa ${co?.name||''}?\n(ex: 5511999999999 — com DDI+DDD, sem espaços)`,'');
+    if(!wpp) return;
+    // Salvar no cadastro da empresa para próximas vezes
+    try{
+      await updateDoc(doc(db,'tenants',f.empresaId),{whatsapp:wpp.replace(/\D/g,'')});
+      if(co) co.whatsapp=wpp.replace(/\D/g,'');
+    }catch(e){}
+  }
+
+  const num = wpp.replace(/\D/g,'');
+  if(!num){ toast('WhatsApp inválido.','err'); return; }
+
+  const nome = co?.name || f.empresaId;
+  const val  = f.valor>0 ? `R$ ${fmt(f.valor)}` : 'Grátis';
+  const venc = f.vencimento ? new Date(f.vencimento+'T12:00:00').toLocaleDateString('pt-BR') : '—';
+  const pix  = f.pixCopiaECola || '';
+  const link = f.linkPagamento || '';
+  const ref  = f.mes ? fmtMes(f.mes) : '—';
+
+  let msg = `Olá, *${nome}*! 👋\n\n`;
+  msg += `📋 *Fatura ${ref}*\n`;
+  msg += `💰 Valor: *${val}*\n`;
+  msg += `📅 Vencimento: *${venc}*\n`;
+  msg += `📦 Plano: *${(f.plano||'free').toUpperCase()}*\n`;
+  if(f.obs) msg += `📝 Obs: ${f.obs}\n`;
+  msg += `\n`;
+  if(pix) msg += `🔑 *PIX Copia e Cola:*\n\`${pix}\`\n\n`;
+  if(link) msg += `🔗 *Link de pagamento:* ${link}\n\n`;
+  msg += `Qualquer dúvida estamos à disposição! 😊`;
+
+  const url = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
+  window.open(url,'_blank');
+  toast('WhatsApp aberto! ✅','ok');
+};
 
 window.excluirFatura = function(id) {
   const f = _faturas.find(x=>x.id===id);

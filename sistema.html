@@ -380,6 +380,24 @@ tr:hover .dre-del{display:inline}.dre-del:hover{color:var(--er)}
 /* ── DANGER ZONE ── */
 .danger-z{background:rgba(239,68,68,.04);border:1.5px solid rgba(239,68,68,.18);border-radius:10px;padding:13px;margin-top:10px}
 
+/* ── PLANO CARD (cadastro) ── */
+.nc-plano-card{border:2px solid var(--brd2);border-radius:12px;padding:12px 14px;cursor:pointer;transition:all .18s;background:#fff;position:relative}
+.nc-plano-card:hover{border-color:var(--brand);background:var(--brand-t2)}
+.nc-plano-card.sel{border-color:var(--brand);background:var(--brand-t);box-shadow:0 0 0 3px rgba(108,71,255,.12)}
+.nc-plano-card .p-name{font-weight:800;font-size:.92rem;color:var(--text)}
+.nc-plano-card .p-price{font-family:"DM Mono",monospace;font-weight:700;color:var(--brand);font-size:1rem}
+.nc-plano-card .p-desc{font-size:.72rem;color:var(--text3);margin-top:2px}
+.nc-plano-destaque{position:absolute;top:-1px;right:12px;background:var(--brand);color:#fff;font-size:.6rem;font-weight:700;padding:2px 8px;border-radius:0 0 7px 7px;letter-spacing:.5px}
+
+/* ── FATURAS DA EMPRESA ── */
+.fat-empresa-card{background:#fff;border:1px solid var(--brd);border-radius:var(--r2);padding:18px;margin-bottom:12px;box-shadow:var(--sh)}
+.fat-status-pago{color:var(--ok);font-weight:700}
+.fat-status-pendente{color:var(--warn);font-weight:700}
+.fat-status-atrasado{color:var(--er);font-weight:700}
+.fat-status-isento{color:var(--brand);font-weight:700}
+.fat-emp-banner{background:linear-gradient(135deg,var(--brand-t2),var(--brand-t));border:1.5px solid rgba(108,71,255,.15);border-radius:var(--r2);padding:16px;margin-bottom:18px;display:flex;align-items:center;gap:14px}
+.fat-emp-aviso{background:rgba(220,38,38,.07);border:1.5px solid rgba(220,38,38,.2);border-radius:var(--r2);padding:14px;margin-bottom:18px}
+
 /* ── RESPONSIVE ── */
 @media(max-width:1024px){.krow{grid-template-columns:repeat(2,1fr)}.kanban{grid-template-columns:1fr}.set-grid{grid-template-columns:1fr}.pdv-wrap{grid-template-columns:1fr;height:auto}.kds-board{grid-template-columns:1fr}}
 @media(max-width:768px){.sidebar{width:46px}.sb-btn span:not(.sb-ic){display:none}.sec-lbl{display:none}.pdv-grid{grid-template-columns:repeat(auto-fill,minmax(80px,1fr))}}
@@ -439,14 +457,26 @@ tr:hover .dre-del{display:inline}.dre-del:hover{color:var(--er)}
 
 <!-- ═══ TELA: NOVA EMPRESA ═══ -->
 <div id="sc-nova-co" class="screen">
-  <div class="auth-box">
+  <div class="auth-box" style="max-width:500px;max-height:95vh;overflow-y:auto">
     <div class="auth-logo">Nova Empresa</div>
     <div class="auth-sub">Configure sua conta</div>
     <input class="lf" id="nc-nome" placeholder="Nome da empresa">
     <input class="lf" id="nc-tipo" placeholder="Tipo (Confeitaria, Restaurante...)">
     <input class="lf" id="nc-email" type="email" placeholder="E-mail do admin">
+    <input class="lf" id="nc-whatsapp" placeholder="WhatsApp (ex: 5511999999999)">
     <input class="lf" id="nc-user" placeholder="Usuário">
     <input class="lf" id="nc-pass" type="password" placeholder="Senha (mín. 4 caracteres)">
+
+    <!-- SELEÇÃO DE PLANO -->
+    <div style="margin:8px 0 12px">
+      <label style="font-size:.65rem;font-weight:700;color:var(--text2);display:block;margin-bottom:8px;text-transform:uppercase;letter-spacing:.8px">Escolha seu Plano</label>
+      <div id="nc-planos-grid" style="display:grid;gap:8px">
+        <!-- Planos carregados dinamicamente -->
+        <div style="text-align:center;color:var(--text3);font-size:.8rem;padding:10px">Carregando planos...</div>
+      </div>
+      <input type="hidden" id="nc-plano-sel" value="free">
+    </div>
+
     <div class="lerr" id="nc-err"></div>
     <button class="lbtn" id="btn-criar-co">Criar Empresa</button>
     <div class="back-link" id="btn-volta-co">← Voltar</div>
@@ -514,6 +544,7 @@ tr:hover .dre-del{display:inline}.dre-del:hover{color:var(--er)}
       <div class="pg" id="pg-relatorios"></div>
       <div class="pg" id="pg-cardapio-digital"></div>
       <div class="pg" id="pg-config"></div>
+      <div class="pg" id="pg-faturas"></div>
     </main>
   </div>
 </div>
@@ -1363,19 +1394,32 @@ function selecionaEmpresa(id){
 async function criarEmpresa(){
   const nome=$("nc-nome").value.trim(), tipo=$("nc-tipo").value.trim(),
         email=$("nc-email").value.trim(), user=$("nc-user").value.trim(),
-        pass=$("nc-pass").value;
+        pass=$("nc-pass").value,
+        whatsapp=$("nc-whatsapp")?$("nc-whatsapp").value.trim():"",
+        plano=$("nc-plano-sel")?$("nc-plano-sel").value:"free";
   if(!nome||!user||!pass){$("nc-err").textContent="Preencha todos os campos.";return;}
   if(pass.length<4){$("nc-err").textContent="Senha mínimo 4 caracteres.";return;}
   try{
     const cos=await dbEmpresas();
     if(cos.find(c=>(c.nome||c.name||"").toLowerCase()===nome.toLowerCase()))
       {$("nc-err").textContent="Empresa já existe.";return;}
+
+    // Buscar nome do plano
+    let planoNome="Gratuito";
+    try{
+      const ps=await db.collection("ceo_planos").doc(plano).get();
+      if(ps.exists) planoNome=ps.data().nome||planoNome;
+    }catch(e){}
+
     const co={id:uid(),nome,name:nome,tipo,type:tipo,logo:"🏪",logoImg:"",
-              adminUser:user,adminPass:pass,adminEmail:email,criadoEm:Date.now()};
+              adminUser:user,adminPass:pass,adminEmail:email,
+              whatsapp,plano,planoNome,
+              criadoEm:Date.now()};
     _tenant=co.id;
     await dbSalvaEmpresa(co);
     await dbSalvaUsers([{id:"admin",nome:"Administrador",user,pass,email,perfil:"admin",perms:PAGINAS.map(p=>p.id)}]);
-    ["nc-nome","nc-tipo","nc-email","nc-user","nc-pass"].forEach(x=>$(x).value="");
+    ["nc-nome","nc-tipo","nc-email","nc-whatsapp","nc-user","nc-pass"].forEach(x=>{if($(x))$(x).value="";});
+    if($("nc-plano-sel"))$("nc-plano-sel").value="free";
     $("nc-err").textContent=""; _cos=null;
     mostrar("sc-empresa"); renderEmpresas();
     toast("✅ Empresa criada! Faça o login.","ok");
@@ -1430,6 +1474,7 @@ function renderAbaAtual(){
     case"kds":renderKDS();break;
     case"relatorios":renderRelatorios();break;
     case"cardapio-digital":renderCardapioDigital();break;
+    case"faturas":renderFaturasEmpresa();break;
     case"config":renderConfig();break;
   }
 }
@@ -1496,7 +1541,7 @@ function buildNav(){
     {id:"kds",ic:"📺",label:"KDS Cozinha"},
     {id:"relatorios",ic:"📈",label:"Relatórios"},
     {id:"cardapio-digital",ic:"📲",label:"Cardápio Digital"},
-    {sec:"Sistema"},{id:"config",ic:"⚙️",label:"Configurações"},
+    {sec:"Sistema"},{id:"faturas",ic:"💳",label:"Minhas Faturas"},{id:"config",ic:"⚙️",label:"Configurações"},
   ];
   $("sidebar").innerHTML=itens.map(it=>{
     if(it.sec) return `<div class="sec-lbl">${it.sec}</div>`;
@@ -4060,6 +4105,136 @@ const CORES=[{v:"#6C47FF",n:"Roxo"},{v:"#E53E3E",n:"Vermelho"},{v:"#7B1A2E",n:"V
 const SONS_CFG=[{k:"suave",ic:"🔔",nm:"Suave"},{k:"claro",ic:"🎵",nm:"Claro"},{k:"forte",ic:"🔊",nm:"Forte"},{k:"caixa",ic:"💰",nm:"Caixa"}];
 const DIAS=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 
+/* ═══════════════════════════════════════════════
+   FATURAS DA EMPRESA — visão do cliente
+═══════════════════════════════════════════════ */
+async function renderFaturasEmpresa(){
+  const pg=$("pg-faturas");
+  pg.innerHTML=`<div class="ph"><div class="ph-title">💳 Minhas Faturas</div></div>
+  <div style="text-align:center;padding:40px;color:var(--text3)">⏳ Carregando faturas...</div>`;
+
+  try{
+    // Busca faturas do tenant atual no Firebase
+    const snap=await db.collection("ceo_faturas")
+      .where("tenantId","==",_tenant)
+      .orderBy("vencimento","desc")
+      .get().catch(()=>null);
+
+    const faturas=snap?snap.docs.map(d=>({id:d.id,...d.data()})):[];
+
+    // Busca plano ativo da empresa
+    const cfgSnap=await db.collection("tenants").doc(_tenant).get().catch(()=>null);
+    const planoAtivo=cfgSnap?.data()?.plano||"free";
+    const planoNome=cfgSnap?.data()?.planoNome||"Gratuito";
+
+    // Separa faturas pendentes e pagas
+    const pendentes=faturas.filter(f=>f.status==="pendente"||f.status==="atrasado");
+    const pagas=faturas.filter(f=>f.status==="pago"||f.status==="isento");
+
+    pg.innerHTML=`
+    <div class="ph"><div class="ph-title">💳 Minhas Faturas</div></div>
+
+    <!-- Banner do plano atual -->
+    <div class="fat-emp-banner">
+      <div style="font-size:2rem">📦</div>
+      <div>
+        <div style="font-weight:800;font-size:1rem">Plano Atual: <span style="color:var(--brand)">${planoNome}</span></div>
+        <div style="font-size:.78rem;color:var(--text3);margin-top:2px">Para alterar seu plano, entre em contato com o suporte.</div>
+      </div>
+    </div>
+
+    ${pendentes.length>0?`
+    <!-- Aviso de faturas pendentes -->
+    <div class="fat-emp-aviso">
+      <div style="font-weight:700;color:var(--er);margin-bottom:4px">⚠️ Você possui ${pendentes.length} fatura(s) em aberto</div>
+      <div style="font-size:.8rem;color:var(--text2)">Realize o pagamento para manter o acesso completo ao sistema.</div>
+    </div>`:""}
+
+    <!-- Faturas em aberto -->
+    ${pendentes.length>0?`
+    <div class="card" style="margin-bottom:16px">
+      <div class="card-h">⚠️ Faturas em Aberto</div>
+      ${pendentes.map(f=>_renderFaturaCard(f)).join("")}
+    </div>`:""}
+
+    <!-- Faturas pagas -->
+    <div class="card">
+      <div class="card-h">✅ Histórico de Pagamentos</div>
+      ${pagas.length===0&&pendentes.length===0?`<div class="empty-st">Nenhuma fatura encontrada.</div>`:""}
+      ${pagas.length===0&&pendentes.length>0?`<div class="empty-st">Nenhum pagamento registrado ainda.</div>`:""}
+      ${pagas.map(f=>_renderFaturaCard(f)).join("")}
+    </div>`;
+
+  }catch(e){
+    pg.innerHTML=`<div class="ph"><div class="ph-title">💳 Minhas Faturas</div></div>
+    <div class="empty-st">❌ Erro ao carregar faturas. Tente novamente.</div>`;
+  }
+}
+
+function _renderFaturaCard(f){
+  const stMap={
+    pago:{cls:"fat-status-pago",ic:"✅"},
+    pendente:{cls:"fat-status-pendente",ic:"⏳"},
+    atrasado:{cls:"fat-status-atrasado",ic:"🔴"},
+    isento:{cls:"fat-status-isento",ic:"🎁"}
+  };
+  const st=stMap[f.status]||{cls:"",ic:"❓"};
+  const venc=f.vencimento?new Date(f.vencimento.seconds?f.vencimento.seconds*1000:f.vencimento).toLocaleDateString("pt-BR"):"—";
+  const val=f.valor!=null?`R$ ${Number(f.valor).toFixed(2).replace(".",",")}`:"-";
+  return `
+  <div class="fat-empresa-card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+      <div>
+        <div style="font-weight:700;font-size:.95rem">${f.descricao||"Fatura mensal"}</div>
+        <div style="font-size:.78rem;color:var(--text3);margin-top:2px">Vencimento: ${venc} · Ref: ${f.referencia||"—"}</div>
+        ${f.pixCopiaECola?`<div style="font-size:.72rem;color:var(--text3);margin-top:4px">PIX: <span style="font-family:'DM Mono',monospace;background:var(--bg3);padding:2px 6px;border-radius:5px;user-select:all">${f.pixCopiaECola}</span></div>`:""}
+        ${f.linkPagamento?`<a href="${f.linkPagamento}" target="_blank" class="btn btn-p btn-sm" style="margin-top:8px;display:inline-flex">💳 Pagar Agora</a>`:""}
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:'DM Mono',monospace;font-size:1.1rem;font-weight:800;color:var(--brand)">${val}</div>
+        <div class="${st.cls}" style="font-size:.8rem;margin-top:4px">${st.ic} ${f.status?.toUpperCase()||"—"}</div>
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════
+   CARREGAR PLANOS NA TELA DE CADASTRO
+═══════════════════════════════════════════════ */
+async function carregarPlanosNoCadastro(){
+  const grid=$("nc-planos-grid");
+  if(!grid)return;
+  try{
+    const snap=await db.collection("ceo_planos").orderBy("ordem","asc").get().catch(()=>null);
+    let planos=snap&&!snap.empty?snap.docs.map(d=>({id:d.id,...d.data()})):[];
+    // Planos padrão se não houver no Firebase
+    if(planos.length===0){
+      planos=[
+        {id:"free",nome:"Gratuito",preco:0,descricao:"Até 50 produtos · 1 usuário"},
+        {id:"basico",nome:"Básico",preco:79,descricao:"Até 200 produtos · 3 usuários",destaque:false},
+        {id:"pro",nome:"Profissional",preco:149,descricao:"Ilimitado · usuários ilimitados",destaque:true},
+      ];
+    }
+    grid.innerHTML=planos.map(p=>`
+      <div class="nc-plano-card${p.id==="free"?" sel":""}" data-plano="${p.id}" onclick="selecionarPlano('${p.id}',this)">
+        ${p.destaque?`<div class="nc-plano-destaque">⭐ MAIS POPULAR</div>`:""}
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="p-name">${p.nome}</div>
+          <div class="p-price">${p.preco===0?"Grátis":"R$ "+Number(p.preco).toFixed(2).replace(".",",")}<span style="font-size:.68rem;color:var(--text3)">${p.preco>0?"/mês":""}</span></div>
+        </div>
+        <div class="p-desc">${p.descricao||""}</div>
+      </div>`).join("");
+  }catch(e){
+    grid.innerHTML=`<div style="color:var(--text3);font-size:.8rem;padding:8px">Não foi possível carregar planos.</div>`;
+  }
+}
+
+function selecionarPlano(id,el){
+  document.querySelectorAll(".nc-plano-card").forEach(c=>c.classList.remove("sel"));
+  el.classList.add("sel");
+  $("nc-plano-sel").value=id;
+}
+
 function renderConfig(){
   const cfg=getCfg(),isAdmin=_user?.perfil==="admin",pg=$("pg-config");
   const biz=cfg.negocio||{};
@@ -4297,7 +4472,7 @@ function initSuggest(){
 // ════ BIND EVENTOS DOS MODAIS ════════════════════════════════
 function bindEvents(){
   // Auth
-  $("btn-nova-co").addEventListener("click",()=>mostrar("sc-nova-co"));
+  $("btn-nova-co").addEventListener("click",()=>{mostrar("sc-nova-co");carregarPlanosNoCadastro();});
   $("btn-entrar-sistema").addEventListener("click",()=>{
     $("ld-filial").value="";$("ld-user").value="";$("ld-pass").value="";$("ld-err").textContent="";
     mostrar("sc-login-direto");
