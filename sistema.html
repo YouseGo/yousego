@@ -1064,6 +1064,7 @@ let _prods=[], _stock={}, _receitas=[], _contatos=[], _usuarios=[], _cfgCache={}
 let _meses={};
 let _dreFilter={ini:null,fim:null,ativo:false};
 let _pdvObs="";
+let _planosDisponiveis=[], _planoAtualId="free", _suporteWpp="";
 
 // Refs
 const coRef  = ()    => doc(db,"companies",_tenant);
@@ -1407,14 +1408,14 @@ async function criarEmpresa(){
     // Buscar nome do plano
     let planoNome="Gratuito";
     try{
-      const ps=await getDoc(doc(db,"ceo_planos",plano));
-      if(ps.exists()) planoNome=ps.data().nome||planoNome;
+      const ps=await getDoc(doc(db,"plans",plano));
+      if(ps.exists()) planoNome=ps.data().name||planoNome;
     }catch(e){}
 
     const co={id:uid(),nome,name:nome,tipo,type:tipo,logo:"🏪",logoImg:"",
               adminUser:user,adminPass:pass,adminEmail:email,
-              whatsapp,plano,planoNome,
-              criadoEm:Date.now()};
+              whatsapp,plano,plan:plano,planoNome,
+              criadoEm:Date.now(),createdAt:Date.now()};
     _tenant=co.id;
     await dbSalvaEmpresa(co);
     await dbSalvaUsers([{id:"admin",nome:"Administrador",user,pass,email,perfil:"admin",perms:PAGINAS.map(p=>p.id)}]);
@@ -1572,12 +1573,14 @@ function irPara(pg,btn){
     target.style.display=(pg==="pdv")?"flex":"block";
     if(pg==="pdv"){target.style.flexDirection="column";target.style.height="100%";target.style.overflow="hidden";}
   }
+  if(pg==="faturas")renderFaturasEmpresa();
 }
 
 function renderTudo(){
   renderDash();renderDRE();renderCatalogo();renderCatalogoPub();renderPedidos();
   renderPDV();renderCaixa();renderEstoque();renderFichas();renderCustos();
   renderContatos();renderFidelidade();renderKDS();renderCardapioDigital();renderConfig();renderRelatorios();
+  renderFaturasEmpresa();
 }
 
 function salvarTudo(){
@@ -4108,6 +4111,20 @@ const DIAS=["Dom","Seg","Ter","Qua","Qui","Sex","Sáb"];
 /* ═══════════════════════════════════════════════
    FATURAS DA EMPRESA — visão do cliente
 ═══════════════════════════════════════════════ */
+const PLANOS_PADRAO=[
+  {id:"free",name:"Free",price:0,desc:"Para começar",benefits:["1 usuário","Até 50 produtos","PDV básico"]},
+  {id:"basic",name:"Basic",price:49.90,desc:"Para pequenas empresas",benefits:["3 usuários","Até 200 produtos","PDV completo","Relatórios"]},
+  {id:"pro",name:"Pro",price:99.90,desc:"Para empresas em crescimento",benefits:["10 usuários","Produtos ilimitados","PDV + KDS","DRE completo","Suporte prioritário"],destaque:true},
+  {id:"premium",name:"Premium",price:199.90,desc:"Para múltiplas unidades",benefits:["Usuários ilimitados","Tudo ilimitado","Multi-empresa","API access","Gerente de conta"]},
+];
+
+const MESES_NOMES=["Jan","Fev","Mar","Abr","Mai","Jun","Jul","Ago","Set","Out","Nov","Dez"];
+function _fmtMesRef(ym){
+  if(!ym)return"—";
+  const[y,m]=String(ym).split("-");
+  return`${MESES_NOMES[parseInt(m,10)-1]||"—"}/${y}`;
+}
+
 async function renderFaturasEmpresa(){
   const pg=$("pg-faturas");
   pg.innerHTML=`<div class="ph"><div class="ph-title">💳 Minhas Faturas</div></div>
@@ -4116,13 +4133,26 @@ async function renderFaturasEmpresa(){
   try{
     // Busca faturas do tenant atual no Firebase
     const snap=await getDocs(query(collection(db,"ceo_faturas"),where("tenantId","==",_tenant),orderBy("vencimento","desc"))).catch(()=>null);
-
     const faturas=snap?snap.docs.map(d=>({id:d.id,...d.data()})):[];
 
-    // Busca plano ativo da empresa
-    const cfgSnap=await getDoc(doc(db,"tenants",_tenant)).catch(()=>null);
-    const planoAtivo=cfgSnap?.data()?.plano||"free";
-    const planoNome=cfgSnap?.data()?.planoNome||"Gratuito";
+    // Busca dados da empresa (plano atual)
+    const coSnap=await getDoc(coRef()).catch(()=>null);
+    const coData=coSnap?.data()||{};
+    const planoId=coData.plan||coData.plano||"free";
+
+    // Busca todos os planos cadastrados pelo CEO
+    const plansSnap=await getDocs(collection(db,"plans")).catch(()=>null);
+    let todosPlanos=plansSnap&&!plansSnap.empty?plansSnap.docs.map(d=>({id:d.id,...d.data()})):[];
+    if(todosPlanos.length===0) todosPlanos=PLANOS_PADRAO.map(p=>({...p}));
+    todosPlanos.sort((a,b)=>(a.price||0)-(b.price||0));
+    const planoAtual=todosPlanos.find(p=>p.id===planoId)||{id:planoId,name:coData.planoNome||"Gratuito",price:0,benefits:[]};
+
+    // Busca WhatsApp de suporte configurado pelo CEO
+    const ceoCfgSnap=await getDoc(doc(db,"ceo_config","main")).catch(()=>null);
+    const suporteWpp=(ceoCfgSnap?.data()?.whatsapp||"").replace(/\D/g,"");
+
+    // Salva em estado global para os botões de troca de plano
+    _planosDisponiveis=todosPlanos; _planoAtualId=planoId; _suporteWpp=suporteWpp;
 
     // Separa faturas pendentes e pagas
     const pendentes=faturas.filter(f=>f.status==="pendente"||f.status==="atrasado");
@@ -4134,9 +4164,34 @@ async function renderFaturasEmpresa(){
     <!-- Banner do plano atual -->
     <div class="fat-emp-banner">
       <div style="font-size:2rem">📦</div>
-      <div>
-        <div style="font-weight:800;font-size:1rem">Plano Atual: <span style="color:var(--brand)">${planoNome}</span></div>
-        <div style="font-size:.78rem;color:var(--text3);margin-top:2px">Para alterar seu plano, entre em contato com o suporte.</div>
+      <div style="flex:1">
+        <div style="font-weight:800;font-size:1rem">Plano Atual: <span style="color:var(--brand)">${esc(planoAtual.name||planoAtual.id)}</span>
+          <span style="font-family:'DM Mono',monospace;font-weight:700;margin-left:8px">${!planoAtual.price?"Grátis":"R$ "+Number(planoAtual.price).toFixed(2).replace(".",",")+"/mês"}</span>
+        </div>
+        ${(planoAtual.benefits&&planoAtual.benefits.length)?`<div style="font-size:.78rem;color:var(--text3);margin-top:4px">${planoAtual.benefits.map(esc).join(" · ")}</div>`:`<div style="font-size:.78rem;color:var(--text3);margin-top:2px">Para alterar seu plano, use o botão ao lado.</div>`}
+      </div>
+      <button class="btn btn-p btn-sm" onclick="toggleMudarPlano()">🔄 Mudar de Plano</button>
+    </div>
+
+    <!-- Grade de planos para troca (oculta por padrão) -->
+    <div id="fat-planos-grid" style="display:none;margin-bottom:18px">
+      <div class="card">
+        <div class="card-h">📦 Planos Disponíveis</div>
+        <div style="display:grid;gap:8px;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+          ${todosPlanos.map(p=>`
+          <div class="nc-plano-card${p.id===planoId?" sel":""}">
+            ${p.destaque?`<div class="nc-plano-destaque">⭐ MAIS POPULAR</div>`:""}
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <div class="p-name">${esc(p.name)}</div>
+              <div class="p-price">${!p.price?"Grátis":"R$ "+Number(p.price).toFixed(2).replace(".",",")}<span style="font-size:.68rem;color:var(--text3)">${p.price>0?"/mês":""}</span></div>
+            </div>
+            <div class="p-desc">${esc(p.desc||"")}</div>
+            ${(p.benefits||[]).length?`<div style="font-size:.72rem;color:var(--text3);margin-top:6px">${p.benefits.map(esc).join(" · ")}</div>`:""}
+            ${p.id===planoId
+              ?`<div style="margin-top:10px;font-size:.78rem;font-weight:700;color:var(--ok)">✅ Plano atual</div>`
+              :`<button class="btn btn-s btn-sm" style="margin-top:10px;width:100%" onclick="solicitarMudancaPlano('${p.id}')">Solicitar mudança</button>`}
+          </div>`).join("")}
+        </div>
       </div>
     </div>
 
@@ -4165,6 +4220,29 @@ async function renderFaturasEmpresa(){
   }catch(e){
     pg.innerHTML=`<div class="ph"><div class="ph-title">💳 Minhas Faturas</div></div>
     <div class="empty-st">❌ Erro ao carregar faturas. Tente novamente.</div>`;
+    console.error("renderFaturasEmpresa:",e);
+  }
+}
+
+function toggleMudarPlano(){
+  const el=$("fat-planos-grid");
+  if(!el)return;
+  el.style.display=el.style.display==="none"?"block":"none";
+}
+
+function solicitarMudancaPlano(planoId){
+  const planoNovo=(_planosDisponiveis||[]).find(p=>p.id===planoId);
+  const planoAtual=(_planosDisponiveis||[]).find(p=>p.id===_planoAtualId);
+  const cfg=getCfg();
+  const nomeEmpresa=cfg?.negocio?.nome||_user?.nome||_tenant;
+  let msg=`Olá! Gostaria de solicitar a mudança de plano da empresa *${nomeEmpresa}*.\n`;
+  msg+=`📦 Plano atual: ${planoAtual?.name||_planoAtualId}\n`;
+  msg+=`✨ Plano desejado: ${planoNovo?.name||planoId}\n`;
+  msg+=`\nPor favor, me ajudem com a mudança e o pagamento. Obrigado!`;
+  if(_suporteWpp){
+    window.open(`https://wa.me/${_suporteWpp}?text=${encodeURIComponent(msg)}`,"_blank");
+  }else{
+    toast("⚠️ WhatsApp de suporte não configurado pelo CEO ainda.","err");
   }
 }
 
@@ -4176,15 +4254,16 @@ function _renderFaturaCard(f){
     isento:{cls:"fat-status-isento",ic:"🎁"}
   };
   const st=stMap[f.status]||{cls:"",ic:"❓"};
-  const venc=f.vencimento?new Date(f.vencimento.seconds?f.vencimento.seconds*1000:f.vencimento).toLocaleDateString("pt-BR"):"—";
+  const venc=f.vencimento?new Date(f.vencimento.seconds?f.vencimento.seconds*1000:(f.vencimento+"T12:00:00")).toLocaleDateString("pt-BR"):"—";
   const val=f.valor!=null?`R$ ${Number(f.valor).toFixed(2).replace(".",",")}`:"-";
+  const titulo=f.obs||`Fatura ${f.plano?String(f.plano).toUpperCase():""}`.trim()||"Fatura mensal";
   return `
   <div class="fat-empresa-card">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
       <div>
-        <div style="font-weight:700;font-size:.95rem">${f.descricao||"Fatura mensal"}</div>
-        <div style="font-size:.78rem;color:var(--text3);margin-top:2px">Vencimento: ${venc} · Ref: ${f.referencia||"—"}</div>
-        ${f.pixCopiaECola?`<div style="font-size:.72rem;color:var(--text3);margin-top:4px">PIX: <span style="font-family:'DM Mono',monospace;background:var(--bg3);padding:2px 6px;border-radius:5px;user-select:all">${f.pixCopiaECola}</span></div>`:""}
+        <div style="font-weight:700;font-size:.95rem">${esc(titulo)}</div>
+        <div style="font-size:.78rem;color:var(--text3);margin-top:2px">Vencimento: ${venc} · Ref: ${_fmtMesRef(f.mes)}</div>
+        ${f.pixCopiaECola?`<div style="font-size:.72rem;color:var(--text3);margin-top:4px">PIX: <span style="font-family:'DM Mono',monospace;background:var(--bg3);padding:2px 6px;border-radius:5px;user-select:all">${esc(f.pixCopiaECola)}</span></div>`:""}
         ${f.linkPagamento?`<a href="${f.linkPagamento}" target="_blank" class="btn btn-p btn-sm" style="margin-top:8px;display:inline-flex">💳 Pagar Agora</a>`:""}
       </div>
       <div style="text-align:right">
@@ -4202,24 +4281,26 @@ async function carregarPlanosNoCadastro(){
   const grid=$("nc-planos-grid");
   if(!grid)return;
   try{
-    const snap=await getDocs(query(collection(db,"ceo_planos"),orderBy("ordem","asc"))).catch(()=>null);
+    const snap=await getDocs(collection(db,"plans")).catch(()=>null);
     let planos=snap&&!snap.empty?snap.docs.map(d=>({id:d.id,...d.data()})):[];
     // Planos padrão se não houver no Firebase
     if(planos.length===0){
       planos=[
-        {id:"free",nome:"Gratuito",preco:0,descricao:"Até 50 produtos · 1 usuário"},
-        {id:"basico",nome:"Básico",preco:79,descricao:"Até 200 produtos · 3 usuários",destaque:false},
-        {id:"pro",nome:"Profissional",preco:149,descricao:"Ilimitado · usuários ilimitados",destaque:true},
+        {id:"free",name:"Free",price:0,desc:"Para começar",benefits:["1 usuário","Até 50 produtos","PDV básico"]},
+        {id:"basic",name:"Basic",price:49.90,desc:"Para pequenas empresas",benefits:["3 usuários","Até 200 produtos","PDV completo","Relatórios"]},
+        {id:"pro",name:"Pro",price:99.90,desc:"Para empresas em crescimento",benefits:["10 usuários","Produtos ilimitados","PDV + KDS","DRE completo","Suporte prioritário"],destaque:true},
+        {id:"premium",name:"Premium",price:199.90,desc:"Para múltiplas unidades",benefits:["Usuários ilimitados","Tudo ilimitado","Multi-empresa","API access","Gerente de conta"]},
       ];
     }
+    planos.sort((a,b)=>(a.price||0)-(b.price||0));
     grid.innerHTML=planos.map(p=>`
       <div class="nc-plano-card${p.id==="free"?" sel":""}" data-plano="${p.id}" onclick="selecionarPlano('${p.id}',this)">
         ${p.destaque?`<div class="nc-plano-destaque">⭐ MAIS POPULAR</div>`:""}
         <div style="display:flex;justify-content:space-between;align-items:center">
-          <div class="p-name">${p.nome}</div>
-          <div class="p-price">${p.preco===0?"Grátis":"R$ "+Number(p.preco).toFixed(2).replace(".",",")}<span style="font-size:.68rem;color:var(--text3)">${p.preco>0?"/mês":""}</span></div>
+          <div class="p-name">${esc(p.name)}</div>
+          <div class="p-price">${!p.price?"Grátis":"R$ "+Number(p.price).toFixed(2).replace(".",",")}<span style="font-size:.68rem;color:var(--text3)">${p.price>0?"/mês":""}</span></div>
         </div>
-        <div class="p-desc">${p.descricao||""}</div>
+        <div class="p-desc">${esc(p.desc||"")}</div>
       </div>`).join("");
   }catch(e){
     grid.innerHTML=`<div style="color:var(--text3);font-size:.8rem;padding:8px">Não foi possível carregar planos.</div>`;

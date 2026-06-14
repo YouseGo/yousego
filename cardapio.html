@@ -321,7 +321,10 @@
 
   const urlParams  = new URLSearchParams(window.location.search);
   const TENANT     = urlParams.get('tenant') || '';
-  const WPP_NUMERO = urlParams.get('whatsapp') || '';
+  // WPP_NUMERO: prioriza o número salvo no painel (Firebase), com fallback
+  // para o parâmetro ?whatsapp= da URL (links antigos). Assim, ao trocar o
+  // número no sistema, o cardápio passa a usar o novo automaticamente.
+  let WPP_NUMERO = urlParams.get('whatsapp') || '';
 
   let CARDAPIO = [], carrinho = [], catAtiva = 'Todos';
   let storeNome = 'Cardápio Digital', storeLogo = '🍽️', storeSub = 'Peça online e receba em casa 🛵';
@@ -374,6 +377,12 @@
         } else {
           storeLogo = cfg.logo || '🍽️';
         }
+        // ── WhatsApp da empresa: o número salvo no painel (Firebase) tem
+        // prioridade e fica sincronizado automaticamente, mesmo que o
+        // link/QR Code do cardápio tenha sido gerado antes de uma troca de
+        // número. Fallback: telefone do negócio e, por último, a URL.
+        const wppCfg = (cfg.whatsappCardapio || cfg.negocio?.fone || '').toString().replace(/\D/g,'');
+        if(wppCfg) WPP_NUMERO = wppCfg;
         aplicarTema();
       }
     } catch(e){ console.warn("Firebase:", e.message); }
@@ -692,8 +701,8 @@
   }
 
   // ── ENVIO — Firebase + WhatsApp ──────────────────────────────
-  document.getElementById('btn-enviar-pedido').addEventListener('click', async function(){
-    if(!WPP_NUMERO){ alert('⚠️ Número de WhatsApp não configurado para esta loja.'); return; }
+  document.getElementById('btn-enviar-pedido').addEventListener('click', function(){
+    // CORREÇÃO: listener síncrono para não bloquear window.open pelo navegador
     if(!validarForm()) return;
     const btn = this; btn.disabled=true; btn.textContent='⏳ Enviando...';
 
@@ -706,71 +715,65 @@
     const pedidoId    = uid();
     const tsAgora     = Date.now();
 
-    // ── 1. Firebase — usa setDoc com ID fixo (sem serverTimestamp) ──
-    // SOLUÇÃO DO BUG: serverTimestamp() era null no primeiro snapshot,
-    // causando o pedido ser ignorado pelo listener do sistema.
-    // Agora usamos Date.now() como número inteiro — sempre disponível.
-    if(TENANT){
-      try{
-        const pedidoFb = {
-          id:        pedidoId,
-          cliente:   nomeCliente,
-          fone:      foneCliente || '',
-          modo:      tipoEntrega==='Entrega' ? 'delivery' : 'balcao',
-          endereco:  endereco,
-          pagamento: pagamento,
-          itens:     carrinho.map(i=>({id:i.id, nome:i.nome, preco:i.preco, qtd:i.qtd, obs:i.obs||''})),
-          total:     total,
-          val:       total,
-          status:    'pendente',
-          kdsStatus: 'pendente',
-          origem:    'cardapio-digital',
-          data:      hoje(),
-          obs:       carrinho.filter(i=>i.obs).map(i=>`${i.nome}: ${i.obs}`).join(' | '),
-          criadoEm:  tsAgora,   // número inteiro — sem serverTimestamp
-          _at:       tsAgora,
-        };
-        // setDoc com ID fixo — garante idempotência e sem índice composto necessário
-        await setDoc(
-          doc(db, "companies", TENANT, "kds_pedidos", pedidoId),
-          pedidoFb
-        );
-        console.log('✅ Pedido gravado no Firebase:', pedidoId);
-      } catch(e){
-        console.warn("Firestore gravação falhou:", e.message);
-        // Não bloqueia — WhatsApp ainda vai
-      }
-    }
-
-    // ── 2. Mensagem WhatsApp ─────────────────────────────────────
+    // ── 1. Mensagem WhatsApp — monta ANTES do async para não ser bloqueado ──
     let msg = '';
-    msg += '*\uD83D\uDED2 NOVO PEDIDO \u2014 CARD\u00C1PIO DIGITAL*\n';
-    msg += '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n';
-    msg += `*\uD83D\uDC64 Cliente:* ${nomeCliente}\n`;
-    if(foneCliente) msg += `*\uD83D\uDCF1 Contato:* ${foneCliente}\n`;
-    msg += `*\uD83D\uDCE6 Entrega:* ${tipoEntrega}\n`;
-    if(tipoEntrega==='Entrega') msg += `*\uD83D\uDCCD Endere\u00E7o:* ${endereco}\n`;
-    msg += `*\uD83D\uDCB3 Pagamento:* ${pagamento.toUpperCase()}\n`;
-    msg += '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n';
-    msg += '*\uD83D\uDCCB ITENS DO PEDIDO:*\n\n';
+    msg += '*🛒 NOVO PEDIDO — CARDÁPIO DIGITAL*\n';
+    msg += '────────────────\n';
+    msg += `*👤 Cliente:* ${nomeCliente}\n`;
+    if(foneCliente) msg += `*📱 Contato:* ${foneCliente}\n`;
+    msg += `*📦 Entrega:* ${tipoEntrega}\n`;
+    if(tipoEntrega==='Entrega') msg += `*📍 Endereço:* ${endereco}\n`;
+    msg += `*💳 Pagamento:* ${pagamento.toUpperCase()}\n`;
+    msg += '────────────────\n';
+    msg += '*📋 ITENS DO PEDIDO:*\n\n';
     carrinho.forEach((item, idx)=>{
       const sub = item.preco * item.qtd;
       msg += `*${idx+1}. ${item.nome}*\n`;
-      msg += `   Qtd: ${item.qtd}x \u2014 ${fmtBRL(item.preco)}/un\n`;
+      msg += `   Qtd: ${item.qtd}x — ${fmtBRL(item.preco)}/un\n`;
       msg += `   Subtotal: *${fmtBRL(sub)}*\n`;
-      if(item.obs) msg += `   \u270F\uFE0F Obs: _${item.obs}_\n`;
+      if(item.obs) msg += `   ✏️ Obs: _${item.obs}_\n`;
       msg += '\n';
     });
-    msg += '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n';
-    msg += `\uD83D\uDCB0 *TOTAL: ${fmtBRL(total)}*\n`;
-    msg += '\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n';
-    msg += `_Pedido #${pedidoId.slice(-6).toUpperCase()} \u2014 via Card\u00E1pio Digital YOUSEGO_ \uD83C\uDF7D\uFE0F`;
+    msg += '────────────────\n';
+    msg += `💰 *TOTAL: ${fmtBRL(total)}*\n`;
+    msg += '────────────────\n';
+    msg += `_Pedido #${pedidoId.slice(-6).toUpperCase()} — via Cardápio Digital YOUSEGO_ 🍽️`;
 
-    let numero = WPP_NUMERO.replace(/\D/g,'');
-    if(!numero.startsWith('55')) numero = '55' + numero;
-    window.open(`https://wa.me/${numero}?text=${encodeURIComponent(msg)}`, '_blank');
+    // ── 2. Abre WhatsApp IMEDIATAMENTE (síncrono, antes de qualquer await) ──
+    if(WPP_NUMERO){
+      let numero = WPP_NUMERO.replace(/\D/g,'');
+      if(!numero.startsWith('55')) numero = '55' + numero;
+      window.open(`https://wa.me/${numero}?text=${encodeURIComponent(msg)}`, '_blank');
+    } else {
+      console.warn('⚠️ WhatsApp não configurado para este tenant.');
+    }
 
-    // ── 3. Limpa ──────────────────────────────────────────────────
+    // ── 3. Firebase — assíncrono, não bloqueia nada ───────────────
+    if(TENANT){
+      const pedidoFb = {
+        id:        pedidoId,
+        cliente:   nomeCliente,
+        fone:      foneCliente || '',
+        modo:      tipoEntrega==='Entrega' ? 'delivery' : 'balcao',
+        endereco:  endereco,
+        pagamento: pagamento,
+        itens:     carrinho.map(i=>({id:i.id, nome:i.nome, preco:i.preco, qtd:i.qtd, obs:i.obs||''})),
+        total:     total,
+        val:       total,
+        status:    'pendente',
+        kdsStatus: 'pendente',
+        origem:    'cardapio-digital',
+        data:      hoje(),
+        obs:       carrinho.filter(i=>i.obs).map(i=>`${i.nome}: ${i.obs}`).join(' | '),
+        criadoEm:  tsAgora,
+        _at:       tsAgora,
+      };
+      setDoc(doc(db, "companies", TENANT, "kds_pedidos", pedidoId), pedidoFb)
+        .then(()=> console.log('✅ Pedido gravado no Firebase:', pedidoId))
+        .catch(e => console.warn("Firestore gravação falhou:", e.message));
+    }
+
+    // ── 4. Limpa ──────────────────────────────────────────────────
     carrinho = [];
     fecharCarrinho();
     sincronizarUI();

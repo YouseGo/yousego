@@ -1385,7 +1385,7 @@ window.enviarFaturaWhatsApp = async function(id) {
     if(!wpp) return;
     // Salvar no cadastro da empresa para próximas vezes
     try{
-      await updateDoc(doc(db,'tenants',f.empresaId),{whatsapp:wpp.replace(/\D/g,'')});
+      await updateDoc(doc(db,'companies',f.empresaId),{whatsapp:wpp.replace(/\D/g,'')});
       if(co) co.whatsapp=wpp.replace(/\D/g,'');
     }catch(e){}
   }
