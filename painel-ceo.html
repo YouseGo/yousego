@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YOUSEGO CEO — Painel Global</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#07070f;--bg2:#0d0d1a;--bg3:#13131f;
+  --card:#111120;--card2:#18182a;
+  --border:rgba(255,255,255,0.06);--border2:rgba(255,255,255,0.11);
+  --accent:#7c5cfc;--accent2:#a78bfa;--accent3:#5a3fd4;
+  --gold:#f59e0b;--green:#22c55e;--red:#ef4444;--blue:#3b82f6;
+  --text:#e8e8f2;--text2:#8888aa;--text3:#444466;
+  --r:12px;--r2:8px;--sh:0 4px 32px rgba(0,0,0,.5);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:14px}
+h1,h2,h3,h4{font-family:'Syne',sans-serif}
+button{cursor:pointer;font-family:'DM Sans',sans-serif;font-size:14px;border:none;outline:none}
+input,select,textarea{font-family:'DM Sans',sans-serif;font-size:14px;outline:none;background:var(--bg3);color:var(--text);border:1px solid var(--border2);border-radius:var(--r2);padding:10px 12px;width:100%;transition:border .2s}
+input:focus,select:focus,textarea:focus{border-color:var(--accent)}
+select option{background:var(--bg3)}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+/* LOGIN CEO */
+#ceo-login{
+  position:fixed;inset:0;z-index:100;
+  background:radial-gradient(ellipse at 20% 50%,#1a0a3e 0%,#07070f 65%);
+  display:flex;align-items:center;justify-content:center;padding:20px;
+}
+.login-card{
+  background:var(--card);border:1px solid var(--border2);border-radius:20px;
+  padding:44px;width:100%;max-width:400px;box-shadow:var(--sh);
+}
+.ceo-brand{text-align:center;margin-bottom:32px}
+.ceo-brand .logo{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800;
+  background:linear-gradient(135deg,#7c5cfc,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:2px}
+.ceo-brand .sub{font-size:.8rem;color:var(--text2);margin-top:4px;letter-spacing:1px;text-transform:uppercase}
+.field{margin-bottom:14px}
+.field label{display:block;color:var(--text2);font-size:.78rem;margin-bottom:5px;font-weight:600;letter-spacing:.3px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 20px;border-radius:var(--r2);font-weight:600;transition:all .2s;width:100%}
+.btn-gold{background:linear-gradient(135deg,#f59e0b,#d97706);color:#000}
+.btn-gold:hover{opacity:.9;transform:translateY(-1px)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent2)}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border2)}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent2)}
+.btn-danger{background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.2)}
+.btn-danger:hover{background:var(--red);color:#fff}
+.btn-success{background:rgba(34,197,94,.15);color:var(--green);border:1px solid rgba(34,197,94,.2)}
+.btn-success:hover{background:var(--green);color:#fff}
+.btn-sm{padding:6px 12px;font-size:.78rem;width:auto}
+.err{color:var(--red);font-size:.8rem;text-align:center;margin-top:8px;min-height:18px}
+
+/* APP CEO */
+#ceo-app{display:none;min-height:100vh;flex-direction:column}
+.ceo-topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(7,7,15,.9);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  padding:0 24px;height:60px;display:flex;align-items:center;gap:16px;
+}
+.ceo-topbar-brand{font-family:'Syne',sans-serif;font-size:1rem;font-weight:800;
+  background:linear-gradient(135deg,#7c5cfc,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:1px}
+.ceo-topbar-tag{background:rgba(245,158,11,.15);color:var(--gold);font-size:.7rem;font-weight:700;padding:3px 8px;border-radius:20px;letter-spacing:.5px;text-transform:uppercase}
+.ceo-nav{display:flex;gap:4px;margin-left:auto}
+.ceo-nav-btn{padding:7px 14px;border-radius:var(--r2);background:transparent;color:var(--text2);font-size:.82rem;font-weight:600;transition:all .15s;white-space:nowrap}
+.ceo-nav-btn:hover{background:var(--bg3);color:var(--text)}
+.ceo-nav-btn.active{background:rgba(124,92,252,.15);color:var(--accent2)}
+.ceo-content{padding:28px;max-width:1400px;margin:0 auto;width:100%}
+
+/* TABS */
+.tab-section{display:none}
+.tab-section.active{display:block}
+
+/* MÉTRICAS */
+.metrics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px}
+.metric-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px;
+  position:relative;overflow:hidden;
+}
+.metric-card::after{content:'';position:absolute;bottom:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:var(--mc,var(--accent));opacity:.08}
+.metric-icon{font-size:1.5rem;margin-bottom:10px}
+.metric-label{font-size:.75rem;color:var(--text2);font-weight:600;letter-spacing:.3px;text-transform:uppercase;margin-bottom:6px}
+.metric-value{font-family:'Syne',sans-serif;font-size:1.8rem;font-weight:800}
+.metric-sub{font-size:.75rem;color:var(--text3);margin-top:4px}
+
+/* EMPRESAS TABLE */
+.sec-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:gap}
+.sec-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700}
+.tbl-wrap{border-radius:var(--r);border:1px solid var(--border);overflow:hidden}
+table{width:100%;border-collapse:collapse}
+th{background:var(--bg3);padding:10px 16px;text-align:left;font-size:.72rem;font-weight:700;color:var(--text2);letter-spacing:.5px;text-transform:uppercase;white-space:nowrap}
+td{padding:12px 16px;border-top:1px solid var(--border);font-size:.85rem;vertical-align:middle}
+tr:hover td{background:rgba(255,255,255,.015)}
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:.72rem;font-weight:700}
+.badge-green{background:rgba(34,197,94,.15);color:#22c55e}
+.badge-red{background:rgba(239,68,68,.15);color:#ef4444}
+.badge-yellow{background:rgba(245,158,11,.15);color:#f59e0b}
+.badge-blue{background:rgba(59,130,246,.15);color:#60a5fa}
+.badge-purple{background:rgba(124,92,252,.15);color:#a78bfa}
+.badge-gray{background:rgba(255,255,255,.07);color:var(--text2)}
+
+/* CARD EMPRESA */
+.co-detail{background:var(--card2);border:1px solid var(--border2);border-radius:var(--r);padding:20px;margin-bottom:12px}
+.co-detail-header{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.co-emoji{width:44px;height:44px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0}
+.co-name{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700}
+.co-id{font-size:.72rem;color:var(--text3);font-family:monospace}
+.co-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-bg.open{display:flex}
+.modal{background:var(--card);border:1px solid var(--border2);border-radius:16px;padding:28px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
+.modal h3{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;margin-bottom:20px}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:24px}
+.modal-footer .btn{width:auto}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* CONFIG CARDS */
+.cfg-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.cfg-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:22px}
+.cfg-card h3{font-size:.9rem;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;z-index:999;background:var(--card2);border:1px solid var(--border2);border-radius:var(--r2);padding:12px 20px;font-size:.85rem;box-shadow:var(--sh);transform:translateY(80px);opacity:0;transition:all .3s;pointer-events:none}
+#toast.show{transform:translateY(0);opacity:1}
+#toast.t-ok{border-left:3px solid var(--green)}
+#toast.t-err{border-left:3px solid var(--red)}
+
+/* PLAN BADGE */
+.plan-free{background:rgba(255,255,255,.07);color:var(--text2)}
+.plan-basic{background:rgba(59,130,246,.15);color:#60a5fa}
+.plan-pro{background:rgba(124,92,252,.15);color:#a78bfa}
+.plan-premium{background:rgba(245,158,11,.15);color:#f59e0b}
+
+/* FINANCEIRO */
+.badge-orange{background:rgba(249,115,22,.15);color:#fb923c}
+.fin-row-atrasado td{background:rgba(239,68,68,.04)!important}
+.fin-row-atrasado td:first-child{border-left:3px solid var(--red)}
+
+.spinner{width:16px;height:16px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-row{color:var(--text2);font-size:.85rem;text-align:center;padding:32px;display:flex;align-items:center;justify-content:center;gap:8px}
+
+/* SWITCH */
+.switch{position:relative;display:inline-block;width:42px;height:24px}
+.switch input{opacity:0;width:0;height:0}
+.slider{position:absolute;cursor:pointer;inset:0;background:var(--bg3);border-radius:24px;transition:.3s;border:1px solid var(--border2)}
+.slider:before{content:'';position:absolute;height:18px;width:18px;left:2px;bottom:2px;background:var(--text2);border-radius:50%;transition:.3s}
+input:checked+.slider{background:var(--accent);border-color:var(--accent)}
+input:checked+.slider:before{transform:translateX(18px);background:#fff}
+
+@media(max-width:900px){
+  .metrics-grid{grid-template-columns:repeat(2,1fr)}
+  .cfg-grid{grid-template-columns:1fr}
+  .ceo-nav{display:none}
+  .form-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN CEO -->
+<div id="ceo-login">
+  <div class="login-card">
+    <div class="ceo-brand">
+      <div class="logo">YOUSEGO</div>
+      <div class="sub">⚡ Painel CEO Global</div>
+    </div>
+    <div class="field"><label>E-mail CEO</label><input id="ceo-email" type="email" placeholder="ceo@yousego.com"></div>
+    <div class="field"><label>Senha</label><input id="ceo-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')ceoLogin()"></div>
+    <div class="err" id="ceo-err"></div>
+    <button class="btn btn-gold" onclick="ceoLogin()" style="margin-top:10px" id="btn-ceo-login">⚡ Entrar como CEO</button>
+    <p style="text-align:center;font-size:.75rem;color:var(--text3);margin-top:16px">Acesso restrito — apenas administradores autorizados</p>
+  </div>
+</div>
+
+<!-- APP CEO -->
+<div id="ceo-app" style="display:none;flex-direction:column">
+
+  <!-- TOPBAR -->
+  <div class="ceo-topbar">
+    <div class="ceo-topbar-brand">YOUSEGO</div>
+    <div class="ceo-topbar-tag">CEO</div>
+    <nav class="ceo-nav">
+      <button class="ceo-nav-btn active" data-tab="overview">📊 Visão Geral</button>
+      <button class="ceo-nav-btn" data-tab="empresas">🏢 Empresas</button>
+      <button class="ceo-nav-btn" data-tab="config">⚙️ Configurações</button>
+      <button class="ceo-nav-btn" data-tab="planos">💎 Planos</button>
+      <button class="ceo-nav-btn" data-tab="financeiro">💰 Financeiro</button>
+    </nav>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:12px">
+      <span id="ceo-user-email" style="font-size:.8rem;color:var(--text2)"></span>
+      <button class="btn btn-ghost btn-sm" onclick="ceoLogout()">Sair</button>
+    </div>
+  </div>
+
+  <!-- MOBILE NAV -->
+  <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:6px;overflow-x:auto" id="mobile-nav">
+    <button class="ceo-nav-btn active" data-tab="overview" style="white-space:nowrap;font-size:.75rem">📊 Geral</button>
+    <button class="ceo-nav-btn" data-tab="empresas" style="white-space:nowrap;font-size:.75rem">🏢 Empresas</button>
+    <button class="ceo-nav-btn" data-tab="config" style="white-space:nowrap;font-size:.75rem">⚙️ Config</button>
+    <button class="ceo-nav-btn" data-tab="planos" style="white-space:nowrap;font-size:.75rem">💎 Planos</button>
+    <button class="ceo-nav-btn" data-tab="financeiro" style="white-space:nowrap;font-size:.75rem">💰 Financeiro</button>
+  </div>
+
+  <div class="ceo-content">
+
+    <!-- ── VISÃO GERAL ── -->
+    <div class="tab-section active" id="tab-overview">
+      <div style="margin-bottom:24px">
+        <h2 style="font-size:1.3rem;margin-bottom:4px">Visão Geral da Plataforma</h2>
+        <p style="color:var(--text2);font-size:.85rem">Métricas em tempo real de todas as empresas</p>
+      </div>
+      <div class="metrics-grid">
+        <div class="metric-card" style="--mc:#7c5cfc">
+          <div class="metric-icon">🏢</div>
+          <div class="metric-label">Total de Empresas</div>
+          <div class="metric-value" id="m-total">—</div>
+          <div class="metric-sub">cadastradas na plataforma</div>
+        </div>
+        <div class="metric-card" style="--mc:#22c55e">
+          <div class="metric-icon">✅</div>
+          <div class="metric-label">Empresas Ativas</div>
+          <div class="metric-value" id="m-ativas">—</div>
+          <div class="metric-sub">com acesso liberado</div>
+        </div>
+        <div class="metric-card" style="--mc:#ef4444">
+          <div class="metric-icon">🚫</div>
+          <div class="metric-label">Suspensas</div>
+          <div class="metric-value" id="m-suspensas">—</div>
+          <div class="metric-sub">acesso bloqueado</div>
+        </div>
+        <div class="metric-card" style="--mc:#f59e0b">
+          <div class="metric-icon">💎</div>
+          <div class="metric-label">Plano Premium</div>
+          <div class="metric-value" id="m-premium">—</div>
+          <div class="metric-sub">empresas no plano premium</div>
+        </div>
+      </div>
+
+      <!-- Lista rápida -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <h3 style="font-size:1rem">Empresas Recentes</h3>
+        <button class="btn btn-ghost btn-sm" onclick="goTab('empresas')">Ver todas →</button>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Empresa</th><th>Plano</th><th>Status</th><th>Cadastro</th><th>Ações</th></tr></thead>
+          <tbody id="overview-tbody"><tr><td colspan="5"><div class="loading-row"><div class="spinner"></div> Carregando...</div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── EMPRESAS ── -->
+    <div class="tab-section" id="tab-empresas">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+        <div>
+          <h2 style="font-size:1.3rem;margin-bottom:4px">Gerenciar Empresas</h2>
+          <p style="color:var(--text2);font-size:.85rem">Gerencie todas as contas da plataforma</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input id="co-search" type="text" placeholder="🔍 Buscar empresa..." oninput="filterEmpresas()" style="width:220px">
+          <select id="co-filter-status" onchange="filterEmpresas()" style="width:140px">
+            <option value="">Todos status</option>
+            <option value="ativo">Ativo</option>
+            <option value="suspenso">Suspenso</option>
+            <option value="inativo">Inativo</option>
+          </select>
+          <select id="co-filter-plan" onchange="filterEmpresas()" style="width:130px">
+            <option value="">Todos planos</option>
+            <option value="free">Free</option>
+            <option value="basic">Basic</option>
+            <option value="pro">Pro</option>
+            <option value="premium">Premium</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="refreshEmpresas()">↻ Atualizar</button>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th>Empresa</th><th>Tenant ID</th><th>Plano</th><th>Status</th><th>WhatsApp</th><th>Cadastro</th><th>Ações</th></tr></thead>
+          <tbody id="empresas-tbody"><tr><td colspan="7"><div class="loading-row"><div class="spinner"></div> Carregando...</div></td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── CONFIGURAÇÕES GLOBAIS ── -->
+    <div class="tab-section" id="tab-config">
+      <div style="margin-bottom:24px">
+        <h2 style="font-size:1.3rem;margin-bottom:4px">Configurações Globais</h2>
+        <p style="color:var(--text2);font-size:.85rem">Tudo salva automaticamente no Firebase</p>
+      </div>
+      <div class="cfg-grid">
+        <div class="cfg-card">
+          <h3>📞 Contato & Suporte</h3>
+          <div class="field"><label>WhatsApp Suporte</label><input id="cfg-whatsapp" type="text" placeholder="5511999999999"></div>
+          <div class="field"><label>E-mail Suporte</label><input id="cfg-email-sup" type="email" placeholder="suporte@yousego.com"></div>
+          <div class="field"><label>E-mail Comercial</label><input id="cfg-email-com" type="email" placeholder="comercial@yousego.com"></div>
+          <button class="btn btn-primary btn-sm" onclick="saveCfgContato()" style="width:auto">Salvar</button>
+        </div>
+        <div class="cfg-card">
+          <h3>🌐 Landing Page — Hero</h3>
+          <div class="field"><label>Badge (topo)</label><input id="cfg-hero-badge" type="text" placeholder="Plataforma SaaS para..."></div>
+          <div class="field"><label>Título Principal</label><input id="cfg-lp-title" type="text" placeholder="Gerencie sua empresa..."></div>
+          <div class="field"><label>Subtítulo</label><textarea id="cfg-lp-sub" rows="2" placeholder="Descrição..."></textarea></div>
+          <div class="field"><label>Botão CTA 1</label><input id="cfg-hero-cta1" type="text" placeholder="🚀 Começar agora — é grátis"></div>
+          <div class="field"><label>Botão CTA 2</label><input id="cfg-hero-cta2" type="text" placeholder="Ver planos"></div>
+          <button class="btn btn-primary btn-sm" onclick="saveCfgLP()" style="width:auto">Salvar Hero</button>
+        </div>
+        <div class="cfg-card">
+          <h3>📊 Landing Page — Estatísticas</h3>
+          <div class="form-row">
+            <div class="field"><label>Stat 1 Valor</label><input id="cfg-stat1-val" type="text" placeholder="500+"></div>
+            <div class="field"><label>Stat 1 Label</label><input id="cfg-stat1-label" type="text" placeholder="Empresas ativas"></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Stat 2 Valor</label><input id="cfg-stat2-val" type="text" placeholder="R$ 2M+"></div>
+            <div class="field"><label>Stat 2 Label</label><input id="cfg-stat2-label" type="text" placeholder="Gerenciados/mês"></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Stat 3 Valor</label><input id="cfg-stat3-val" type="text" placeholder="99.9%"></div>
+            <div class="field"><label>Stat 3 Label</label><input id="cfg-stat3-label" type="text" placeholder="Uptime"></div>
+          </div>
+          <div class="form-row">
+            <div class="field"><label>Stat 4 Valor</label><input id="cfg-stat4-val" type="text" placeholder="4.9★"></div>
+            <div class="field"><label>Stat 4 Label</label><input id="cfg-stat4-label" type="text" placeholder="Avaliação média"></div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="saveCfgStats()" style="width:auto">Salvar Stats</button>
+        </div>
+        <div class="cfg-card">
+          <h3>💬 Depoimentos</h3>
+          <div id="depo-list" style="margin-bottom:10px"></div>
+          <button class="btn btn-ghost btn-sm" onclick="addDepo()">+ Adicionar depoimento</button>
+        </div>
+        <div class="cfg-card">
+          <h3>🏁 CTA Final & Footer</h3>
+          <div class="field"><label>Título CTA</label><input id="cfg-cta-title" type="text" placeholder="Pronto para transformar..."></div>
+          <div class="field"><label>Subtítulo CTA</label><input id="cfg-cta-sub" type="text" placeholder="Configure em minutos..."></div>
+          <div class="field"><label>Botão CTA 1</label><input id="cfg-cta-btn1" type="text" placeholder="🚀 Criar conta grátis"></div>
+          <div class="field"><label>Botão CTA 2</label><input id="cfg-cta-btn2" type="text" placeholder="💬 Falar com consultor"></div>
+          <div class="field"><label>Descrição Footer</label><textarea id="cfg-footer-desc" rows="2" placeholder="Gestão inteligente..."></textarea></div>
+          <div class="field"><label>Copyright</label><input id="cfg-footer-copy" type="text" placeholder="© 2026 YOUSEGO..."></div>
+          <button class="btn btn-primary btn-sm" onclick="saveCfgCta()" style="width:auto">Salvar</button>
+        </div>
+        <div class="cfg-card">
+          <h3>🎨 Cores & Visual</h3>
+          <div class="field"><label>Cor Primária</label><input id="cfg-color-primary" type="color" value="#7c5cfc" style="height:44px;padding:4px"></div>
+          <div class="field"><label>Cor Destaque</label><input id="cfg-color-accent" type="color" value="#f59e0b" style="height:44px;padding:4px"></div>
+          <div class="field"><label>Nome da Plataforma</label><input id="cfg-platform-name" type="text" placeholder="YOUSEGO"></div>
+          <button class="btn btn-primary btn-sm" onclick="saveCfgVisual()" style="width:auto">Salvar</button>
+        </div>
+        <div class="cfg-card">
+          <h3>📢 Banners & Avisos</h3>
+          <div class="field"><label>Banner Principal (URL imagem)</label><input id="cfg-banner" type="text" placeholder="https://..."></div>
+          <div class="field"><label>Aviso Global (exibido no sistema)</label><textarea id="cfg-aviso" rows="2" placeholder="Deixe vazio para ocultar"></textarea></div>
+          <div class="field" style="display:flex;align-items:center;gap:10px">
+            <label class="switch"><input type="checkbox" id="cfg-aviso-active"><span class="slider"></span></label>
+            <label>Exibir aviso nas empresas</label>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="saveCfgBanners()" style="width:auto">Salvar</button>
+        </div>
+        <div class="cfg-card">
+          <h3>🏷️ Categorias Globais</h3>
+          <p style="color:var(--text2);font-size:.8rem;margin-bottom:12px">Sugestões de categorias para novas empresas</p>
+          <div id="cats-list" style="margin-bottom:10px"></div>
+          <div style="display:flex;gap:8px">
+            <input id="cat-new" type="text" placeholder="Nova categoria..." style="flex:1">
+            <button class="btn btn-primary btn-sm" onclick="addGlobalCat()">+</button>
+          </div>
+        </div>
+        <div class="cfg-card">
+          <h3>❓ FAQ</h3>
+          <div id="faq-list" style="margin-bottom:10px"></div>
+          <button class="btn btn-ghost btn-sm" onclick="addFaq()">+ Adicionar pergunta</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PLANOS ── -->
+    <div class="tab-section" id="tab-planos">
+      <div style="margin-bottom:24px">
+        <h2 style="font-size:1.3rem;margin-bottom:4px">Gerenciar Planos</h2>
+        <p style="color:var(--text2);font-size:.85rem">Preços e benefícios salvos no Firebase em tempo real</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px" id="plans-grid">
+        <div class="loading-row"><div class="spinner"></div> Carregando planos...</div>
+      </div>
+    </div>
+
+    <!-- ── FINANCEIRO ── -->
+    <div class="tab-section" id="tab-financeiro">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px">
+        <div>
+          <h2 style="font-size:1.3rem;margin-bottom:4px">Financeiro & Assinaturas</h2>
+          <p style="color:var(--text2);font-size:.85rem">Acompanhe planos, datas de início e status de pagamento de cada empresa</p>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input id="fin-search" type="text" placeholder="🔍 Buscar empresa..." oninput="filterFinanceiro()" style="width:200px">
+          <select id="fin-filter-status" onchange="filterFinanceiro()" style="width:160px">
+            <option value="">Todos status</option>
+            <option value="pago">✅ Pago</option>
+            <option value="pendente">⏳ Pendente</option>
+            <option value="atrasado">🔴 Atrasado</option>
+            <option value="isento">🎁 Isento</option>
+          </select>
+          <select id="fin-filter-plan" onchange="filterFinanceiro()" style="width:130px">
+            <option value="">Todos planos</option>
+            <option value="free">Free</option>
+            <option value="basic">Basic</option>
+            <option value="pro">Pro</option>
+            <option value="premium">Premium</option>
+          </select>
+          <select id="fin-filter-mes" onchange="filterFinanceiro()" style="width:140px" id="fin-filter-mes"></select>
+          <button class="btn btn-primary btn-sm" onclick="refreshFinanceiro()">↻ Atualizar</button>
+          <button class="btn btn-success btn-sm" onclick="openModalNovaFatura()">+ Nova Fatura</button>
+        </div>
+      </div>
+
+      <!-- Métricas financeiras -->
+      <div class="metrics-grid" style="margin-bottom:28px">
+        <div class="metric-card" style="--mc:#22c55e">
+          <div class="metric-icon">✅</div>
+          <div class="metric-label">Faturas Pagas</div>
+          <div class="metric-value" id="fin-m-pagas">—</div>
+          <div class="metric-sub" id="fin-m-pagas-val">no mês atual</div>
+        </div>
+        <div class="metric-card" style="--mc:#f59e0b">
+          <div class="metric-icon">⏳</div>
+          <div class="metric-label">Pendentes</div>
+          <div class="metric-value" id="fin-m-pendentes">—</div>
+          <div class="metric-sub">aguardando pagamento</div>
+        </div>
+        <div class="metric-card" style="--mc:#ef4444">
+          <div class="metric-icon">🔴</div>
+          <div class="metric-label">Em Atraso</div>
+          <div class="metric-value" id="fin-m-atrasadas">—</div>
+          <div class="metric-sub">faturas vencidas</div>
+        </div>
+        <div class="metric-card" style="--mc:#7c5cfc">
+          <div class="metric-icon">💵</div>
+          <div class="metric-label">Receita do Mês</div>
+          <div class="metric-value" id="fin-m-receita">—</div>
+          <div class="metric-sub">faturas pagas no mês</div>
+        </div>
+      </div>
+
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Empresa</th>
+              <th>Plano</th>
+              <th>Início na plataforma</th>
+              <th>Mês de referência</th>
+              <th>Valor</th>
+              <th>Vencimento</th>
+              <th>Status Pagamento</th>
+              <th>Pago em</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody id="financeiro-tbody">
+            <tr><td colspan="9"><div class="loading-row"><div class="spinner"></div> Carregando...</div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /ceo-content -->
+</div><!-- /ceo-app -->
+
+<!-- MODAL EDITAR EMPRESA -->
+<div class="modal-bg" id="modal-empresa">
+  <div class="modal">
+    <h3>✏️ Editar Empresa</h3>
+    <input type="hidden" id="edit-co-id">
+    <div class="field"><label>Nome</label><input id="edit-co-name" type="text"></div>
+    <div class="field"><label>Emoji</label><input id="edit-co-emoji" type="text" maxlength="2"></div>
+    <div class="field"><label>WhatsApp</label><input id="edit-co-whatsapp" type="text" placeholder="5511999999999"></div>
+    <div class="field"><label>E-mail</label><input id="edit-co-email" type="email"></div>
+    <div class="field"><label>CPF/CNPJ (necessário para cobrança automática via Asaas)</label><input id="edit-co-cpfcnpj" type="text" placeholder="000.000.000-00 ou 00.000.000/0000-00"></div>
+    <div class="field"><label>Plano</label>
+      <select id="edit-co-plan">
+        <option value="free">Free</option>
+        <option value="basic">Basic</option>
+        <option value="pro">Pro</option>
+        <option value="premium">Premium</option>
+      </select>
+    </div>
+    <div class="field"><label>Status</label>
+      <select id="edit-co-status">
+        <option value="ativo">✅ Ativo</option>
+        <option value="suspenso">🚫 Suspenso</option>
+        <option value="inativo">⬛ Inativo</option>
+      </select>
+    </div>
+    <div class="field"><label>Observações internas</label><textarea id="edit-co-obs" rows="2" placeholder="Notas para o CEO..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-empresa')">Cancelar</button>
+      <button class="btn btn-primary btn-sm" onclick="saveEmpresa()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR PLANO -->
+<div class="modal-bg" id="modal-plano">
+  <div class="modal">
+    <h3>💎 Editar Plano</h3>
+    <input type="hidden" id="plan-id">
+    <div class="field"><label>Nome do Plano</label><input id="plan-name" type="text"></div>
+    <div class="form-row">
+      <div class="field"><label>Preço Mensal (R$)</label><input id="plan-price" type="number" step="0.01"></div>
+      <div class="field"><label>Preço Anual (R$)</label><input id="plan-price-anual" type="number" step="0.01"></div>
+    </div>
+    <div class="field"><label>Descrição</label><textarea id="plan-desc" rows="2"></textarea></div>
+    <div class="field"><label>Benefícios (um por linha)</label><textarea id="plan-benefits" rows="5" placeholder="PDV completo&#10;Até 500 produtos&#10;Suporte por e-mail"></textarea></div>
+    <div class="field"><label>Limite de Produtos</label><input id="plan-prod-limit" type="number" placeholder="-1 para ilimitado"></div>
+    <div class="field"><label>Limite de Usuários</label><input id="plan-user-limit" type="number" placeholder="-1 para ilimitado"></div>
+    <div class="field" style="display:flex;align-items:center;gap:10px">
+      <label class="switch"><input type="checkbox" id="plan-destaque"><span class="slider"></span></label>
+      <label>Plano em destaque</label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-plano')">Cancelar</button>
+      <button class="btn btn-primary btn-sm" onclick="savePlano()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FATURA -->
+<div class="modal-bg" id="modal-fatura">
+  <div class="modal" style="max-width:540px">
+    <h3 id="modal-fatura-title">💰 Nova Fatura</h3>
+    <input type="hidden" id="fat-id">
+    <div class="field">
+      <label>Empresa</label>
+      <select id="fat-empresa"></select>
+    </div>
+    <div class="form-row">
+      <div class="field">
+        <label>Mês de Referência</label>
+        <input id="fat-mes" type="month">
+      </div>
+      <div class="field">
+        <label>Vencimento</label>
+        <input id="fat-vencimento" type="date">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="field">
+        <label>Plano Cobrado</label>
+        <select id="fat-plano">
+          <option value="free">Free — R$ 0,00</option>
+          <option value="basic">Basic — R$ 49,90</option>
+          <option value="pro">Pro — R$ 99,90</option>
+          <option value="premium">Premium — R$ 199,90</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Valor (R$)</label>
+        <input id="fat-valor" type="number" step="0.01" placeholder="0.00">
+      </div>
+    </div>
+    <div class="field">
+      <label>Status de Pagamento</label>
+      <select id="fat-status">
+        <option value="pendente">⏳ Pendente</option>
+        <option value="pago">✅ Pago</option>
+        <option value="atrasado">🔴 Atrasado</option>
+        <option value="isento">🎁 Isento (Free/Cortesia)</option>
+      </select>
+    </div>
+    <div class="field" id="fat-data-pag-wrap">
+      <label>Data de Pagamento</label>
+      <input id="fat-data-pagamento" type="date">
+    </div>
+    <div class="field" style="background:var(--bg3);border-radius:var(--r2);padding:12px;border:1px solid var(--border2)">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+        <label class="switch"><input type="checkbox" id="fat-asaas-auto" checked><span class="slider"></span></label>
+        <label style="margin:0" id="fat-asaas-auto-label">💳 Gerar cobrança automática via Asaas</label>
+      </div>
+      <div class="field" id="fat-asaas-tipo-wrap" style="margin-bottom:0">
+        <label>Forma de cobrança</label>
+        <select id="fat-asaas-tipo">
+          <option value="UNDEFINED">Cliente escolhe (Pix, Boleto ou Cartão)</option>
+          <option value="PIX">Somente Pix</option>
+          <option value="BOLETO">Somente Boleto</option>
+          <option value="CREDIT_CARD">Somente Cartão de Crédito</option>
+        </select>
+      </div>
+      <p style="font-size:.72rem;color:var(--text2);margin-top:8px">Se desmarcado, use os campos manuais abaixo (PIX/link colados à mão).</p>
+    </div>
+    <div class="field">
+      <label>PIX Copia e Cola (opcional / manual)</label>
+      <textarea id="fat-pix" rows="2" placeholder="Cole aqui o código PIX para o cliente copiar"></textarea>
+    </div>
+    <div class="field">
+      <label>Link de Pagamento (opcional / manual)</label>
+      <input id="fat-link" type="url" placeholder="https://pagamento.exemplo.com/...">
+    </div>
+    <div class="field">
+      <label>Observações</label>
+      <textarea id="fat-obs" rows="2" placeholder="Observações internas"></textarea>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-fatura')">Cancelar</button>
+      <button class="btn btn-primary btn-sm" onclick="salvarFatura()">Salvar Fatura</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMAR EXCLUSÃO -->
+<div class="modal-bg" id="modal-confirm">
+  <div class="modal" style="max-width:380px;text-align:center">
+    <div style="font-size:2rem;margin-bottom:12px">⚠️</div>
+    <h3 id="confirm-title">Confirmar ação</h3>
+    <p id="confirm-msg" style="color:var(--text2);font-size:.85rem;margin:10px 0 24px"></p>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('modal-confirm')">Cancelar</button>
+      <button class="btn btn-danger btn-sm" id="confirm-btn">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+  from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc }
+  from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
+const fbApp = initializeApp({
+  apiKey: "AIzaSyB3e2ixEv8G3n8N-eL8dxlrUPRn-VDAA_4",
+  authDomain: "sweetoz.firebaseapp.com",
+  projectId: "sweetoz",
+  storageBucket: "sweetoz.firebasestorage.app",
+  messagingSenderId: "783203069717",
+  appId: "1:783203069717:web:ac29de45f322ccd1bfc31c"
+});
+const auth = getAuth(fbApp);
+const db   = getFirestore(fbApp);
+
+// CEO UIDs autorizados — adicione o UID do seu usuário Firebase Auth aqui
+const CEO_EMAILS = ['ceo@yousego.com','admin@yousego.com','wellherreira@gmail.com'];
+
+// ── STATE ──
+let _companies = [];
+let _globalCfg = {};
+let _plans = [];
+let _curTab = 'overview';
+
+// ── HELPERS ──
+const $ = id => document.getElementById(id);
+const fmt = v => Number(v||0).toLocaleString('pt-BR',{minimumFractionDigits:2});
+const esc = s => String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2);
+
+function toast(msg, type='ok') {
+  const t=$('toast'); t.textContent=msg; t.className=`show t-${type}`;
+  clearTimeout(t._t); t._t=setTimeout(()=>t.className='',2800);
+}
+function openModal(id){$(id).classList.add('open')}
+function closeModal(id){$(id).classList.remove('open')}
+window.closeModal=closeModal;
+
+document.querySelectorAll('.modal-bg').forEach(bg=>
+  bg.addEventListener('click',e=>{if(e.target===bg)bg.classList.remove('open')})
+);
+
+// ── LOGIN ──
+window.ceoLogin = async function() {
+  const email=$('ceo-email').value.trim();
+  const pass=$('ceo-pass').value;
+  if(!email||!pass){$('ceo-err').textContent='Preencha e-mail e senha.';return;}
+  $('ceo-err').textContent='🔄 Verificando...';
+  $('btn-ceo-login').disabled=true;
+  try {
+    const cred = await signInWithEmailAndPassword(auth, email, pass);
+    // Verificar se é CEO autorizado
+    const isCeo = CEO_EMAILS.includes(email) || await checkCeoPermission(cred.user.uid);
+    if(!isCeo) {
+      await signOut(auth);
+      $('ceo-err').textContent='Acesso negado. Apenas CEOs autorizados.';
+      $('btn-ceo-login').disabled=false;
+      return;
+    }
+    enterCeoApp(cred.user);
+  } catch(e) {
+    $('ceo-err').textContent = e.code==='auth/invalid-credential'?'E-mail ou senha incorretos.':e.message;
+    $('btn-ceo-login').disabled=false;
+  }
+}
+
+async function checkCeoPermission(uid) {
+  try {
+    const snap = await getDoc(doc(db,'ceo_admins',uid));
+    return snap.exists() && snap.data().active===true;
+  } catch(e) { return false; }
+}
+
+window.ceoLogout = async function() {
+  await signOut(auth);
+  $('ceo-app').style.display='none';
+  $('ceo-login').style.display='flex';
+  $('ceo-email').value=''; $('ceo-pass').value=''; $('ceo-err').textContent='';
+  $('btn-ceo-login').disabled=false;
+}
+
+// Auth state
+onAuthStateChanged(auth, async user => {
+  if(user) {
+    const isCeo = CEO_EMAILS.includes(user.email) || await checkCeoPermission(user.uid);
+    if(isCeo) { enterCeoApp(user); return; }
+  }
+  $('ceo-login').style.display='flex';
+  $('ceo-app').style.display='none';
+});
+
+function enterCeoApp(user) {
+  $('ceo-login').style.display='none';
+  $('ceo-app').style.display='flex';
+  $('ceo-user-email').textContent=user.email;
+  setupNav();
+  loadAll();
+}
+
+// ── NAVEGAÇÃO ──
+function setupNav() {
+  document.querySelectorAll('.ceo-nav-btn[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => goTab(btn.dataset.tab));
+  });
+}
+window.goTab = function(tab) {
+  _curTab=tab;
+  document.querySelectorAll('.ceo-nav-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  document.querySelectorAll('.tab-section').forEach(s=>s.classList.remove('active'));
+  $('tab-'+tab)?.classList.add('active');
+  if(tab==='overview') renderOverview();
+  if(tab==='empresas') renderEmpresas();
+  if(tab==='config') renderConfig();
+  if(tab==='planos') renderPlanos();
+  if(tab==='financeiro') renderFinanceiro();
+}
+
+// ── LOAD ALL ──
+async function loadAll() {
+  await Promise.all([loadCompanies(), loadGlobalConfig(), loadPlans()]);
+  renderOverview();
+}
+
+async function loadCompanies() {
+  try {
+    const snap = await getDocs(collection(db,'companies'));
+    _companies = snap.docs.map(d=>({id:d.id,...d.data()}));
+  } catch(e) { toast('Erro ao carregar empresas','err'); }
+}
+
+async function loadGlobalConfig() {
+  try {
+    const snap = await getDoc(doc(db,'ceo_config','main'));
+    _globalCfg = snap.exists() ? snap.data() : {};
+  } catch(e) {}
+}
+
+async function loadPlans() {
+  try {
+    const snap = await getDocs(collection(db,'plans'));
+    _plans = snap.docs.map(d=>({id:d.id,...d.data()}));
+    if(!_plans.length) await initDefaultPlans();
+  } catch(e) {}
+}
+
+async function initDefaultPlans() {
+  const defaults = [
+    {id:'free',name:'Free',price:0,priceAnual:0,desc:'Para começar',benefits:['1 usuário','Até 50 produtos','PDV básico'],prodLimit:50,userLimit:1,destaque:false},
+    {id:'basic',name:'Basic',price:49.90,priceAnual:479,desc:'Para pequenas empresas',benefits:['3 usuários','Até 200 produtos','PDV completo','Relatórios'],prodLimit:200,userLimit:3,destaque:false},
+    {id:'pro',name:'Pro',price:99.90,priceAnual:959,desc:'Para empresas em crescimento',benefits:['10 usuários','Produtos ilimitados','PDV + KDS','DRE completo','Suporte prioritário'],prodLimit:-1,userLimit:10,destaque:true},
+    {id:'premium',name:'Premium',price:199.90,priceAnual:1919,desc:'Para múltiplas unidades',benefits:['Usuários ilimitados','Tudo ilimitado','Multi-empresa','API access','Gerente de conta'],prodLimit:-1,userLimit:-1,destaque:false},
+  ];
+  for(const p of defaults) {
+    await setDoc(doc(db,'plans',p.id),{...p,createdAt:Date.now()});
+    _plans.push({...p});
+  }
+}
+
+// ── VISÃO GERAL ──
+function renderOverview() {
+  const total=_companies.length;
+  const ativas=_companies.filter(c=>c.status!=='suspenso'&&c.status!=='inativo').length;
+  const suspensas=_companies.filter(c=>c.status==='suspenso').length;
+  const premium=_companies.filter(c=>c.plan==='premium'||c.plan==='pro').length;
+  $('m-total').textContent=total;
+  $('m-ativas').textContent=ativas;
+  $('m-suspensas').textContent=suspensas;
+  $('m-premium').textContent=premium;
+
+  const recent=[..._companies].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,8);
+  $('overview-tbody').innerHTML=recent.length?recent.map(c=>`
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:10px"><span style="font-size:1.2rem">${c.emoji||'🏢'}</span><div><div style="font-weight:600">${esc(c.name)}</div><div style="font-size:.72rem;color:var(--text3)">${c.id}</div></div></div></td>
+      <td><span class="badge plan-${c.plan||'free'}">${(c.plan||'free').toUpperCase()}</span></td>
+      <td>${statusBadge(c.status)}</td>
+      <td style="font-size:.78rem;color:var(--text2)">${c.createdAt?new Date(c.createdAt).toLocaleDateString('pt-BR'):'—'}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="editEmpresa('${c.id}')">✏</button></td>
+    </tr>`).join('')
+  : '<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text3)">Nenhuma empresa</td></tr>';
+}
+
+function statusBadge(s) {
+  if(!s||s==='ativo') return '<span class="badge badge-green">✅ Ativo</span>';
+  if(s==='suspenso') return '<span class="badge badge-red">🚫 Suspenso</span>';
+  return '<span class="badge badge-gray">⬛ Inativo</span>';
+}
+
+// ── EMPRESAS ──
+window.renderEmpresas = function() {
+  filterEmpresas();
+}
+window.filterEmpresas = function() {
+  const q=($('co-search').value||'').toLowerCase();
+  const fs=$('co-filter-status').value;
+  const fp=$('co-filter-plan').value;
+  let list=[..._companies];
+  if(q) list=list.filter(c=>c.name?.toLowerCase().includes(q)||c.id.includes(q));
+  if(fs) list=list.filter(c=>(c.status||'ativo')===fs);
+  if(fp) list=list.filter(c=>(c.plan||'free')===fp);
+  list.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  $('empresas-tbody').innerHTML=list.length?list.map(c=>`
+    <tr>
+      <td><div style="display:flex;align-items:center;gap:10px"><span style="font-size:1.2rem">${c.emoji||'🏢'}</span><div><div style="font-weight:600">${esc(c.name)}</div><div style="font-size:.72rem;color:var(--text3)">${c.email||''}</div></div></div></td>
+      <td style="font-family:monospace;font-size:.75rem;color:var(--text3)">${c.id.slice(0,12)}...</td>
+      <td><span class="badge plan-${c.plan||'free'}">${(c.plan||'free').toUpperCase()}</span></td>
+      <td>${statusBadge(c.status)}</td>
+      <td style="font-size:.8rem">${c.whatsapp||'—'}</td>
+      <td style="font-size:.78rem;color:var(--text2)">${c.createdAt?new Date(c.createdAt).toLocaleDateString('pt-BR'):'—'}</td>
+      <td>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" onclick="editEmpresa('${c.id}')">✏</button>
+          ${(c.status||'ativo')==='ativo'
+            ?`<button class="btn btn-danger btn-sm" onclick="suspenderEmpresa('${c.id}')">🚫</button>`
+            :`<button class="btn btn-success btn-sm" onclick="ativarEmpresa('${c.id}')">✅</button>`}
+          <button class="btn btn-danger btn-sm" onclick="confirmarExclusao('${c.id}','${esc(c.name)}')">🗑</button>
+        </div>
+      </td>
+    </tr>`).join('')
+  : '<tr><td colspan="7" style="text-align:center;padding:32px;color:var(--text3)">Nenhuma empresa encontrada</td></tr>';
+}
+
+window.refreshEmpresas = async function() {
+  $('empresas-tbody').innerHTML='<tr><td colspan="7"><div class="loading-row"><div class="spinner"></div> Atualizando...</div></td></tr>';
+  await loadCompanies();
+  renderEmpresas();
+  toast('Atualizado!');
+}
+
+window.editEmpresa = function(id) {
+  const c=_companies.find(x=>x.id===id); if(!c) return;
+  $('edit-co-id').value=id;
+  $('edit-co-name').value=c.name||'';
+  $('edit-co-emoji').value=c.emoji||'';
+  $('edit-co-whatsapp').value=c.whatsapp||'';
+  $('edit-co-email').value=c.email||'';
+  $('edit-co-cpfcnpj').value=c.cpfCnpj||'';
+  $('edit-co-plan').value=c.plan||'free';
+  $('edit-co-status').value=c.status||'ativo';
+  $('edit-co-obs').value=c.ceoObs||'';
+  openModal('modal-empresa');
+}
+
+window.saveEmpresa = async function() {
+  const id=$('edit-co-id').value;
+  const data={name:$('edit-co-name').value.trim(),emoji:$('edit-co-emoji').value.trim(),whatsapp:$('edit-co-whatsapp').value.trim(),email:$('edit-co-email').value.trim(),cpfCnpj:$('edit-co-cpfcnpj').value.trim(),plan:$('edit-co-plan').value,status:$('edit-co-status').value,ceoObs:$('edit-co-obs').value.trim(),updatedAt:Date.now()};
+  try {
+    await updateDoc(doc(db,'companies',id),data);
+    const i=_companies.findIndex(x=>x.id===id); if(i>=0) _companies[i]={..._companies[i],...data};
+    closeModal('modal-empresa'); renderEmpresas(); renderOverview(); toast('Empresa atualizada!');
+  } catch(e){toast('Erro: '+e.message,'err');}
+}
+
+window.suspenderEmpresa = async function(id) {
+  await updateDoc(doc(db,'companies',id),{status:'suspenso',updatedAt:Date.now()});
+  const c=_companies.find(x=>x.id===id); if(c) c.status='suspenso';
+  renderEmpresas(); toast('Empresa suspensa.');
+}
+window.ativarEmpresa = async function(id) {
+  await updateDoc(doc(db,'companies',id),{status:'ativo',updatedAt:Date.now()});
+  const c=_companies.find(x=>x.id===id); if(c) c.status='ativo';
+  renderEmpresas(); toast('Empresa ativada!');
+}
+
+window.confirmarExclusao = function(id, name) {
+  $('confirm-title').textContent='Excluir empresa';
+  $('confirm-msg').textContent=`Tem certeza que deseja excluir "${name}"? Esta ação não pode ser desfeita.`;
+  $('confirm-btn').onclick=()=>excluirEmpresa(id);
+  openModal('modal-confirm');
+}
+window.excluirEmpresa = async function(id) {
+  try {
+    await deleteDoc(doc(db,'companies',id));
+    _companies=_companies.filter(x=>x.id!==id);
+    closeModal('modal-confirm'); renderEmpresas(); renderOverview(); toast('Empresa excluída.');
+  } catch(e){toast('Erro: '+e.message,'err');}
+}
+
+// ── CONFIG GLOBAL ──
+window.renderConfig = function() {
+  // Contato
+  $('cfg-whatsapp').value=_globalCfg.whatsapp||'';
+  $('cfg-email-sup').value=_globalCfg.emailSupporte||'';
+  $('cfg-email-com').value=_globalCfg.emailComercial||'';
+  // Hero
+  if($('cfg-hero-badge')) $('cfg-hero-badge').value=_globalCfg.heroBadge||'';
+  $('cfg-lp-title').value=_globalCfg.lpTitle||'';
+  $('cfg-lp-sub').value=_globalCfg.lpSub||'';
+  if($('cfg-hero-cta1')) $('cfg-hero-cta1').value=_globalCfg.heroCta1||'';
+  if($('cfg-hero-cta2')) $('cfg-hero-cta2').value=_globalCfg.heroCta2||'';
+  // Stats
+  if($('cfg-stat1-val')) {
+    $('cfg-stat1-val').value=_globalCfg.stat1Val||'500+';
+    $('cfg-stat1-label').value=_globalCfg.stat1Label||'Empresas ativas';
+    $('cfg-stat2-val').value=_globalCfg.stat2Val||'R$ 2M+';
+    $('cfg-stat2-label').value=_globalCfg.stat2Label||'Gerenciados/mês';
+    $('cfg-stat3-val').value=_globalCfg.stat3Val||'99.9%';
+    $('cfg-stat3-label').value=_globalCfg.stat3Label||'Uptime';
+    $('cfg-stat4-val').value=_globalCfg.stat4Val||'4.9★';
+    $('cfg-stat4-label').value=_globalCfg.stat4Label||'Avaliação média';
+  }
+  // CTA Final
+  if($('cfg-cta-title')) {
+    $('cfg-cta-title').value=_globalCfg.ctaTitle||'';
+    $('cfg-cta-sub').value=_globalCfg.ctaSub||'';
+    $('cfg-cta-btn1').value=_globalCfg.ctaBtn1||'';
+    $('cfg-cta-btn2').value=_globalCfg.ctaBtn2||'';
+    $('cfg-footer-desc').value=_globalCfg.footerDesc||'';
+    $('cfg-footer-copy').value=_globalCfg.footerCopy||'';
+  }
+  // Visual
+  $('cfg-color-primary').value=_globalCfg.colorPrimary||'#7c5cfc';
+  $('cfg-color-accent').value=_globalCfg.colorAccent||'#f59e0b';
+  $('cfg-platform-name').value=_globalCfg.platformName||'YOUSEGO';
+  // Banners
+  $('cfg-banner').value=_globalCfg.banner||'';
+  $('cfg-aviso').value=_globalCfg.aviso||'';
+  $('cfg-aviso-active').checked=_globalCfg.avisoActive||false;
+  renderGlobalCats();
+  renderFaqs();
+  renderDepos();
+}
+
+async function saveCfgField(data) {
+  const merged={..._globalCfg,...data,updatedAt:Date.now()};
+  await setDoc(doc(db,'ceo_config','main'),merged,{merge:true});
+  _globalCfg=merged;
+  toast('Configuração salva!');
+}
+window.saveCfgContato=()=>saveCfgField({whatsapp:$('cfg-whatsapp').value.trim(),emailSupporte:$('cfg-email-sup').value.trim(),emailComercial:$('cfg-email-com').value.trim()});
+window.saveCfgLP=()=>saveCfgField({
+  heroBadge:$('cfg-hero-badge')?.value.trim(),
+  lpTitle:$('cfg-lp-title').value.trim(),
+  lpSub:$('cfg-lp-sub').value.trim(),
+  heroCta1:$('cfg-hero-cta1')?.value.trim(),
+  heroCta2:$('cfg-hero-cta2')?.value.trim()
+});
+window.saveCfgStats=()=>saveCfgField({
+  stat1Val:$('cfg-stat1-val').value.trim(),stat1Label:$('cfg-stat1-label').value.trim(),
+  stat2Val:$('cfg-stat2-val').value.trim(),stat2Label:$('cfg-stat2-label').value.trim(),
+  stat3Val:$('cfg-stat3-val').value.trim(),stat3Label:$('cfg-stat3-label').value.trim(),
+  stat4Val:$('cfg-stat4-val').value.trim(),stat4Label:$('cfg-stat4-label').value.trim()
+});
+window.saveCfgCta=()=>saveCfgField({
+  ctaTitle:$('cfg-cta-title').value.trim(),ctaSub:$('cfg-cta-sub').value.trim(),
+  ctaBtn1:$('cfg-cta-btn1').value.trim(),ctaBtn2:$('cfg-cta-btn2').value.trim(),
+  footerDesc:$('cfg-footer-desc').value.trim(),footerCopy:$('cfg-footer-copy').value.trim()
+});
+window.saveCfgVisual=()=>saveCfgField({colorPrimary:$('cfg-color-primary').value,colorAccent:$('cfg-color-accent').value,platformName:$('cfg-platform-name').value.trim()});
+window.saveCfgBanners=()=>saveCfgField({banner:$('cfg-banner').value.trim(),aviso:$('cfg-aviso').value.trim(),avisoActive:$('cfg-aviso-active').checked});
+
+// Categorias globais
+function renderGlobalCats() {
+  const cats=_globalCfg.categories||[];
+  $('cats-list').innerHTML=cats.map((c,i)=>`
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--bg3);border-radius:6px;margin-bottom:6px">
+      <span style="font-size:.85rem">${esc(c)}</span>
+      <button onclick="removeGlobalCat(${i})" style="background:none;border:none;color:var(--red);cursor:pointer">✕</button>
+    </div>`).join('')||'<p style="color:var(--text3);font-size:.8rem">Nenhuma categoria</p>';
+}
+window.addGlobalCat=async function(){
+  const v=$('cat-new').value.trim(); if(!v)return;
+  const cats=[...(_globalCfg.categories||[]),v];
+  await saveCfgField({categories:cats});
+  $('cat-new').value=''; renderGlobalCats();
+}
+window.removeGlobalCat=async function(i){
+  const cats=[...(_globalCfg.categories||[])]; cats.splice(i,1);
+  await saveCfgField({categories:cats}); renderGlobalCats();
+}
+
+// FAQ
+function renderFaqs(){
+  const faqs=_globalCfg.faqs||[];
+  $('faq-list').innerHTML=faqs.map((f,i)=>`
+    <div style="background:var(--bg3);border-radius:8px;padding:12px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <strong style="font-size:.82rem">P: ${esc(f.q)}</strong>
+        <button onclick="removeFaq(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.8rem">✕</button>
+      </div>
+      <p style="font-size:.8rem;color:var(--text2)">R: ${esc(f.a)}</p>
+    </div>`).join('')||'<p style="color:var(--text3);font-size:.8rem">Nenhuma pergunta</p>';
+}
+window.addFaq=function(){
+  const q=prompt('Pergunta:'); if(!q) return;
+  const a=prompt('Resposta:'); if(!a) return;
+  const faqs=[...(_globalCfg.faqs||[]),{q,a}];
+  saveCfgField({faqs}).then(()=>renderFaqs());
+}
+window.removeFaq=function(i){
+  const faqs=[...(_globalCfg.faqs||[])]; faqs.splice(i,1);
+  saveCfgField({faqs}).then(()=>renderFaqs());
+}
+
+// Depoimentos
+function renderDepos(){
+  const depos=_globalCfg.depoimentos||[];
+  const el=$('depo-list'); if(!el) return;
+  el.innerHTML=depos.map((d,i)=>`
+    <div style="background:var(--bg3);border-radius:8px;padding:12px;margin-bottom:8px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <strong style="font-size:.82rem">⭐ ${esc(d.name)} — ${esc(d.biz)}</strong>
+        <button onclick="removeDepo(${i})" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:.8rem">✕</button>
+      </div>
+      <p style="font-size:.8rem;color:var(--text2)">"${esc(d.text)}"</p>
+    </div>`).join('')||'<p style="color:var(--text3);font-size:.8rem">Nenhum depoimento</p>';
+}
+window.addDepo=function(){
+  const name=prompt('Nome do cliente:'); if(!name) return;
+  const biz=prompt('Empresa/negócio (ex: 🎂 Doces da Maria):'); if(!biz) return;
+  const text=prompt('Depoimento:'); if(!text) return;
+  const stars=parseInt(prompt('Estrelas (1-5):')||'5')||5;
+  const depos=[...(_globalCfg.depoimentos||[]),{name,biz,text,stars}];
+  saveCfgField({depoimentos:depos}).then(()=>renderDepos());
+}
+window.removeDepo=function(i){
+  const depos=[...(_globalCfg.depoimentos||[])]; depos.splice(i,1);
+  saveCfgField({depoimentos:depos}).then(()=>renderDepos());
+}
+
+// ── PLANOS ──
+window.renderPlanos = function() {
+  $('plans-grid').innerHTML=_plans.length?_plans.map(p=>`
+    <div style="background:var(--card);border:1px solid ${p.destaque?'var(--accent)':'var(--border)'};border-radius:var(--r);padding:24px;position:relative">
+      ${p.destaque?'<div style="position:absolute;top:-1px;right:20px;background:var(--accent);color:#fff;font-size:.7rem;font-weight:700;padding:3px 10px;border-radius:0 0 8px 8px;letter-spacing:.5px">DESTAQUE</div>':''}
+      <div style="margin-bottom:16px">
+        <div style="font-family:\'Syne\',sans-serif;font-size:1.1rem;font-weight:800;margin-bottom:4px">${esc(p.name)}</div>
+        <div style="font-size:.8rem;color:var(--text2)">${esc(p.desc||'')}</div>
+      </div>
+      <div style="margin-bottom:16px">
+        <div style="font-family:\'Syne\',sans-serif;font-size:1.8rem;font-weight:800;color:var(--accent2)">
+          ${p.price>0?'R$ '+fmt(p.price):'Grátis'}
+        </div>
+        ${p.price>0?`<div style="font-size:.75rem;color:var(--text3)">ou R$ ${fmt(p.priceAnual||0)}/ano</div>`:''}
+      </div>
+      <div style="margin-bottom:16px">
+        ${(p.benefits||[]).map(b=>`<div style="display:flex;align-items:center;gap:6px;padding:4px 0;font-size:.82rem"><span style="color:var(--green)">✓</span>${esc(b)}</div>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost btn-sm" onclick="editPlano('${p.id}')">✏ Editar</button>
+        <span style="font-size:.75rem;color:var(--text3);display:flex;align-items:center">
+          ${_companies.filter(c=>(c.plan||'free')===p.id).length} empresas
+        </span>
+      </div>
+    </div>`).join('')
+  :'<div class="loading-row"><div class="spinner"></div> Carregando...</div>';
+}
+
+window.editPlano=function(id){
+  const p=_plans.find(x=>x.id===id);if(!p)return;
+  $('plan-id').value=id;
+  $('plan-name').value=p.name||'';
+  $('plan-price').value=p.price||0;
+  $('plan-price-anual').value=p.priceAnual||0;
+  $('plan-desc').value=p.desc||'';
+  $('plan-benefits').value=(p.benefits||[]).join('\n');
+  $('plan-prod-limit').value=p.prodLimit||-1;
+  $('plan-user-limit').value=p.userLimit||-1;
+  $('plan-destaque').checked=p.destaque||false;
+  openModal('modal-plano');
+}
+
+window.savePlano=async function(){
+  const id=$('plan-id').value;
+  const data={
+    name:$('plan-name').value.trim(),
+    price:Number($('plan-price').value)||0,
+    priceAnual:Number($('plan-price-anual').value)||0,
+    desc:$('plan-desc').value.trim(),
+    benefits:$('plan-benefits').value.split('\n').map(s=>s.trim()).filter(Boolean),
+    prodLimit:Number($('plan-prod-limit').value)||-1,
+    userLimit:Number($('plan-user-limit').value)||-1,
+    destaque:$('plan-destaque').checked,
+    updatedAt:Date.now()
+  };
+  try{
+    await setDoc(doc(db,'plans',id),data,{merge:true});
+    const i=_plans.findIndex(x=>x.id===id);
+    if(i>=0) _plans[i]={..._plans[i],...data};
+    else _plans.push({id,...data});
+    closeModal('modal-plano');renderPlanos();toast('Plano salvo!');
+  }catch(e){toast('Erro: '+e.message,'err');}
+}
+
+window.openModal=openModal;
+
+// ── FINANCEIRO ──
+let _faturas = [];
+let _fatMesAtual = '';
+
+function mesAtual() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+
+function fmtMes(ym) {
+  if(!ym) return '—';
+  const [y,m] = ym.split('-');
+  const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  return `${meses[parseInt(m)-1]}/${y}`;
+}
+
+function fmtData(str) {
+  if(!str) return '—';
+  const [y,m,d] = str.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+function fatStatusBadge(s) {
+  if(s==='pago')     return '<span class="badge badge-green">✅ Pago</span>';
+  if(s==='atrasado') return '<span class="badge badge-red">🔴 Atrasado</span>';
+  if(s==='isento')   return '<span class="badge badge-purple">🎁 Isento</span>';
+  return '<span class="badge badge-yellow">⏳ Pendente</span>';
+}
+
+function planoPreco(planId) {
+  const p = _plans.find(x=>x.id===planId);
+  return p ? p.price : 0;
+}
+
+async function loadFaturas() {
+  try {
+    const snap = await getDocs(collection(db,'invoices'));
+    _faturas = snap.docs.map(d=>({id:d.id,...d.data()}));
+    // Verificar atrasos automaticamente
+    const hoje = new Date().toISOString().slice(0,10);
+    let algumAtualizado = false;
+    for(const f of _faturas) {
+      if(f.status==='pendente' && f.vencimento && f.vencimento < hoje) {
+        f.status='atrasado';
+        await updateDoc(doc(db,'invoices',f.id),{status:'atrasado'});
+        algumAtualizado=true;
+      }
+    }
+  } catch(e) { toast('Erro ao carregar faturas','err'); }
+}
+
+function renderMetricasFinanceiro(lista) {
+  const mes = $('fin-filter-mes')?.value || mesAtual();
+  const doMes = lista.filter(f=>f.mes===mes);
+  const pagas = doMes.filter(f=>f.status==='pago').length;
+  const pendentes = lista.filter(f=>f.status==='pendente').length;
+  const atrasadas = lista.filter(f=>f.status==='atrasado').length;
+  const receita = doMes.filter(f=>f.status==='pago').reduce((s,f)=>s+(Number(f.valor)||0),0);
+  $('fin-m-pagas').textContent = pagas;
+  $('fin-m-pagas-val').textContent = `em ${fmtMes(mes)}`;
+  $('fin-m-pendentes').textContent = pendentes;
+  $('fin-m-atrasadas').textContent = atrasadas;
+  $('fin-m-receita').textContent = 'R$ '+fmt(receita);
+}
+
+function popularMesesSelect() {
+  const sel = $('fin-filter-mes');
+  if(!sel) return;
+  // Gera últimos 12 meses + próximo mês
+  const meses = [];
+  const d = new Date();
+  d.setMonth(d.getMonth()+1);
+  for(let i=0;i<13;i++) {
+    const ym = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    meses.push(ym);
+    d.setMonth(d.getMonth()-1);
+  }
+  sel.innerHTML = meses.map(m=>`<option value="${m}" ${m===mesAtual()?'selected':''}>${fmtMes(m)}</option>`).join('');
+}
+
+window.renderFinanceiro = async function() {
+  if(!_faturas.length) {
+    $('financeiro-tbody').innerHTML='<tr><td colspan="9"><div class="loading-row"><div class="spinner"></div> Carregando...</div></td></tr>';
+    await loadFaturas();
+  }
+  popularMesesSelect();
+  filterFinanceiro();
+}
+
+window.filterFinanceiro = function() {
+  const q = ($('fin-search')?.value||'').toLowerCase();
+  const fs = $('fin-filter-status')?.value||'';
+  const fp = $('fin-filter-plan')?.value||'';
+  const fm = $('fin-filter-mes')?.value||'';
+
+  let lista = [..._faturas];
+  if(q) lista = lista.filter(f=>{
+    const co = _companies.find(c=>c.id===f.empresaId);
+    return co?.name?.toLowerCase().includes(q);
+  });
+  if(fs) lista = lista.filter(f=>f.status===fs);
+  if(fp) lista = lista.filter(f=>f.plano===fp);
+  if(fm) lista = lista.filter(f=>f.mes===fm);
+
+  lista.sort((a,b)=>{
+    // Atrasados primeiro, depois por vencimento desc
+    const ord = {atrasado:0,pendente:1,pago:2,isento:3};
+    const oa = ord[a.status]??4, ob = ord[b.status]??4;
+    if(oa!==ob) return oa-ob;
+    return (b.vencimento||'')>(a.vencimento||'') ? -1 : 1;
+  });
+
+  renderMetricasFinanceiro(lista.length ? lista : _faturas);
+
+  $('financeiro-tbody').innerHTML = lista.length ? lista.map(f=>{
+    const co = _companies.find(c=>c.id===f.empresaId);
+    const rowClass = f.status==='atrasado'?'fin-row-atrasado':'';
+    return `<tr class="${rowClass}">
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:1.1rem">${co?.emoji||'🏢'}</span>
+          <div>
+            <div style="font-weight:600;font-size:.85rem">${esc(co?.name||f.empresaId)}</div>
+            <div style="font-size:.7rem;color:var(--text3)">${co?.email||''}</div>
+          </div>
+        </div>
+      </td>
+      <td><span class="badge plan-${f.plano||'free'}">${(f.plano||'free').toUpperCase()}</span></td>
+      <td style="font-size:.8rem;color:var(--text2)">${co?.createdAt?new Date(co.createdAt).toLocaleDateString('pt-BR'):'—'}</td>
+      <td style="font-size:.82rem;font-weight:600">${fmtMes(f.mes)}</td>
+      <td style="font-size:.85rem;font-weight:700;color:var(--accent2)">${f.valor>0?'R$ '+fmt(f.valor):'<span style="color:var(--text3)">Grátis</span>'}</td>
+      <td style="font-size:.8rem;color:${f.status==='atrasado'?'var(--red)':'var(--text2)'};font-weight:${f.status==='atrasado'?'700':'400'}">${fmtData(f.vencimento)}</td>
+      <td>${fatStatusBadge(f.status)}</td>
+      <td style="font-size:.8rem;color:var(--green)">${f.dataPagamento?fmtData(f.dataPagamento):'—'}</td>
+      <td>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          <button class="btn btn-ghost btn-sm" onclick="editarFatura('${f.id}')">✏</button>
+          ${f.status==='pendente'||f.status==='atrasado'
+            ?`<button class="btn btn-success btn-sm" onclick="marcarPago('${f.id}')">✅</button>`:''}
+          <button class="btn btn-sm" style="background:#25D366;color:#fff" onclick="enviarFaturaWhatsApp('${f.id}')" title="Enviar por WhatsApp">📲</button>
+          <button class="btn btn-danger btn-sm" onclick="excluirFatura('${f.id}')">🗑</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('')
+  : '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text3)">Nenhuma fatura encontrada</td></tr>';
+}
+
+window.refreshFinanceiro = async function() {
+  $('financeiro-tbody').innerHTML='<tr><td colspan="9"><div class="loading-row"><div class="spinner"></div> Atualizando...</div></td></tr>';
+  await loadFaturas();
+  filterFinanceiro();
+  toast('Financeiro atualizado!');
+}
+
+function popularEmpresasSelect() {
+  const sel = $('fat-empresa');
+  if(!sel) return;
+  sel.innerHTML = _companies
+    .sort((a,b)=>(a.name||'').localeCompare(b.name||''))
+    .map(c=>`<option value="${c.id}">${c.emoji||'🏢'} ${esc(c.name)} (${(c.plan||'free').toUpperCase()})</option>`)
+    .join('');
+}
+
+window.openModalNovaFatura = function() {
+  popularEmpresasSelect();
+  $('fat-id').value='';
+  $('modal-fatura-title').textContent='💰 Nova Fatura';
+  // Defaults
+  const hoje = new Date();
+  const mes = mesAtual();
+  $('fat-mes').value = mes;
+  // Vencimento padrão: dia 10 do mês atual
+  $('fat-vencimento').value = `${hoje.getFullYear()}-${String(hoje.getMonth()+1).padStart(2,'0')}-10`;
+  $('fat-status').value='pendente';
+  $('fat-data-pagamento').value='';
+  $('fat-pix').value='';
+  $('fat-link').value='';
+  $('fat-obs').value='';
+  $('fat-asaas-auto').checked=true;
+  $('fat-asaas-auto').disabled=false;
+  $('fat-asaas-auto-label').textContent='💳 Gerar cobrança automática via Asaas';
+  $('fat-asaas-tipo').value='UNDEFINED';
+  $('fat-asaas-tipo-wrap').style.display='block';
+  // Preencher plano e valor com base na empresa selecionada
+  atualizarValorFatura();
+  $('fat-empresa').onchange = atualizarValorFatura;
+  $('fat-plano').onchange = () => {
+    const plan = $('fat-plano').value;
+    $('fat-valor').value = planoPreco(plan)||0;
+  };
+  $('fat-status').onchange = () => {
+    $('fat-data-pag-wrap').style.display=$('fat-status').value==='pago'?'block':'none';
+  };
+  $('fat-data-pag-wrap').style.display='none';
+  openModal('modal-fatura');
+}
+
+function atualizarValorFatura() {
+  const coId = $('fat-empresa')?.value;
+  const co = _companies.find(c=>c.id===coId);
+  if(co) {
+    $('fat-plano').value = co.plan||'free';
+    $('fat-valor').value = planoPreco(co.plan||'free')||0;
+  }
+}
+
+window.editarFatura = function(id) {
+  const f = _faturas.find(x=>x.id===id); if(!f) return;
+  popularEmpresasSelect();
+  $('fat-id').value = id;
+  $('modal-fatura-title').textContent='✏️ Editar Fatura';
+  $('fat-empresa').value = f.empresaId||'';
+  $('fat-mes').value = f.mes||mesAtual();
+  $('fat-vencimento').value = f.vencimento||'';
+  $('fat-plano').value = f.plano||'free';
+  $('fat-valor').value = f.valor||0;
+  $('fat-status').value = f.status||'pendente';
+  $('fat-data-pagamento').value = f.dataPagamento||'';
+  $('fat-pix').value = f.pixCopiaECola||'';
+  $('fat-link').value = f.linkPagamento||'';
+  $('fat-obs').value = f.obs||'';
+  $('fat-asaas-auto').checked=false;
+  $('fat-asaas-auto').disabled=!!f.asaasId;
+  $('fat-asaas-tipo').value='UNDEFINED';
+  $('fat-asaas-tipo-wrap').style.display = f.asaasId?'none':'block';
+  $('fat-asaas-auto-label').textContent = f.asaasId
+    ? '💳 Cobrança Asaas já gerada (status: '+(f.asaasStatus||f.status)+')'
+    : '💳 Gerar cobrança automática via Asaas';
+  $('fat-data-pag-wrap').style.display = f.status==='pago'?'block':'none';
+  $('fat-status').onchange = () => {
+    $('fat-data-pag-wrap').style.display=$('fat-status').value==='pago'?'block':'none';
+  };
+  $('fat-plano').onchange = () => {
+    $('fat-valor').value = planoPreco($('fat-plano').value)||0;
+  };
+  openModal('modal-fatura');
+}
+
+window.salvarFatura = async function() {
+  const id = $('fat-id').value;
+  const data = {
+    empresaId: $('fat-empresa').value,
+    mes:       $('fat-mes').value,
+    vencimento:$('fat-vencimento').value,
+    plano:     $('fat-plano').value,
+    valor:     Number($('fat-valor').value)||0,
+    status:    $('fat-status').value,
+    dataPagamento: $('fat-status').value==='pago' ? ($('fat-data-pagamento').value||new Date().toISOString().slice(0,10)) : null,
+    pixCopiaECola: $('fat-pix').value.trim(),
+    linkPagamento: $('fat-link').value.trim(),
+    obs:       $('fat-obs').value.trim(),
+    updatedAt: Date.now()
+  };
+
+  // ── Cobrança automática via Asaas (somente em fatura NOVA, valor>0, checkbox marcado) ──
+  const gerarAsaas = !id && data.valor>0 && $('fat-asaas-auto') && $('fat-asaas-auto').checked;
+  if(gerarAsaas) {
+    const co = _companies.find(c=>c.id===data.empresaId);
+    if(!co) { toast('Selecione uma empresa válida.','err'); return; }
+    if(!co.cpfCnpj) {
+      toast('⚠️ Empresa sem CPF/CNPJ cadastrado — fatura salva sem cobrança automática. Edite a empresa para habilitar o Asaas.','err');
+    } else {
+      try {
+        const resp = await fetch('/api/asaas-criar-cobranca', {
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({
+            empresaId: data.empresaId,
+            nome: co.name||'',
+            email: co.email||'',
+            cpfCnpj: co.cpfCnpj||'',
+            whatsapp: co.whatsapp||'',
+            valor: data.valor,
+            vencimento: data.vencimento,
+            descricao: `Fatura ${fmtMes(data.mes)} — Plano ${(data.plano||'free').toUpperCase()} — YOUSEGO`,
+            tipoPagamento: $('fat-asaas-tipo').value||'UNDEFINED'
+          })
+        });
+        const json = await resp.json();
+        if(!resp.ok || json.error) throw new Error(json.error||'Falha ao gerar cobrança no Asaas');
+        data.asaasId = json.asaasId;
+        data.asaasStatus = json.status;
+        data.linkPagamento = json.linkPagamento || data.linkPagamento;
+        if(json.pixCopiaECola) data.pixCopiaECola = json.pixCopiaECola;
+      } catch(e) {
+        toast('⚠️ Fatura salva, mas a cobrança automática falhou: '+e.message,'err');
+      }
+    }
+  }
+
+  try {
+    if(id) {
+      await updateDoc(doc(db,'invoices',id), data);
+      // Sincroniza no tenant da empresa para ela ver no sistema
+      try{ await updateDoc(doc(db,'ceo_faturas',id), {...data, tenantId: data.empresaId}); }catch(e){}
+      const i = _faturas.findIndex(x=>x.id===id);
+      if(i>=0) _faturas[i]={..._faturas[i],...data};
+    } else {
+      data.createdAt = Date.now();
+      const ref = await addDoc(collection(db,'invoices'), data);
+      // Salva também em ceo_faturas para a empresa ver no sistema dela
+      try{
+        await setDoc(doc(db,'ceo_faturas',ref.id), {...data, tenantId: data.empresaId, faturaId: ref.id});
+      }catch(e){}
+      _faturas.push({id:ref.id,...data});
+    }
+    closeModal('modal-fatura');
+    filterFinanceiro();
+    toast('Fatura salva!');
+  } catch(e){ toast('Erro: '+e.message,'err'); }
+}
+
+window.marcarPago = async function(id) {
+  const hoje = new Date().toISOString().slice(0,10);
+  await updateDoc(doc(db,'invoices',id),{status:'pago',dataPagamento:hoje,updatedAt:Date.now()});
+  const f = _faturas.find(x=>x.id===id);
+  if(f){f.status='pago';f.dataPagamento=hoje;}
+  filterFinanceiro();
+  toast('Marcado como pago! ✅');
+}
+
+/* ── ENVIAR FATURA POR WHATSAPP ── */
+window.enviarFaturaWhatsApp = async function(id) {
+  const f = _faturas.find(x=>x.id===id); if(!f) return;
+  const co = _companies.find(c=>c.id===f.empresaId);
+
+  // Pegar WhatsApp da empresa (salvo no tenant)
+  let wpp = co?.whatsapp || co?.phone || '';
+  if(!wpp){
+    wpp = prompt(`📲 WhatsApp da empresa ${co?.name||''}?\n(ex: 5511999999999 — com DDI+DDD, sem espaços)`,'');
+    if(!wpp) return;
+    // Salvar no cadastro da empresa para próximas vezes
+    try{
+      await updateDoc(doc(db,'companies',f.empresaId),{whatsapp:wpp.replace(/\D/g,'')});
+      if(co) co.whatsapp=wpp.replace(/\D/g,'');
+    }catch(e){}
+  }
+
+  const num = wpp.replace(/\D/g,'');
+  if(!num){ toast('WhatsApp inválido.','err'); return; }
+
+  const nome = co?.name || f.empresaId;
+  const val  = f.valor>0 ? `R$ ${fmt(f.valor)}` : 'Grátis';
+  const venc = f.vencimento ? new Date(f.vencimento+'T12:00:00').toLocaleDateString('pt-BR') : '—';
+  const pix  = f.pixCopiaECola || '';
+  const link = f.linkPagamento || '';
+  const ref  = f.mes ? fmtMes(f.mes) : '—';
+
+  let msg = `Olá, *${nome}*! 👋\n\n`;
+  msg += `📋 *Fatura ${ref}*\n`;
+  msg += `💰 Valor: *${val}*\n`;
+  msg += `📅 Vencimento: *${venc}*\n`;
+  msg += `📦 Plano: *${(f.plano||'free').toUpperCase()}*\n`;
+  if(f.obs) msg += `📝 Obs: ${f.obs}\n`;
+  msg += `\n`;
+  if(pix) msg += `🔑 *PIX Copia e Cola:*\n\`${pix}\`\n\n`;
+  if(link) msg += `🔗 *Link de pagamento:* ${link}\n\n`;
+  msg += `Qualquer dúvida estamos à disposição! 😊`;
+
+  const url = `https://wa.me/${num}?text=${encodeURIComponent(msg)}`;
+  window.open(url,'_blank');
+  toast('WhatsApp aberto! ✅','ok');
+};
+
+window.excluirFatura = function(id) {
+  const f = _faturas.find(x=>x.id===id);
+  const co = _companies.find(c=>c.id===f?.empresaId);
+  $('confirm-title').textContent='Excluir Fatura';
+  $('confirm-msg').textContent=`Excluir fatura de ${co?.name||f?.empresaId} (${fmtMes(f?.mes)})?`;
+  $('confirm-btn').onclick=async()=>{
+    await deleteDoc(doc(db,'invoices',id));
+    _faturas=_faturas.filter(x=>x.id!==id);
+    closeModal('modal-confirm');
+    filterFinanceiro();
+    toast('Fatura excluída.');
+  };
+  openModal('modal-confirm');
+}
+
+</script>
+</body>
+</html>
