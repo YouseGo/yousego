@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal de Acesso — YOUSEGO</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+body {
+  min-height: 100vh;
+  font-family: 'Inter', sans-serif;
+  background: radial-gradient(ellipse at 50% -10%, #241454 0%, #05040d 65%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+body::before{content:"";position:fixed;left:-60%;right:-60%;bottom:-15%;height:75%;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(34,211,238,.35) 0 1px, transparent 1px 56px),
+    repeating-linear-gradient(90deg, rgba(139,92,246,.3) 0 1px, transparent 1px 56px);
+  background-size:56px 56px;
+  transform:perspective(380px) rotateX(68deg);
+  transform-origin:bottom center;
+  animation:gridMove 10s linear infinite;
+  pointer-events:none;
+  z-index:0;
+  -webkit-mask-image:linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 85%);
+  mask-image:linear-gradient(to top, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 85%);
+}
+body::after{content:"";position:fixed;width:55vmax;height:55vmax;top:-18%;left:50%;
+  transform:translateX(-50%);
+  background:radial-gradient(circle, rgba(139,92,246,.35), transparent 70%);
+  filter:blur(70px);
+  animation:floatGlow 9s ease-in-out infinite;
+  pointer-events:none;
+  z-index:0;
+}
+@keyframes gridMove{from{background-position:0 0,0 0}to{background-position:0 56px,0 0}}
+@keyframes floatGlow{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(24px)}}
+@media (prefers-reduced-motion: reduce){body::before,body::after{animation:none}}
+
+.portal { position: relative; z-index: 1; }
+
+.portal {
+  width: 100%;
+  max-width: 440px;
+  text-align: center;
+}
+
+.brand {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.55);
+  margin-bottom: 56px;
+}
+
+.header { margin-bottom: 48px; }
+
+.title {
+  font-family: 'Syne', sans-serif;
+  font-size: clamp(1.9rem, 5vw, 2.5rem);
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.15;
+  margin-bottom: 10px;
+  letter-spacing: -0.5px;
+}
+
+.title span { color: #b9a6ff; }
+
+.subtitle {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,.7);
+  line-height: 1.6;
+}
+
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 48px;
+}
+
+.card-btn {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 22px;
+  border-radius: 14px;
+  text-decoration: none;
+  background: #fff;
+  border: 1px solid #e8e8e4;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.card-btn:hover {
+  border-color: #d0d0ca;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.07);
+  transform: translateY(-2px);
+}
+
+.card-btn:active { transform: translateY(0); box-shadow: none; }
+
+.card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.card-btn.vendas .card-icon  { background: #f0faf3; }
+.card-btn.sistema .card-icon { background: #f2f0ff; }
+.card-btn.ceo .card-icon     { background: #fffbf0; }
+
+.card-info { flex: 1; text-align: left; }
+
+.card-title {
+  font-family: 'Syne', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #111110;
+  letter-spacing: -0.1px;
+}
+
+.card-desc {
+  font-size: 0.78rem;
+  color: #a8a8a2;
+  line-height: 1.4;
+  margin-top: 3px;
+}
+
+.card-arrow {
+  font-size: 0.95rem;
+  color: #d0d0ca;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.card-btn:hover .card-arrow {
+  color: #9a9a94;
+  transform: translateX(3px);
+}
+
+.footer {
+  font-size: 0.73rem;
+  color: rgba(255,255,255,.4);
+  letter-spacing: 0.3px;
+}
+
+.footer span { color: #b9a6ff; }
+
+@media (max-width: 480px) {
+  .card-btn { padding: 16px 18px; gap: 14px; }
+  .card-icon { width: 40px; height: 40px; font-size: 1.1rem; }
+  .title { font-size: 1.7rem; }
+}
+</style>
+</head>
+<body>
+
+<div class="portal">
+
+  <div class="brand">YOUSEGO</div>
+
+  <div class="header">
+    <h1 class="title">Bem-vindo ao<br><span>YOUSEGO</span></h1>
+    <p class="subtitle">Selecione o destino para continuar</p>
+  </div>
+
+  <div class="cards">
+
+    <a href="/vendas" class="card-btn vendas">
+      <div class="card-icon">🚀</div>
+      <div class="card-info">
+        <div class="card-title">Conheça nossos Planos, Funcionalidades e Preço</div>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+
+    <a href="/sistema" class="card-btn sistema">
+      <div class="card-icon">⚡</div>
+      <div class="card-info">
+        <div class="card-title">Entrar no Sistema</div>
+        <div class="card-desc">Acesse o painel de gestão da sua empresa</div>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+
+    <a href="painel-ceo.html" class="card-btn ceo">
+      <div class="card-icon">👑</div>
+      <div class="card-info">
+        <div class="card-title">Painel do CEO</div>
+        <div class="card-desc">Administração global da plataforma</div>
+      </div>
+      <div class="card-arrow">→</div>
+    </a>
+
+  </div>
+
+  <div class="footer">Powered by <span>YOUSEGO</span> · Todos os direitos reservados</div>
+
+</div>
+</body>
+</html>
